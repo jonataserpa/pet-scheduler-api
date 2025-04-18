@@ -1,16 +1,36 @@
 # Task ID: 2
-# Title: Develop Command Line Interface Foundation
-# Status: done
+# Title: Implementação do Modelo de Dados e Entidades
+# Status: pending
 # Dependencies: 1
 # Priority: high
-# Description: Create the basic CLI structure using Commander.js with command parsing and help documentation.
+# Description: Criar as entidades de domínio e seus relacionamentos usando DDD e Prisma ORM.
 # Details:
-Implement the CLI foundation including:
-- Set up Commander.js for command parsing
-- Create help documentation for all commands
-- Implement colorized console output for better readability
-- Add logging system with configurable levels
-- Handle global options (--help, --version, --file, --quiet, --debug, --json)
+Desenvolver o modelo de dados e as entidades de domínio conforme as especificações do PRD, utilizando Domain-Driven Design (DDD) e Prisma ORM:
+
+1. Definir as entidades principais do domínio:
+   - Scheduling (Agendamento)
+   - Customer (Cliente)
+   - Pet (Animal de estimação)
+   - Service (Serviço oferecido)
+   - Notification (Notificação)
+
+2. Implementar os Value Objects para conceitos imutáveis:
+   - Endereço
+   - Contato
+   - Período de tempo
+
+3. Configurar o Prisma Schema com:
+   - Modelos para todas as entidades
+   - Relacionamentos entre entidades
+   - Índices únicos (especialmente para date/time em Scheduling)
+   - Constraints e validações no nível do banco de dados
+
+4. Criar as migrations iniciais do banco de dados
+
+5. Implementar validações das entidades no domínio (regras de negócio)
 
 # Test Strategy:
-Test each command with various parameters to ensure proper parsing. Verify help documentation is comprehensive and accurate. Test logging at different verbosity levels.
+1. Testes unitários para validar regras de domínio nas entidades
+2. Testes de integração para verificar se o Prisma ORM está mapeando corretamente as entidades
+3. Verificar se as migrations são aplicadas corretamente
+4. Testar os índices únicos para garantir que não haja conflitos de agendamento

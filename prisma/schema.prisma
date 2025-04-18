@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuário do sistema (admin ou funcionário)
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role      @default(EMPLOYEE)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// Cliente que agenda serviços
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  phone     String
+  address   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pets      Pet[]
+  schedulings Scheduling[]
+
+  @@map("customers")
+}
+
+// Animal de estimação
+model Pet {
+  id          String    @id @default(uuid())
+  name        String
+  species     String
+  breed       String?
+  size        PetSize
+  birthDate   DateTime?
+  allergies   String?
+  observations String?
+  customerId  String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  schedulings Scheduling[]
+
+  @@map("pets")
+}
+
+// Serviço oferecido pelo pet shop
+model Service {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  duration    Int       // duração em minutos
+  price       Float
+  petSizes    PetSize[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  schedulings SchedulingService[]
+
+  @@map("services")
+}
+
+// Agendamento de serviço
+model Scheduling {
+  id          String    @id @default(uuid())
+  startTime   DateTime
+  endTime     DateTime
+  status      SchedulingStatus @default(SCHEDULED)
+  totalPrice  Float
+  notes       String?
+  customerId  String
+  petId       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  pet         Pet       @relation(fields: [petId], references: [id])
+  services    SchedulingService[]
+  notifications Notification[]
+
+  @@map("schedulings")
+  @@index([startTime, endTime])
+}
+
+// Relação many-to-many entre Scheduling e Service
+model SchedulingService {
+  id           String    @id @default(uuid())
+  schedulingId String
+  serviceId    String
+  scheduling   Scheduling @relation(fields: [schedulingId], references: [id])
+  service      Service    @relation(fields: [serviceId], references: [id])
+
+  @@map("scheduling_services")
+  @@unique([schedulingId, serviceId])
+}
+
+// Notificações enviadas para clientes
+model Notification {
+  id           String    @id @default(uuid())
+  type         NotificationType
+  content      String
+  sentAt       DateTime  @default(now())
+  status       NotificationStatus @default(PENDING)
+  schedulingId String
+  scheduling   Scheduling @relation(fields: [schedulingId], references: [id])
+
+  @@map("notifications")
+}
+
+// Enumerações
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum PetSize {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}
+
+enum SchedulingStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+} 

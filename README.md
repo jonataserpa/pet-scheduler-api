@@ -1,167 +1,127 @@
-# Task Master [![GitHub stars](https://img.shields.io/github/stars/eyaltoledano/claude-task-master?style=social)](https://github.com/eyaltoledano/claude-task-master/stargazers)
+# Pet Scheduler API
 
-[![CI](https://github.com/eyaltoledano/claude-task-master/actions/workflows/ci.yml/badge.svg)](https://github.com/eyaltoledano/claude-task-master/actions/workflows/ci.yml) [![npm version](https://badge.fury.io/js/task-master-ai.svg)](https://badge.fury.io/js/task-master-ai) ![Discord Follow](https://dcbadge.limes.pink/api/server/https://discord.gg/2ms58QJjqp?style=flat) [![License: MIT with Commons Clause](https://img.shields.io/badge/license-MIT%20with%20Commons%20Clause-blue.svg)](LICENSE)
+API para gerenciamento de agendamentos de serviços de banho e tosa para pets em petshops e clínicas veterinárias.
 
-### By [@eyaltoledano](https://x.com/eyaltoledano) & [@RalphEcom](https://x.com/RalphEcom)
+## Tecnologias Utilizadas
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/eyaltoledano?style=flat)](https://x.com/eyaltoledano)
-[![Twitter Follow](https://img.shields.io/twitter/follow/RalphEcom?style=flat)](https://x.com/RalphEcom)
+- Node.js
+- TypeScript
+- Express
+- Prisma ORM
+- PostgreSQL
+- Redis
+- Docker & Docker Compose
+- Jest
+- ESLint & Prettier
 
-A task management system for AI-driven development with Claude, designed to work seamlessly with Cursor AI.
+## Arquitetura
 
-## Requirements
+O projeto segue os princípios de Clean Architecture e Domain-Driven Design (DDD), com a seguinte estrutura de diretórios:
 
-- Anthropic API key (Claude API)
-- OpenAI SDK (for Perplexity API integration, optional)
+```
+src/
+├── domain/           # Regras de negócio e entidades
+├── application/      # Casos de uso e serviços de aplicação
+├── infrastructure/   # Adaptadores para frameworks e ferramentas externas
+├── presentation/     # Interface com o usuário (controllers, rotas)
+└── shared/           # Recursos compartilhados entre camadas
+```
 
-## Quick Start
+## Requisitos
 
-### Option 1 | MCP (Recommended):
+- Node.js 18+ 
+- Docker e Docker Compose
+- PostgreSQL 16
+- Redis 7
 
-MCP (Model Control Protocol) provides the easiest way to get started with Task Master directly in your editor.
+## Configuração do Ambiente
 
-1. **Install the package**
+### Instalação
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/pet-scheduler-api.git
+cd pet-scheduler-api
+```
+
+2. Instale as dependências:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+```bash
+cp .env.example .env
+```
+Edite o arquivo `.env` com suas configurações.
+
+### Usando Docker
+
+O modo mais simples de executar a aplicação é usando Docker Compose:
 
 ```bash
-npm i -g task-master-ai
+docker-compose up
 ```
 
-2. **Add the MCP config to your editor** (Cursor recommended, but it works with other text editors):
+Isso irá iniciar todos os serviços necessários:
+- Aplicação principal (API)
+- Worker para processamento assíncrono
+- PostgreSQL
+- Redis
+- Banco de dados de teste
 
-```json
-{
-	"mcpServers": {
-		"taskmaster-ai": {
-			"command": "npx",
-			"args": ["-y", "task-master-mcp"],
-			"env": {
-				"ANTHROPIC_API_KEY": "YOUR_ANTHROPIC_API_KEY_HERE",
-				"PERPLEXITY_API_KEY": "YOUR_PERPLEXITY_API_KEY_HERE",
-				"MODEL": "claude-3-7-sonnet-20250219",
-				"PERPLEXITY_MODEL": "sonar-pro",
-				"MAX_TOKENS": 64000,
-				"TEMPERATURE": 0.2,
-				"DEFAULT_SUBTASKS": 5,
-				"DEFAULT_PRIORITY": "medium"
-			}
-		}
-	}
-}
-```
+### Desenvolvimento sem Docker
 
-2. **Enable the MCP** in your editor
+1. Certifique-se de ter PostgreSQL e Redis rodando localmente.
 
-3. **Prompt the AI** to initialize Task Master:
+2. Configure as variáveis de ambiente no arquivo `.env`
 
-```
-Can you please initialize taskmaster-ai into my project?
-```
-
-4. **Use common commands** directly through your AI assistant:
-
-```txt
-Can you parse my PRD at scripts/prd.txt?
-What's the next task I should work on?
-Can you help me implement task 3?
-Can you help me expand task 4?
-```
-
-### Option 2: Using Command Line
-
-#### Installation
-
+3. Execute as migrações do Prisma:
 ```bash
-# Install globally
-npm install -g task-master-ai
-
-# OR install locally within your project
-npm install task-master-ai
+npx prisma migrate dev
 ```
 
-#### Initialize a new project
-
+4. Inicie o servidor em modo de desenvolvimento:
 ```bash
-# If installed globally
-task-master init
-
-# If installed locally
-npx task-master-init
+npm run dev
 ```
 
-This will prompt you for project details and set up a new project with the necessary files and structure.
-
-#### Common Commands
-
+5. Para o worker de processamento assíncrono, abra outro terminal e execute:
 ```bash
-# Initialize a new project
-task-master init
-
-# Parse a PRD and generate tasks
-task-master parse-prd your-prd.txt
-
-# List all tasks
-task-master list
-
-# Show the next task to work on
-task-master next
-
-# Generate task files
-task-master generate
+node dist/infrastructure/messaging/worker.js
 ```
 
-## Documentation
+## Scripts Disponíveis
 
-For more detailed information, check out the documentation in the `docs` directory:
+- `npm run build`: Compila o projeto TypeScript
+- `npm start`: Inicia o servidor em produção
+- `npm run dev`: Inicia o servidor em modo de desenvolvimento com hot reload
+- `npm test`: Executa os testes
+- `npm run lint`: Verifica a qualidade do código com ESLint
+- `npm run lint:fix`: Corrige automaticamente problemas de lint
+- `npm run format`: Formata o código usando Prettier
 
-- [Configuration Guide](docs/configuration.md) - Set up environment variables and customize Task Master
-- [Tutorial](docs/tutorial.md) - Step-by-step guide to getting started with Task Master
-- [Command Reference](docs/command-reference.md) - Complete list of all available commands
-- [Task Structure](docs/task-structure.md) - Understanding the task format and features
-- [Example Interactions](docs/examples.md) - Common Cursor AI interaction examples
+## Estrutura do Banco de Dados
 
-## Troubleshooting
+O projeto utiliza Prisma ORM para gerenciar o banco de dados PostgreSQL. As principais entidades são:
 
-### If `task-master init` doesn't respond:
+- User: Usuários do sistema (admin/funcionário)
+- Customer: Clientes que agendam serviços
+- Pet: Animais de estimação vinculados aos clientes
+- Service: Serviços oferecidos (banho, tosa, etc.)
+- Scheduling: Agendamentos de serviços
+- Notification: Notificações enviadas para clientes
 
-Try running it with Node directly:
+Para visualizar ou modificar o schema, consulte o arquivo `prisma/schema.prisma`.
 
-```bash
-node node_modules/claude-task-master/scripts/init.js
-```
+## Contribuição
 
-Or clone the repository and run:
+1. Crie um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
 
-```bash
-git clone https://github.com/eyaltoledano/claude-task-master.git
-cd claude-task-master
-node scripts/init.js
-```
+## Licença
 
-## Contributors
-
-<a href="https://github.com/eyaltoledano/claude-task-master/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=eyaltoledano/claude-task-master" alt="Task Master project contributors" />
-</a>
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=eyaltoledano/claude-task-master&type=Timeline)](https://www.star-history.com/#eyaltoledano/claude-task-master&Timeline)
-
-## Licensing
-
-Task Master is licensed under the MIT License with Commons Clause. This means you can:
-
-✅ **Allowed**:
-
-- Use Task Master for any purpose (personal, commercial, academic)
-- Modify the code
-- Distribute copies
-- Create and sell products built using Task Master
-
-❌ **Not Allowed**:
-
-- Sell Task Master itself
-- Offer Task Master as a hosted service
-- Create competing products based on Task Master
-
-See the [LICENSE](LICENSE) file for the complete license text and [licensing details](docs/licensing.md) for more information.
+Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.

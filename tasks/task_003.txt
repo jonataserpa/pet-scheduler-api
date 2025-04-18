@@ -1,18 +1,39 @@
 # Task ID: 3
-# Title: Implement Basic Task Operations
-# Status: done
+# Title: Implementação de Autenticação e Autorização
+# Status: pending
 # Dependencies: 1
 # Priority: high
-# Description: Create core functionality for managing tasks including listing, creating, updating, and deleting tasks.
+# Description: Criar o sistema de autenticação e autorização utilizando JWT conforme ADR-002.
 # Details:
-Implement the following task operations:
-- List tasks with filtering options
-- Create new tasks with required fields
-- Update existing task properties
-- Delete tasks
-- Change task status (pending/done/deferred)
-- Handle dependencies between tasks
-- Manage task priorities
+Desenvolver o sistema de autenticação e autorização utilizando JWT (JSON Web Token) conforme especificado no ADR-002:
+
+1. Criar entidade de User/Admin no domínio
+   - Implementar model no Prisma
+   - Definir roles e permissões
+
+2. Implementar serviço de autenticação:
+   - Login com email/senha
+   - Geração de tokens JWT
+   - Refresh token
+   - Armazenamento seguro de senhas (bcrypt)
+
+3. Criar middlewares de autorização:
+   - Verificação de token JWT
+   - Validação de roles/permissões
+   - Proteção de rotas específicas
+
+4. Implementar logout e gestão de sessões:
+   - Invalidação de tokens
+   - Lista negra de tokens (usando Redis)
+
+5. Criar endpoints de autenticação:
+   - POST /login
+   - POST /refresh-token
+   - POST /logout
 
 # Test Strategy:
-Test each operation with valid and invalid inputs. Verify that dependencies are properly tracked and that status changes are reflected correctly in the tasks.json file.
+1. Testes unitários para serviços de autenticação
+2. Testes de integração para endpoints de login/logout
+3. Testar edge cases como tokens expirados, inválidos ou falsificados
+4. Verificar se as rotas protegidas realmente exigem autenticação
+5. Testar diferentes níveis de permissão/roles

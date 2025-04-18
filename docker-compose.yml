@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/pet_scheduler?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - JWT_SECRET=development_jwt_secret
+      - JWT_EXPIRES_IN=1d
+      - JWT_REFRESH_SECRET=development_jwt_refresh_secret
+      - JWT_REFRESH_EXPIRES_IN=7d
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    networks:
+      - pet-scheduler-network
+    command: npm run dev
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/pet_scheduler?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    networks:
+      - pet-scheduler-network
+    command: node dist/infrastructure/messaging/worker.js
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pet_scheduler
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - pet-scheduler-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - pet-scheduler-network
+
+  test-db:
+    image: postgres:16-alpine
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pet_scheduler_test
+    networks:
+      - pet-scheduler-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  pet-scheduler-network:
+    driver: bridge 

@@ -22,14 +22,25 @@ export default {
 	],
 
 	// Transform files
-	transform: {},
+	transform: {
+		'^.+\\.tsx?$': [
+			'ts-jest',
+			{
+				useESM: true,
+			},
+		],
+	},
 
 	// Disable transformations for node_modules
 	transformIgnorePatterns: ['/node_modules/'],
 
 	// Set moduleNameMapper for absolute paths
 	moduleNameMapper: {
-		'^@/(.*)$': '<rootDir>/$1'
+		'^@domain/(.*)$': '<rootDir>/src/domain/$1',
+		'^@application/(.*)$': '<rootDir>/src/application/$1',
+		'^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+		'^@presentation/(.*)$': '<rootDir>/src/presentation/$1',
+		'^@shared/(.*)$': '<rootDir>/src/shared/$1',
 	},
 
 	// Setup module aliases
@@ -52,5 +63,12 @@ export default {
 	verbose: true,
 
 	// Setup file
-	setupFilesAfterEnv: ['<rootDir>/tests/setup.js']
+	setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+
+	collectCoverageFrom: [
+		'src/**/*.{ts,tsx}',
+		'!src/**/*.d.ts',
+		'!src/index.ts',
+		'!src/server.ts',
+	],
 };

@@ -1,16 +1,33 @@
 # Task ID: 1
-# Title: Implement Task Data Structure
+# Title: Configuração do Ambiente de Desenvolvimento
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Design and implement the core tasks.json structure that will serve as the single source of truth for the system.
+# Description: Configurar o ambiente de desenvolvimento com Docker, TypeScript e ferramentas necessárias conforme ADR-001.
 # Details:
-Create the foundational data structure including:
-- JSON schema for tasks.json
-- Task model with all required fields (id, title, description, status, dependencies, priority, details, testStrategy, subtasks)
-- Validation functions for the task model
-- Basic file system operations for reading/writing tasks.json
-- Error handling for file operations
+Implementar a configuração inicial do ambiente de desenvolvimento seguindo as especificações do ADR-001. Isso inclui:
+
+1. Configurar Docker e Docker Compose com containers para:
+   - Node.js app
+   - PostgreSQL
+   - Redis
+   - Worker para processamento assíncrono
+   - Ambiente de testes
+
+2. Configurar TypeScript com configurações estritas
+   - Criar tsconfig.json com `strict: true`
+   - Configurar ESLint e Prettier
+
+3. Estruturar o projeto seguindo Clean Architecture e DDD:
+   - Organizar diretórios conforme especificado no PRD seção C.2
+   - Configurar scripts de build e desenvolvimento
+
+4. Implementar gestão de variáveis de ambiente:
+   - Criar .env.example com as variáveis necessárias
+   - Implementar validação das variáveis em runtime conforme ADR-003
 
 # Test Strategy:
-Verify that the tasks.json structure can be created, read, and validated. Test with sample data to ensure all fields are properly handled and that validation correctly identifies invalid structures.
+1. Verificar se todos os containers Docker são iniciados corretamente com `docker-compose up`
+2. Confirmar que o ambiente de desenvolvimento permite compilar o TypeScript sem erros
+3. Testar a validação de variáveis de ambiente com valores inválidos para garantir que o sistema falhe adequadamente
+4. Verificar se a estrutura de diretórios está conforme o especificado no PRD
