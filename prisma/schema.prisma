@@ -118,6 +118,27 @@ model Notification {
   @@map("notifications")
 }
 
+// Histórico de logins/tentativas de login
+model LoginHistory {
+  id           String        @id @default(uuid())
+  userId       String?       // Pode ser nulo em caso de login falho
+  email        String        // Email usado na tentativa de login
+  status       LoginStatus
+  timestamp    DateTime      @default(now())
+  ipAddress    String
+  userAgent    String
+  authMethod   AuthMethod    @default(PASSWORD)
+  details      Json?         // Detalhes adicionais do login (JSON)
+  location     Json?         // Informações de geolocalização (JSON)
+
+  @@map("login_histories")
+  @@index([email])
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([timestamp])
+  @@index([status])
+}
+
 // Enumerações
 enum Role {
   ADMIN
@@ -151,4 +172,22 @@ enum NotificationStatus {
   SENT
   FAILED
   DELIVERED
+}
+
+// Enumerações para LoginHistory
+enum LoginStatus {
+  SUCCESS
+  FAILED
+  LOCKED
+  PASSWORD_RESET
+  SUSPICIOUS
+}
+
+enum AuthMethod {
+  PASSWORD
+  GOOGLE
+  FACEBOOK
+  GITHUB
+  TOKEN
+  RECOVERY
 } 

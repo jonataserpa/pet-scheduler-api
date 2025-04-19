@@ -28,10 +28,32 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1d'),
   JWT_REFRESH_SECRET: z.string().min(10),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  
+  // Email (para recuperação de senha)
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().transform((val) => parseInt(val, 10)).optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z.string().transform((val) => val === 'true').default('false'),
+  EMAIL_FROM: z.string().optional(),
+  
+  // Recuperação de Senha
+  PASSWORD_RESET_TOKEN_EXPIRES: z.string().transform((val) => parseInt(val, 10)).default('3600'), // 1 hora em segundos
 
+  // Rate Limiting
+  RATE_LIMIT_WINDOW_MS: z.string().transform((val) => parseInt(val, 10)).default('900000'), // 15 minutos em ms
+  RATE_LIMIT_MAX: z.string().transform((val) => parseInt(val, 10)).default('100'),
+  LOGIN_RATE_LIMIT_WINDOW_MS: z.string().transform((val) => parseInt(val, 10)).default('600000'), // 10 minutos em ms 
+  LOGIN_RATE_LIMIT_MAX: z.string().transform((val) => parseInt(val, 10)).default('5'),
+  
   // Log
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info'),
   LOG_FILE_PATH: z.string().default('logs/app.log'),
+
+  // OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  OAUTH_CALLBACK_URL: z.string().optional(),
 });
 
 // Tenta validar as variáveis de ambiente
