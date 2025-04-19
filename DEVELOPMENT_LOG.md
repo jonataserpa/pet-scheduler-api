@@ -123,3 +123,37 @@ Configurar o ambiente de desenvolvimento com Docker, TypeScript e ferramentas ne
 - A configuração de logs detalhados ajudará na depuração e monitoramento da aplicação.
 
 **Próxima Tarefa:** Implementação do Modelo de Dados e Entidades (Tarefa #2) 
+
+## Tarefa 2: Implementação do Modelo de Dados e Entidades
+
+Data: 2024-08-13
+
+### Objetivo
+Criar as entidades de domínio e seus relacionamentos usando DDD e Prisma ORM.
+
+### Requisitos da Tarefa
+1. Definir as entidades principais do domínio:
+   - Scheduling (Agendamento)
+   - Customer (Cliente)
+   - Pet (Animal de estimação)
+   - Service (Serviço oferecido)
+   - Notification (Notificação)
+
+2. Implementar os Value Objects para conceitos imutáveis:
+   - Endereço
+   - Contato
+   - Período de tempo
+
+3. Configurar o Prisma Schema com:
+   - Modelos para todas as entidades
+   - Relacionamentos entre entidades
+   - Índices únicos (especialmente para date/time em Scheduling)
+   - Constraints e validações no nível do banco de dados
+
+4. Criar as migrations iniciais do banco de dados
+
+5. Implementar validações das entidades no domínio (regras de negócio)
+
+### Etapas Realizadas
+- Iniciando a implementação da Tarefa #2...
+- (As etapas serão registradas ao longo do desenvolvimento) 

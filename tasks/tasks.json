@@ -20,7 +20,7 @@
       "id": 2,
       "title": "Implementação do Modelo de Dados e Entidades",
       "description": "Criar as entidades de domínio e seus relacionamentos usando DDD e Prisma ORM.",
-      "status": "pending",
+      "status": "done",
       "dependencies": [1],
       "priority": "high",
       "details": "Desenvolver o modelo de dados e as entidades de domínio conforme as especificações do PRD, utilizando Domain-Driven Design (DDD) e Prisma ORM:\n\n1. Definir as entidades principais do domínio:\n   - Scheduling (Agendamento)\n   - Customer (Cliente)\n   - Pet (Animal de estimação)\n   - Service (Serviço oferecido)\n   - Notification (Notificação)\n\n2. Implementar os Value Objects para conceitos imutáveis:\n   - Endereço\n   - Contato\n   - Período de tempo\n\n3. Configurar o Prisma Schema com:\n   - Modelos para todas as entidades\n   - Relacionamentos entre entidades\n   - Índices únicos (especialmente para date/time em Scheduling)\n   - Constraints e validações no nível do banco de dados\n\n4. Criar as migrations iniciais do banco de dados\n\n5. Implementar validações das entidades no domínio (regras de negócio)",

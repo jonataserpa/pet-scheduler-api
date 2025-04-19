@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './shared/config/env.js';
 import { logger } from './shared/utils/logger.js';
-import { connectDatabase, disconnectDatabase } from './infrastructure/database/prisma-client.js';
+import { connectDatabase } from './infrastructure/database/prisma-client.js';
 
 // Cria a instância do aplicativo Express
 const app = express();
@@ -21,7 +21,7 @@ app.use(
 app.use(express.json());
 
 // Configuração de logs para requisições HTTP
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   logger.info(`${req.method} ${req.path}`, {
     ip: req.ip,
     userAgent: req.get('User-Agent'),
