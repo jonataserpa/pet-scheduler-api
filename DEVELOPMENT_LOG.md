@@ -367,4 +367,89 @@ Criar o sistema de autenticação e autorização utilizando JWT conforme especi
 - Rate limiting é crucial para prevenir ataques de força bruta em endpoints sensíveis como login e recuperação de senha.
 - A separação clara entre domínio, serviços e controladores facilita a manutenção e teste do sistema de autenticação.
 
-**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #4) 
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #4)
+
+## Tarefa 4: Implementação dos Repositórios
+
+Data: 2024-08-22
+
+### Objetivo
+Implementar os repositórios de acesso a dados para todas as entidades do sistema, seguindo o padrão de Repositório e o princípio de inversão de dependência.
+
+### Requisitos da Tarefa
+1. Definir interfaces de repositório para as principais entidades:
+   - Customer (Cliente)
+   - Pet (Animal de estimação)
+   - Service (Serviço)
+   - Scheduling (Agendamento)
+   - Notification (Notificação)
+   - LoginHistory (Histórico de login)
+
+2. Implementar as versões Prisma para cada repositório:
+   - Mapear entre entidades de domínio e modelos do Prisma
+   - Implementar operações CRUD
+   - Adicionar consultas específicas do domínio
+   - Garantir tratamento adequado de erros
+
+3. Criar uma base reutilizável para os repositórios Prisma
+
+4. Implementar suporte a transações para operações atômicas
+
+### Etapas Realizadas
+
+#### 1. Definição das Interfaces de Repositório
+- Criadas interfaces para todos os repositórios em `src/domain/repositories/`:
+  - `CustomerRepository`: Para operações com clientes
+  - `PetRepository`: Para gerenciamento de pets
+  - `ServiceRepository`: Para manipulação de serviços
+  - `SchedulingRepository`: Para agendamentos
+  - `NotificationRepository`: Para notificações
+  - `LoginHistoryRepository`: Para histórico de login
+
+#### 2. Implementação da Base dos Repositórios Prisma
+- Criada classe base `PrismaRepositoryBase` implementando:
+  - Gestão de cliente Prisma compartilhado
+  - Tratamento padronizado de erros
+  - Suporte a transações
+
+#### 3. Implementação do Suporte a Transações
+- Criado `PrismaTransaction` para encapsular operações transacionais
+- Implementadas funções para:
+  - Executar uma operação dentro de uma transação
+  - Executar múltiplas operações em uma única transação
+
+#### 4. Implementação dos Repositórios Prisma
+- Implementadas as versões Prisma para cada repositório:
+  - `PrismaCustomerRepository`
+  - `PrismaPetRepository`
+  - `PrismaServiceRepository`
+  - `PrismaSchedulingRepository` (incluindo verificação de conflitos)
+  - `PrismaNotificationRepository`
+  - `PrismaLoginHistoryRepository`
+
+#### 5. Implementação do Repositório de Agendamentos
+- Implementado `PrismaSchedulingRepository` com:
+  - Mapeamento de status entre domínio e persistência
+  - Gerenciamento de serviços associados ao agendamento
+  - Verificação de conflitos de horários
+  - Consultas por cliente, pet e período
+  - Atualização de status e informações
+  - Suporte para adicionar notas e observações
+
+### Conclusão da Tarefa 4
+
+✅ **Status: Concluída**
+
+**Data de conclusão:** 2024-08-23
+
+**Observações:**
+- A tarefa foi concluída com sucesso, implementando todos os repositórios necessários.
+- A abordagem de ter interfaces de repositório no domínio e implementações concretas na infraestrutura reforça a inversão de dependência.
+- O repositório de agendamentos inclui funcionalidades para detecção de conflitos de horários, essencial para o negócio.
+
+**Aprendizados:**
+- A criação de uma classe base para repositórios reduziu significativamente a duplicação de código e padronizou o tratamento de erros.
+- O suporte a transações permite operações atômicas complexas que mantêm a consistência dos dados.
+- O mapeamento entre entidades de domínio e modelos de banco de dados mantém a camada de domínio isolada.
+
+**Próxima Tarefa:** Implementação dos Casos de Uso e Serviços (Tarefa #5) 
