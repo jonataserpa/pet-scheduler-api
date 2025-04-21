@@ -49,6 +49,28 @@ src/
 4. Execute as migrações do banco de dados: `npx prisma migrate dev`
 5. Inicie o servidor: `npm run dev`
 
+## Seed de Dados
+
+O projeto inclui um script de seed para popular o banco de dados com dados iniciais para desenvolvimento e testes:
+
+```bash
+# Executar o seed de dados
+npm run seed
+```
+
+O script irá criar:
+- Usuários (admin e funcionário)
+- Clientes
+- Pets (cães e gatos)
+- Serviços (banho, tosa, etc.)
+- Agendamentos
+- Notificações
+- Histórico de login
+
+Dados de acesso para testes:
+- Admin: admin@petshop.com / senha: admin123
+- Funcionário: funcionario@petshop.com / senha: employee123
+
 ## Variáveis de Ambiente
 
 O projeto utiliza diversas variáveis de ambiente para configuração. Veja abaixo as principais:

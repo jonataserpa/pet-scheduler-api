@@ -617,279 +617,82 @@ Implementar os casos de uso e controladores de notificação, seguindo os princ�
 
 **Próxima Tarefa:** Implementação dos Serviços de Cliente e Pet (Tarefa #7)
 
-## Tarefa 50: Refatoração das Configurações de Email
+## Tarefa 7: Implementação de Seed de Dados
 
-Data: 2024-12-05
+Data: 2024-08-22
 
 ### Objetivo
-Refatorar as configurações de email do sistema, substituindo as antigas variáveis SMTP por novas variáveis EMAIL para melhor consistência e gerenciamento.
+Implementar um sistema de seed de dados para popular o banco de dados com informações iniciais para facilitar o desenvolvimento e testes.
 
 ### Requisitos da Tarefa
-1. Atualizar o arquivo de configuração do ambiente (`env.ts`) para usar as novas variáveis EMAIL.
-2. Garantir compatibilidade com os serviços de notificação existentes.
-3. Melhorar a organização e nomenclatura das variáveis de ambiente relacionadas a email.
+1. Criar script de seed no Prisma:
+   - Implementar seed.ts na pasta prisma
+   - Configurar script no package.json
+
+2. Criar dados iniciais para todas as tabelas:
+   - Usuários (admin e funcionário)
+   - Clientes
+   - Pets (diferentes espécies e tamanhos)
+   - Serviços (banho, tosa, etc.)
+   - Agendamentos (com datas variadas)
+   - Notificações relacionadas aos agendamentos
+   - Histórico de login
+
+3. Implementar limpeza de dados antes do seed:
+   - Remover dados existentes nas tabelas na ordem correta
+   - Respeitar constraints de chave estrangeira
+
+4. Documentar o processo de seed:
+   - Adicionar instruções no README
+   - Documentar no DEVELOPMENT_LOG.md
 
 ### Etapas Realizadas
 
-#### 1. Atualização do Arquivo de Configuração de Ambiente
-- Modificado o arquivo `src/shared/config/env.ts`:
-  - Removidas as antigas variáveis:
-    - SMTP_HOST
-    - SMTP_PORT
-    - SMTP_USER
-    - SMTP_PASS
-    - SMTP_SECURE
-  - Adicionadas as novas variáveis:
-    - EMAIL_HOST
-    - EMAIL_PORT
-    - EMAIL_USER
-    - EMAIL_PASSWORD
-    - EMAIL_SECURE
-    - EMAIL_FROM
-    - EMAIL_FROM_NAME
-  - Atualizado o esquema de validação para as novas variáveis
+#### 1. Criação do Script de Seed
+- Implementado o arquivo `prisma/seed.ts` para popular o banco de dados
+- Configurado o package.json com scripts para execução do seed:
+  - `npm run seed` para execução manual
+  - `npx prisma db seed` para execução integrada com Prisma
 
-#### 2. Verificação de Compatibilidade
-- Revisado o `PrismaNotificationRepository` para garantir compatibilidade com as novas configurações
-- Confirmada a eficácia da atual estrutura de gerenciamento de notificações
+#### 2. Implementação de Dados para Todas as Tabelas
+- Criados dados de usuários: um administrador e um funcionário
+- Adicionados registros de histórico de login
+- Implementados serviços comuns de petshop (banho, tosa, etc.)
+- Criados dados de clientes com informações de contato
+- Adicionados pets de diferentes espécies, tamanhos e com características variadas
+- Criados agendamentos futuros (próximos dias)
+- Implementadas notificações de diferentes tipos (email, SMS, WhatsApp)
 
-### Conclusão da Tarefa 50
+#### 3. Implementação de Limpeza de Dados
+- Adicionada limpeza de dados existentes antes do seed
+- Implementada ordem correta de exclusão respeitando as restrições de chave estrangeira
+- Adicionados logs para acompanhamento do processo
 
-✅ **Status: Concluída**
+#### 4. Documentação
+- Adicionadas instruções de uso do seed no README
+- Documentado o processo no DEVELOPMENT_LOG.md
+- Adicionados comentários explicativos no código
 
-**Data de conclusão:** 2024-12-05
+### Desafios Encontrados
+- Foi necessário respeitar a ordem correta para exclusão e criação de dados devido às constraints de chave estrangeira
+- A criação de agendamentos precisou considerar tanto o relacionamento com cliente e pet quanto com os serviços na tabela de junção
+- Garantir que as datas dos agendamentos fossem sempre futuras e dinâmicas
 
-**Observações:**
-- Refatoração concluída com sucesso
-- Nomenclatura mais consistente para as variáveis de ambiente
-- Melhor organização do código de configuração
-
-**Aprendizados:**
-- A padronização dos nomes de variáveis melhora a manutenção do código
-- É importante revisar periodicamente a consistência das nomenclaturas
-- Mudanças em configurações críticas devem ser testadas cuidadosamente
-
-**Próximos Passos:**
-- Atualizar os serviços que utilizam as novas configurações de email
-- Documentar as novas configurações no README do projeto
-- Considerar a implementação de testes específicos para o envio de emails
-
-## Tarefa 51: Análise e Melhoria do Repositório de Notificações
-
-Data: 2024-12-06
-
-### Objetivo
-Realizar uma análise completa do repositório de notificações para identificar possíveis melhorias em termos de escalabilidade, manutenção e desempenho.
-
-### Requisitos da Tarefa
-1. Avaliar a estrutura atual do `PrismaNotificationRepository`
-2. Identificar possíveis gargalos ou problemas de desempenho
-3. Propor melhorias na organização do código
-4. Verificar a cobertura de casos de uso e cenários de exceção
-
-### Etapas Realizadas
-
-#### 1. Análise do Repositório Atual
-- Revisado o arquivo `src/infrastructure/repositories/prisma-notification-repository.ts` (490 linhas)
-- Identificados os principais componentes e responsabilidades:
-  - Mapeamento de tipos de notificação entre domínio e Prisma
-  - Validação de dados antes de operações no banco
-  - Operações CRUD para notificações
-  - Funções de mudança de status (envio, entrega, falha)
-
-#### 2. Avaliação de Escalabilidade e Manutenibilidade
-- **Pontos Positivos:**
-  - Encapsulamento adequado das operações do Prisma
-  - Separação clara entre domínio e infraestrutura
-  - Validações robustas antes de operações no banco
-  - Tratamento adequado de erros
-  
-- **Oportunidades de Melhoria:**
-  - Alto número de linhas no arquivo (490) dificulta a manutenção
-  - Funções com alta responsabilidade, como `save` e `findByFilters`
-  - Redundância em algumas operações de mapeamento
-  - Ausência de logs estruturados para facilitar o monitoramento
-
-### Conclusão da Tarefa 51
+### Conclusão da Tarefa 7
 
 ✅ **Status: Concluída**
 
-**Data de conclusão:** 2024-12-06
+**Data de conclusão:** 2024-08-22
 
 **Observações:**
-- O repositório atual atende bem às necessidades do projeto, mas pode se beneficiar de algumas melhorias arquiteturais.
-- A responsabilidade de mapeamento entre domínio e Prisma está bem encapsulada.
-- É necessário considerar a divisão do arquivo em módulos menores para melhorar a manutenibilidade.
+- A tarefa foi concluída com sucesso, implementando o script de seed para todas as tabelas do banco de dados.
+- O script pode ser facilmente executado através do comando `npm run seed`.
+- Os dados criados são suficientes para testar as principais funcionalidades da aplicação.
+- A estrutura permite que novos dados sejam adicionados facilmente para casos de teste específicos.
 
 **Aprendizados:**
-- Arquivos muito extensos, mesmo bem estruturados, podem dificultar a manutenção no longo prazo.
-- A validação robusta dentro do repositório reduz erros nas operações no banco de dados.
-- A separação clara entre domínio e infraestrutura facilita testes e substituição de tecnologias.
+- A criação de dados de seed é essencial para o desenvolvimento e testes consistentes.
+- Manter os dados dinâmicos (especialmente datas) evita problemas com dados desatualizados.
+- A ordem de criação e exclusão de dados é crítica devido às restrições do banco de dados.
 
-**Próximos Passos:**
-1. Refatorar o repositório dividindo em módulos menores:
-   - Criar um módulo específico para mapeamentos (mappers)
-   - Extrair a lógica de validação para um serviço dedicado
-   - Dividir as operações por tipo (consulta, modificação, status)
-   
-2. Implementar logs estruturados para facilitar o monitoramento
-
-3. Melhorar a documentação do código com comentários mais descritivos
-
-4. Considerar a implementação de uma camada de cache para operações frequentes
-
-## Tarefa 52: Refatoração de Email Service e Correção do Job de Notificações
-
-**Data:** 2024-12-08
-
-### Objetivo:
-Refatorar o EmailService para usar as novas variáveis de ambiente EMAIL_* em vez das antigas SMTP_* e corrigir o ScheduleNotificationJob que estava sendo inicializado incorretamente.
-
-### Requisitos:
-1. Atualizar o EmailService para usar as novas variáveis de ambiente
-2. Corrigir a inicialização do ScheduleNotificationJob com os parâmetros corretos (repositories)
-3. Adicionar a configuração ENABLE_NOTIFICATION_JOB para controlar a execução do job independentemente do ambiente
-4. Garantir compatibilidade com o restante do sistema de notificações
-
-### Passos Realizados:
-1. **Atualização do EmailService:**
-   - Substituí todas as referências às variáveis SMTP_* por EMAIL_* no `src/infrastructure/services/email-service.ts`
-   - Melhorei o formatador de "from" para incluir o nome do remetente: `"${env.EMAIL_FROM_NAME}" <${env.EMAIL_FROM}>`
-   - Atualizei as mensagens de log para refletir a nova nomenclatura
-
-2. **Correção do ScheduleNotificationJob:**
-   - Atualizei a inicialização do job no `src/server.ts` para incluir os parâmetros obrigatórios
-   - Adicionei código para obter os repositórios da fábrica (petRepository e customerRepository)
-   - Passei os repositórios corretamente para o construtor do job
-
-3. **Adição da variável ENABLE_NOTIFICATION_JOB:**
-   - Adicionei a variável ao esquema de validação em `src/shared/config/env.ts`
-   - Configurei a tipagem apropriada no ambiente
-   - Mantive a lógica condicional para iniciar o job apenas em produção ou quando explicitamente configurado
-
-4. **Verificação da compatibilidade:**
-   - EmailNotificationProvider já estava configurado corretamente para usar as novas variáveis
-   - Não foi necessário atualizar outros componentes do sistema de notificações
-
-### Conclusão:
-
-**Status:** Concluído em 2024-12-08
-
-**Observações:**
-- A refatoração do EmailService para usar as novas variáveis de ambiente foi concluída com sucesso
-- O ScheduleNotificationJob agora é inicializado corretamente com todos os parâmetros necessários
-- A nova variável ENABLE_NOTIFICATION_JOB permite um controle mais flexível sobre a execução do job de notificações
-- O sistema de emails agora está mais consistente em sua nomenclatura e configuração
-
-**Aprendizados:**
-- Padronizar nomenclatura de variáveis de ambiente é importante para a manutenção e entendimento do código
-- A utilização de DI (Dependency Injection) ajuda a identificar facilmente dependências faltantes
-- É importante ter uma forma de controlar a execução de jobs em background em diferentes ambientes
-
-**Próximos passos:**
-- Implementar testes para o EmailService com as novas configurações
-- Considerar a adição de uma estratégia de retry para emails que falham
-- Documentar no README os requisitos de configuração para as variáveis de email
-
-## Tarefa 52: Implementação da Documentação Swagger e Melhorias na Estrutura de Notificações
-
-**Data:** 2024-12-07
-
-**Objetivo:** Implementar a documentação Swagger para a API e melhorar a estrutura do sistema de notificações.
-
-**Requisitos:**
-1. Integrar o Swagger UI na aplicação para documentar os endpoints da API.
-2. Adicionar anotações nas rotas para melhorar a documentação automática.
-3. Organizar os endpoints por tags para melhor navegabilidade.
-4. Garantir que todas as rotas de notificação estejam documentadas.
-
-**Passos Realizados:**
-1. Importação das bibliotecas `swagger-ui-express` e configuração do Swagger no servidor Express.
-2. Criação de endpoint `/api-docs` para acessar a documentação interativa da API.
-3. Criação de endpoint `/api-docs.json` para disponibilizar a especificação OpenAPI como JSON.
-4. Adição de anotações JSDoc nas rotas de notificação para documentar os endpoints, parâmetros e respostas.
-5. Organização das rotas em tags lógicas: `Notificações`, `Notificações por Email`, `Notificações por SMS`, `Notificações por WhatsApp` e `Notificações de Cliente`.
-
-**Conclusão da Tarefa 52:**
-- **Status:** Concluído em 2024-12-07
-- **Observações:** 
-  A implementação da documentação Swagger foi realizada com sucesso, fornecendo uma interface interativa para explorar e testar os endpoints da API. As rotas de notificação agora estão bem documentadas, facilitando o entendimento da API por desenvolvedores frontend ou integradores.
-  
-  Foi identificado que a implementação atual do repositório de notificações (PrismaNotificationRepository) já passou por melhorias significativas, com a refatoração em múltiplos módulos menores e especializados, como:
-  - Mapeadores (NotificationMapper)
-  - Validadores (NotificationValidator)
-  - Operações de Status (NotificationStatusOperations)
-  - Camada de cache (NotificationCache)
-  - Monitor de performance (PerformanceMonitor)
-  
-  A versão refatorada do repositório (PrismaNotificationRepositoryCached) demonstra uma implementação mais modular e eficiente.
-
-- **Aprendizados:**
-  1. A documentação de API é um aspecto crucial para facilitar a integração e manutenção de sistemas.
-  2. A organização de endpoints por tags melhora significativamente a experiência de navegação na documentação.
-  3. A abordagem modular adotada no repositório de notificações melhora a testabilidade e a manutenibilidade do código.
-  4. O uso de padrões como cache e monitoramento de performance demonstra boas práticas de engenharia de software.
-
-- **Próximos Passos:**
-  1. Expandir a documentação Swagger para cobrir outros endpoints da API.
-  2. Adicionar exemplos mais detalhados para cada endpoint.
-  3. Implementar testes automatizados para os componentes do sistema de notificações.
-  4. Considerar a adição de um mecanismo de feedback para notificações (confirmação de leitura).
-
-## Tarefa 10: Análise e Verificação de Domínio das Entidades
-
-Data: 2024-09-20
-
-### Objetivo
-Verificar a implementação da classe `Pet` e entender como o atributo `active` é gerenciado na aplicação.
-
-### Requisitos da Tarefa
-1. Analisar a implementação da classe `Pet` no domínio
-2. Verificar como a propriedade `active` é tratada em toda a aplicação
-3. Analisar o repositório Prisma para manipulação de pets
-4. Entender como os controladores e rotas interagem com a entidade Pet
-
-### Etapas Realizadas
-
-#### 1. Análise da Classe Pet
-- Verificada a implementação da classe `Pet` em `src/domain/entities/pet.ts`
-- Identificadas as propriedades e métodos da entidade
-- Propriedade `_active` é gerenciada com default `true`
-- Métodos `activate()` e `deactivate()` para controlar o estado ativo
-- Validações robustas implementadas no método estático `create`
-
-#### 2. Verificação do Repositório PrismaPet
-- Analisado o repositório `PrismaPetRepository` em `src/infrastructure/repositories/prisma-pet-repository.ts`
-- Métodos `activate` e `deactivate` implementados para atualizar o status na base de dados
-- Método `mapToDomain` manipula corretamente a propriedade `active`
-- Filtragem por estado `active` implementada nos métodos de busca
-
-#### 3. Análise do Schema Prisma
-- Verificado o modelo `Pet` em `prisma/schema.prisma`
-- Campo `active` definido como `Boolean` com valor padrão `true`
-- Relacionamentos com `Customer` e `Scheduling` adequadamente implementados
-
-#### 4. Análise dos Controladores e Rotas
-- Analisadas as rotas em `src/presentation/routes/pet-routes.ts`
-- Verificados os métodos do controlador em `src/presentation/controllers/pet-controller.ts`
-- Implementação dos endpoints de ativação/desativação de pets
-- Confirmada a proteção dos endpoints com middleware de autenticação
-
-### Conclusão da Tarefa 10
-
-✅ **Status: Concluída**
-
-**Data de conclusão:** 2024-09-20
-
-**Observações:**
-- A entidade `Pet` e sua propriedade `active` estão corretamente implementadas em todas as camadas da aplicação
-- A manipulação do estado ativo/inativo segue os princípios da Clean Architecture e DDD
-- A validação de domínio na entidade `Pet` garante a integridade dos dados
-- A implementação do repositório garante que a propriedade `active` seja persistida corretamente no banco de dados
-
-**Aprendizados:**
-- A abordagem orientada a domínio permite um controle preciso do estado das entidades
-- A centralização da lógica de status na entidade garante consistência em toda a aplicação
-- O mapeamento adequado entre entidades de domínio e modelos do Prisma facilita a manutenção
-
-**Próxima Tarefa:** Implementação de notificações automatizadas para checkups de pets
+**Próxima Tarefa:** Implementação dos Casos de Uso de Agendamento (Tarefa #5)

@@ -1,0 +1,36 @@
+# Task ID: 7
+# Title: Implementação de Seed de Dados
+# Status: pending
+# Dependencies: 2
+# Priority: medium
+# Description: Implementar sistema de seed de dados para popular o banco com dados iniciais durante o desenvolvimento.
+# Details:
+Implementar um script de seed para popular o banco de dados com dados iniciais para facilitar o desenvolvimento e testes:
+
+1. Criar script de seed no Prisma:
+   - Implementar seed.ts na pasta prisma
+   - Configurar script no package.json
+
+2. Criar dados iniciais para todas as tabelas:
+   - Usuários (admin e funcionário)
+   - Clientes
+   - Pets (diferentes espécies e tamanhos)
+   - Serviços (banho, tosa, etc.)
+   - Agendamentos (com datas variadas)
+   - Notificações relacionadas aos agendamentos
+   - Histórico de login
+
+3. Implementar limpeza de dados antes do seed:
+   - Remover dados existentes nas tabelas na ordem correta
+   - Respeitar constraints de chave estrangeira
+
+4. Documentar o processo de seed:
+   - Adicionar instruções no README
+   - Documentar no DEVELOPMENT_LOG.md
+
+# Test Strategy:
+1. Testar execução do script de seed em ambiente limpo
+2. Verificar se todos os dados foram inseridos corretamente
+3. Testar a execução do seed em banco com dados existentes
+4. Verificar se todas as tabelas foram populadas
+5. Testar se o relacionamento entre os dados está correto 

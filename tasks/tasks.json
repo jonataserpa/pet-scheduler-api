@@ -65,6 +65,16 @@
       "priority": "medium",
       "details": "Desenvolver os casos de uso relacionados ao cadastro e gestão de clientes e seus pets:\n\n1. Implementar casos de uso para Cliente:\n   - CreateCustomerUseCase\n   - UpdateCustomerUseCase\n   - DeleteCustomerUseCase\n   - ListCustomersUseCase\n   - GetCustomerByIdUseCase\n   - SearchCustomersUseCase\n\n2. Implementar casos de uso para Pet:\n   - AddPetToCustomerUseCase\n   - UpdatePetUseCase\n   - RemovePetUseCase\n   - ListPetsByCustomerUseCase\n   - GetPetByIdUseCase\n\n3. Implementar regras de negócio para cliente/pet:\n   - Validação de dados cadastrais\n   - Restrições de cadastro para pets de porte grande ou com alergias\n   - Validação de histórico de agendamento\n\n4. Integrar com sistema de agendamento para manter consistência",
       "testStrategy": "1. Testes unitários para cada caso de uso\n2. Testes de integração para fluxos completos de cadastro\n3. Testes para validações e restrições específicas\n4. Verificar integridade referencial entre cliente e pets\n5. Testar cenários de atualização e exclusão"
+    },
+    {
+      "id": 7,
+      "title": "Implementação de Seed de Dados",
+      "description": "Implementar sistema de seed de dados para popular o banco com dados iniciais durante o desenvolvimento.",
+      "status": "pending",
+      "dependencies": [2],
+      "priority": "medium",
+      "details": "Implementar um script de seed para popular o banco de dados com dados iniciais para facilitar o desenvolvimento e testes:\n\n1. Criar script de seed no Prisma:\n   - Implementar seed.ts na pasta prisma\n   - Configurar script no package.json\n\n2. Criar dados iniciais para todas as tabelas:\n   - Usuários (admin e funcionário)\n   - Clientes\n   - Pets (diferentes espécies e tamanhos)\n   - Serviços (banho, tosa, etc.)\n   - Agendamentos (com datas variadas)\n   - Notificações relacionadas aos agendamentos\n   - Histórico de login\n\n3. Implementar limpeza de dados antes do seed:\n   - Remover dados existentes nas tabelas na ordem correta\n   - Respeitar constraints de chave estrangeira\n\n4. Documentar o processo de seed:\n   - Adicionar instruções no README\n   - Documentar no DEVELOPMENT_LOG.md",
+      "testStrategy": "1. Testar execução do script de seed em ambiente limpo\n2. Verificar se todos os dados foram inseridos corretamente\n3. Testar a execução do seed em banco com dados existentes\n4. Verificar se todas as tabelas foram populadas\n5. Testar se o relacionamento entre os dados está correto"
     }
   ]
 }
