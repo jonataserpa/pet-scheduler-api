@@ -1,4 +1,3 @@
-import { Customer } from '../../entities/customer.js';
 import { CustomerRepository } from '../../repositories/customer-repository.js';
 
 export interface GetCustomerByIdResponseDTO {

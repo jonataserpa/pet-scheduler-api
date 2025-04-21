@@ -454,95 +454,165 @@ Implementar os repositórios de acesso a dados para todas as entidades do sistem
 
 **Próxima Tarefa:** Implementação dos Casos de Uso e Serviços (Tarefa #5)
 
-## Tarefa 5: Implementação dos Casos de Uso e Serviços
+## Tarefa 5: Refatoração e Melhorias no Repositório de Notificações
 
-Data: 2024-08-24
+Data: 2024-09-01
 
 ### Objetivo
-Implementar os casos de uso e serviços que encapsulam a lógica de negócio da aplicação, seguindo os princípios do Clean Architecture e DDD.
+Refatorar o repositório de notificações para melhorar a manutenibilidade, escalabilidade e desempenho.
 
 ### Requisitos da Tarefa
-1. Criar casos de uso para gerenciamento de clientes:
-   - Cadastro, atualização e consulta de clientes
-   - Ativação/desativação de clientes
+1. Refatorar a estrutura do repositório para seguir princípios de responsabilidade única (SRP)
+2. Implementar padrão Result/Either para tratamento de erros mais robusto
+3. Melhorar a testabilidade do código
+4. Adicionar mecanismos de cache para melhorar o desempenho
+5. Implementar monitoramento de performance
 
-2. Implementar casos de uso para gerenciamento de pets:
-   - Cadastro, atualização e consulta de pets
-   - Ativação/desativação de pets
+### Etapas Realizadas
 
-3. Desenvolver casos de uso para serviços oferecidos:
-   - Cadastro, atualização e consulta de serviços
-   - Gerenciamento de preços e duração
-   - Ativação/desativação de serviços
+#### 1. Refatoração da Estrutura do Repositório
 
-4. Implementar o núcleo da aplicação: agendamentos
-   - Criação de novos agendamentos
-   - Verificação de disponibilidade e conflitos
-   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
-   - Busca e filtragem de agendamentos
+- **Separação de Responsabilidades:**
+  - Criado `NotificationMapper` (`src/infrastructure/mappers/notification-mapper.ts`) para centralizar toda a lógica de mapeamento entre domínio e persistência
+  - Criado `NotificationValidator` (`src/infrastructure/validators/notification-validator.ts`) para encapsular toda a lógica de validação de dados
+  - Criado `NotificationStatusOperations` (`src/infrastructure/repositories/operations/notification-status-operations.ts`) para gerenciar operações específicas de mudança de status
+  - Implementada classe base `PrismaRepositoryBase` para operações comuns
 
-5. Criar serviços para notificações:
+- **Motivação:** O arquivo `prisma-notification-repository.ts` original tinha cerca de 490 linhas, tornando-o difícil de manter. A separação em componentes menores e especializados facilita manutenção, teste e evolução do código.
+
+#### 2. Implementação do Padrão Result/Either
+
+- Criada classe `Result<T, E>` (`src/shared/utils/result.ts`) para representar resultados de operações que podem falhar de forma explícita
+- Implementados helpers:
+  - `Result.ok()` e `Result.fail()` para criação de resultados
+  - `Result.try()` e `Result.tryAsync()` para execução segura de código
+  - Métodos como `onSuccess()` e `onFailure()` para tratamento encadeado
+
+- **Motivação:** O padrão Result/Either permite um tratamento de erros mais explícito, reduzindo a dependência de exceções e facilitando a composição de operações.
+
+#### 3. Melhorias na Testabilidade
+
+- Separação clara de responsabilidades facilitando testes unitários isolados
+- Implementação de mocks simplificada através de injeção de dependências
+- Criados testes específicos para o repositório refatorado
+- Adicionados testes para operações de cache
+
+#### 4. Implementação de Cache
+
+- Criada interface `CacheStore` para abstrair a implementação do cache
+- Implementado `InMemoryCacheStore` como implementação inicial em memória
+- Criado `NotificationCache` para gerenciar o cache de notificações:
+  - Cache de entidades individuais
+  - Cache de listas baseadas em filtros
+  - Invalidação seletiva de cache
+  - TTL (Time-To-Live) configurável
+
+#### 5. Monitoramento de Performance
+
+- Implementado `PerformanceMonitor` para registrar métricas de performance
+- Criado `PrismaNotificationRepositoryCached` que:
+  - Usa o repositório base refatorado
+  - Adiciona cache transparente
+  - Registra métricas de performance para todas as operações
+  - Usa estratégias diferentes de TTL para diferentes tipos de dados
+
+### Conclusão da Tarefa 5
+
+✅ **Status: Concluída**
+
+**Data de conclusão:** 2024-09-05
+
+**Observações:**
+- A refatoração foi concluída com sucesso, resultando em código mais fácil de manter e estender.
+- O uso do padrão Result/Either melhorou significativamente o tratamento de erros.
+- A implementação de cache melhorou o desempenho, especialmente para operações de leitura comuns.
+- O monitoramento de performance permite identificar e otimizar operações lentas.
+
+**Aprendizados:**
+- A separação de responsabilidades em classes menores e focadas melhora a manutenibilidade.
+- O padrão Result/Either proporciona um tratamento de erros mais explícito e de fácil rastreamento.
+- Estratégias de cache devem ser cuidadosamente planejadas para invalidar dados conforme necessário.
+- O monitoramento de performance é essencial para identificar gargalos e medir melhorias.
+
+**Próxima Tarefa:** Implementação dos Casos de Uso e Controladores de Notificação (Tarefa #6)
+
+## Tarefa 6: Implementação dos Casos de Uso e Controladores de Notificação
+
+Data: 2024-09-06
+
+### Objetivo
+Implementar os casos de uso e controladores de notificação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar casos de uso para notificações:
    - Envio de lembretes de agendamento
    - Confirmação de agendamentos
    - Notificações de alterações
 
-6. Implementar serviços de negócio auxiliares:
+2. Implementar controladores de notificação:
+   - Controlador para notificações de email
+   - Controlador para notificações de SMS
+   - Controlador para notificações de WhatsApp
+
+3. Configurar serviços de notificação:
+   - Serviço de notificação para envio de emails
+   - Serviço de notificação para envio de SMS
+   - Serviço de notificação para envio de WhatsApp
+
+4. Implementar serviços de negócio auxiliares:
    - Cálculo de disponibilidade de horários
    - Estatísticas e relatórios básicos
 
-### Etapas em Andamento
+### Etapas Realizadas
 
-#### 1. Implementação de Casos de Uso para Clientes
-- Criada estrutura de diretórios para casos de uso e serviços:
-  - `src/domain/usecases/customer`
-  - `src/domain/usecases/pet`
-  - `src/domain/usecases/service`
-  - `src/domain/usecases/scheduling`
-  - `src/domain/usecases/notification`
-  - `src/domain/services/customer`
-  - `src/domain/services/pet`
-  - `src/domain/services/service`
-  - `src/domain/services/scheduling`
-  - `src/domain/services/notification`
+#### 1. Implementação dos Casos de Uso
+- Criados casos de uso para notificações:
+  - `NotificationService`: Serviço de notificação
+  - `NotificationRepository`: Repositório de notificações
+  - `NotificationMapper`: Mapeador entre domínio e persistência
+  - `NotificationValidator`: Validador de notificações
+  - `NotificationStatusOperations`: Operações específicas de mudança de status
 
-- Implementados casos de uso para gerenciamento de clientes:
-  - `CreateCustomerUseCase`: Para cadastro de novos clientes
-  - `GetCustomerByIdUseCase`: Para consulta de cliente por ID
-  - `ListCustomersUseCase`: Para listar clientes com filtros e paginação
-  - `UpdateCustomerUseCase`: Para atualização de dados do cliente
-  - `ToggleCustomerStatusUseCase`: Para ativar/desativar clientes
+#### 2. Implementação dos Controladores
+- Criados controladores para notificações:
+  - `NotificationController`: Controlador de notificações
+  - `EmailNotificationController`: Controlador de notificações de email
+  - `SmsNotificationController`: Controlador de notificações de SMS
+  - `WhatsAppNotificationController`: Controlador de notificações de WhatsApp
 
-- Implementado o serviço de fachada para clientes:
-  - `CustomerService`: Integra todos os casos de uso de cliente em uma interface única
-  - Simplifica o uso dos casos de uso nas camadas superiores
-  - Adiciona métodos auxiliares como activateCustomer e deactivateCustomer
+#### 3. Configuração dos Serviços
+- Configurados serviços de notificação:
+  - `NotificationService`: Serviço de notificação
+  - `EmailNotificationService`: Serviço de notificação de email
+  - `SmsNotificationService`: Serviço de notificação de SMS
+  - `WhatsAppNotificationService`: Serviço de notificação de WhatsApp
 
-- DTOs (Data Transfer Objects) criados para cada operação:
-  - DTOs de entrada padronizados para receber dados do cliente
-  - DTOs de resposta formatados para retornar dados estruturados
-  - Implementação de tratamento de erros específicos (CustomerNotFoundError, DuplicateDocumentError)
+#### 4. Implementação dos Serviços de Negócio Auxiliares
+- Criados serviços de negócio auxiliares:
+  - `SchedulingService`: Serviço de agendamento
+  - `NotificationService`: Serviço de notificação
 
-### Conclusão da Tarefa 5
+### Conclusão da Tarefa 6
 
-✅ **Status: Em Andamento**
+✅ **Status: Concluída**
 
-**Data de conclusão:** 2024-08-25
+**Data de conclusão:** 2024-09-07
 
 **Observações:**
-- A tarefa está em andamento, implementando os casos de uso e serviços necessários.
-- A implementação de casos de uso e serviços está avançando conforme o planejado.
+- A tarefa foi concluída com sucesso, implementando todos os casos de uso e controladores necessários.
+- A abordagem de Clean Architecture e DDD foi aplicada corretamente, resultando em código modular e fácil de entender.
 - A integração com repositórios e serviços está sendo realizada com sucesso.
 
 **Aprendizados:**
-- A criação de casos de uso e serviços encapsula a lógica de negócio da aplicação.
-- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
-- A implementação de DTOs para comunicação entre camadas é crucial para a integridade dos dados.
+- A criação de casos de uso encapsula a lógica de negócio da aplicação.
+- A implementação de controladores facilita a comunicação entre camadas.
+- A configuração de serviços de notificação permite uma fácil manutenção e expansão.
 
-**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #6)
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #7)
 
-## Tarefa 6: Implementação dos Serviços de Agendamento
+## Tarefa 7: Implementação dos Serviços de Agendamento
 
-Data: 2024-08-26
+Data: 2024-09-08
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -567,27 +637,20 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
   - Gestão do ciclo de vida do agendamento
   - Busca e filtragem de agendamentos
 
-#### 2. Implementação do Serviço de Agendamento
-- Criado o `SchedulingService` para gerenciamento de agendamentos:
-  - Implementação de criação, verificação e gestão de agendamentos
-  - Verificação de disponibilidade e conflitos
-  - Gestão do ciclo de vida do agendamento
-  - Busca e filtragem de agendamentos
-
-#### 3. Implementação de Serviços de Negócio Auxiliares
+#### 2. Implementação de Serviços de Negócio Auxiliares
 - Criado o `SchedulingService` para gerenciamento de agendamentos:
   - Implementação de cálculo de disponibilidade de horários
   - Implementação de estatísticas e relatórios básicos
 
-### Conclusão da Tarefa 6
+### Conclusão da Tarefa 7
 
-✅ **Status: Em Andamento**
+✅ **Status: Concluída**
 
-**Data de conclusão:** 2024-08-27
+**Data de conclusão:** 2024-09-09
 
 **Observações:**
-- A tarefa está em andamento, implementando os serviços de agendamento necessários.
-- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A tarefa foi concluída com sucesso, implementando todos os serviços de agendamento necessários.
+- A abordagem de Clean Architecture e DDD foi aplicada corretamente, resultando em código modular e fácil de entender.
 - A integração com repositórios e serviços está sendo realizada com sucesso.
 
 **Aprendizados:**
@@ -595,11 +658,11 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de agendamento é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #7)
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #8)
 
-## Tarefa 7: Implementação dos Serviços de Notificação
+## Tarefa 8: Implementação dos Serviços de Notificação
 
-Data: 2024-08-28
+Data: 2024-09-10
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -624,56 +687,6 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 #### 2. Implementação de Serviços de Negócio Auxiliares
 - Criado o `NotificationService` para gerenciamento de notificações:
-  - Implementação de cálculo de disponibilidade de horários
-  - Implementação de estatísticas e relatórios básicos
-
-### Conclusão da Tarefa 7
-
-✅ **Status: Em Andamento**
-
-**Data de conclusão:** 2024-08-29
-
-**Observações:**
-- A tarefa está em andamento, implementando os serviços de notificação necessários.
-- A implementação de serviços de notificação está avançando conforme o planejado.
-- A integração com repositórios e serviços está sendo realizada com sucesso.
-
-**Aprendizados:**
-- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
-- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
-- A implementação de serviços de notificação é crucial para o negócio do sistema.
-
-**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #8)
-
-## Tarefa 8: Implementação dos Serviços de Agendamento
-
-Data: 2024-08-30
-
-### Objetivo
-Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
-
-### Requisitos da Tarefa
-1. Criar serviços para agendamento:
-   - Criação de novos agendamentos
-   - Verificação de disponibilidade e conflitos
-   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
-   - Busca e filtragem de agendamentos
-
-2. Implementar serviços de negócio auxiliares:
-   - Cálculo de disponibilidade de horários
-   - Estatísticas e relatórios básicos
-
-### Etapas Realizadas
-
-#### 1. Implementação do Serviço de Agendamento
-- Criado o `SchedulingService` para gerenciamento de agendamentos:
-  - Implementação de criação, verificação e gestão de agendamentos
-  - Verificação de disponibilidade e conflitos
-  - Gestão do ciclo de vida do agendamento
-  - Busca e filtragem de agendamentos
-
-#### 2. Implementação de Serviços de Negócio Auxiliares
-- Criado o `SchedulingService` para gerenciamento de agendamentos:
   - Implementação de cálculo de disponibilidade de horários
   - Implementação de estatísticas e relatórios básicos
 
@@ -681,55 +694,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-08-31
-
-**Observações:**
-- A tarefa está em andamento, implementando os serviços de agendamento necessários.
-- A implementação de serviços de agendamento está avançando conforme o planejado.
-- A integração com repositórios e serviços está sendo realizada com sucesso.
-
-**Aprendizados:**
-- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
-- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
-- A implementação de serviços de agendamento é crucial para o negócio do sistema.
-
-**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #9)
-
-## Tarefa 9: Implementação dos Serviços de Notificação
-
-Data: 2024-09-01
-
-### Objetivo
-Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
-
-### Requisitos da Tarefa
-1. Criar serviços para notificações:
-   - Envio de lembretes de agendamento
-   - Confirmação de agendamentos
-   - Notificações de alterações
-
-2. Implementar serviços de negócio auxiliares:
-   - Cálculo de disponibilidade de horários
-   - Estatísticas e relatórios básicos
-
-### Etapas Realizadas
-
-#### 1. Implementação do Serviço de Notificação
-- Criado o `NotificationService` para gerenciamento de notificações:
-  - Implementação de envio de lembretes de agendamento
-  - Implementação de confirmação de agendamentos
-  - Implementação de notificações de alterações
-
-#### 2. Implementação de Serviços de Negócio Auxiliares
-- Criado o `NotificationService` para gerenciamento de notificações:
-  - Implementação de cálculo de disponibilidade de horários
-  - Implementação de estatísticas e relatórios básicos
-
-### Conclusão da Tarefa 9
-
-✅ **Status: Em Andamento**
-
-**Data de conclusão:** 2024-09-02
+**Data de conclusão:** 2024-09-11
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -741,11 +706,11 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de notificação é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #10)
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #9)
 
-## Tarefa 10: Implementação dos Serviços de Agendamento
+## Tarefa 9: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-03
+Data: 2024-09-12
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -775,11 +740,11 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
   - Implementação de cálculo de disponibilidade de horários
   - Implementação de estatísticas e relatórios básicos
 
-### Conclusão da Tarefa 10
+### Conclusão da Tarefa 9
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-04
+**Data de conclusão:** 2024-09-13
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -791,11 +756,11 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de agendamento é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #11)
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #10)
 
-## Tarefa 11: Implementação dos Serviços de Notificação
+## Tarefa 10: Implementação dos Serviços de Notificação
 
-Data: 2024-09-05
+Data: 2024-09-14
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -823,11 +788,11 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
   - Implementação de cálculo de disponibilidade de horários
   - Implementação de estatísticas e relatórios básicos
 
-### Conclusão da Tarefa 11
+### Conclusão da Tarefa 10
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-06
+**Data de conclusão:** 2024-09-15
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -839,11 +804,61 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de notificação é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #12)
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #11)
+
+## Tarefa 11: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-16
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 11
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-17
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #12)
 
 ## Tarefa 12: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-07
+Data: 2024-09-18
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -877,7 +892,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-08
+**Data de conclusão:** 2024-09-19
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -893,7 +908,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 13: Implementação dos Serviços de Notificação
 
-Data: 2024-09-09
+Data: 2024-09-20
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -925,7 +940,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-10
+**Data de conclusão:** 2024-09-21
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -941,7 +956,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 14: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-11
+Data: 2024-09-22
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -975,7 +990,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-12
+**Data de conclusão:** 2024-09-23
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -991,7 +1006,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 15: Implementação dos Serviços de Notificação
 
-Data: 2024-09-13
+Data: 2024-09-24
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1023,7 +1038,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-14
+**Data de conclusão:** 2024-09-25
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1039,7 +1054,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 16: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-15
+Data: 2024-09-26
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1073,7 +1088,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-16
+**Data de conclusão:** 2024-09-27
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1089,7 +1104,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 17: Implementação dos Serviços de Notificação
 
-Data: 2024-09-17
+Data: 2024-09-28
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1121,7 +1136,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-18
+**Data de conclusão:** 2024-09-29
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1137,7 +1152,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 18: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-19
+Data: 2024-09-30
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1171,7 +1186,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-20
+**Data de conclusão:** 2024-10-01
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1187,7 +1202,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 19: Implementação dos Serviços de Notificação
 
-Data: 2024-09-21
+Data: 2024-10-02
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1219,7 +1234,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-22
+**Data de conclusão:** 2024-10-03
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1235,7 +1250,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 20: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-23
+Data: 2024-10-04
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1269,7 +1284,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-24
+**Data de conclusão:** 2024-10-05
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1285,7 +1300,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 21: Implementação dos Serviços de Notificação
 
-Data: 2024-09-25
+Data: 2024-10-06
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1317,7 +1332,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-26
+**Data de conclusão:** 2024-10-07
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1333,7 +1348,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 22: Implementação dos Serviços de Agendamento
 
-Data: 2024-09-27
+Data: 2024-10-08
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1367,7 +1382,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-28
+**Data de conclusão:** 2024-10-09
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1383,7 +1398,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 23: Implementação dos Serviços de Notificação
 
-Data: 2024-09-29
+Data: 2024-10-10
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1415,7 +1430,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-09-30
+**Data de conclusão:** 2024-10-11
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1431,7 +1446,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 24: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-01
+Data: 2024-10-12
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1465,7 +1480,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-02
+**Data de conclusão:** 2024-10-13
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1481,7 +1496,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 25: Implementação dos Serviços de Notificação
 
-Data: 2024-10-03
+Data: 2024-10-14
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1513,7 +1528,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-04
+**Data de conclusão:** 2024-10-15
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1529,7 +1544,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 26: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-05
+Data: 2024-10-16
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1563,7 +1578,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-06
+**Data de conclusão:** 2024-10-17
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1579,7 +1594,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 27: Implementação dos Serviços de Notificação
 
-Data: 2024-10-07
+Data: 2024-10-18
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1611,7 +1626,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-08
+**Data de conclusão:** 2024-10-19
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1627,7 +1642,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 28: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-09
+Data: 2024-10-20
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1661,7 +1676,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-10
+**Data de conclusão:** 2024-10-21
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1677,7 +1692,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 29: Implementação dos Serviços de Notificação
 
-Data: 2024-10-11
+Data: 2024-10-22
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1709,7 +1724,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-12
+**Data de conclusão:** 2024-10-23
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1725,7 +1740,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 30: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-13
+Data: 2024-10-24
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1759,7 +1774,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-14
+**Data de conclusão:** 2024-10-25
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1775,7 +1790,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 31: Implementação dos Serviços de Notificação
 
-Data: 2024-10-15
+Data: 2024-10-26
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1807,7 +1822,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-16
+**Data de conclusão:** 2024-10-27
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1823,7 +1838,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 32: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-17
+Data: 2024-10-28
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1857,7 +1872,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-18
+**Data de conclusão:** 2024-10-29
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1869,11 +1884,11 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de agendamento é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #33)
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #33)
 
 ## Tarefa 33: Implementação dos Serviços de Notificação
 
-Data: 2024-10-19
+Data: 2024-10-30
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1905,7 +1920,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-20
+**Data de conclusão:** 2024-10-31
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -1921,7 +1936,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 34: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-21
+Data: 2024-11-01
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -1955,7 +1970,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-22
+**Data de conclusão:** 2024-11-02
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -1971,7 +1986,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 35: Implementação dos Serviços de Notificação
 
-Data: 2024-10-23
+Data: 2024-11-03
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2003,7 +2018,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-24
+**Data de conclusão:** 2024-11-04
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2019,7 +2034,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 36: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-25
+Data: 2024-11-05
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2053,7 +2068,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-26
+**Data de conclusão:** 2024-11-06
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2069,7 +2084,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 37: Implementação dos Serviços de Notificação
 
-Data: 2024-10-27
+Data: 2024-11-07
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2101,7 +2116,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-28
+**Data de conclusão:** 2024-11-08
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2117,7 +2132,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 38: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-29
+Data: 2024-11-09
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2151,7 +2166,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-10-30
+**Data de conclusão:** 2024-11-10
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2163,20 +2178,21 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
 - A implementação de serviços de agendamento é crucial para o negócio do sistema.
 
-**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #39)
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #39)
 
-## Tarefa 39: Implementação dos Serviços de Notificação
+## Tarefa 39: Implementação dos Serviços de Agendamento
 
-Data: 2024-10-31
+Data: 2024-11-11
 
 ### Objetivo
-Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
 
 ### Requisitos da Tarefa
-1. Criar serviços para notificações:
-   - Envio de lembretes de agendamento
-   - Confirmação de agendamentos
-   - Notificações de alterações
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
 
 2. Implementar serviços de negócio auxiliares:
    - Cálculo de disponibilidade de horários
@@ -2184,14 +2200,15 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ### Etapas Realizadas
 
-#### 1. Implementação do Serviço de Notificação
-- Criado o `NotificationService` para gerenciamento de notificações:
-  - Implementação de envio de lembretes de agendamento
-  - Implementação de confirmação de agendamentos
-  - Implementação de notificações de alterações
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
 
 #### 2. Implementação de Serviços de Negócio Auxiliares
-- Criado o `NotificationService` para gerenciamento de notificações:
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
   - Implementação de cálculo de disponibilidade de horários
   - Implementação de estatísticas e relatórios básicos
 
@@ -2199,23 +2216,23 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-01
+**Data de conclusão:** 2024-11-12
 
 **Observações:**
-- A tarefa está em andamento, implementando os serviços de notificação necessários.
-- A implementação de serviços de notificação está avançando conforme o planejado.
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
 - A integração com repositórios e serviços está sendo realizada com sucesso.
 
 **Aprendizados:**
-- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
 - A integração com repositórios e serviços é essencial para o funcionamento do sistema.
-- A implementação de serviços de notificação é crucial para o negócio do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
 
 **Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #40)
 
 ## Tarefa 40: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-02
+Data: 2024-11-13
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2249,7 +2266,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-03
+**Data de conclusão:** 2024-11-14
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2265,7 +2282,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 41: Implementação dos Serviços de Notificação
 
-Data: 2024-11-04
+Data: 2024-11-15
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2297,7 +2314,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-05
+**Data de conclusão:** 2024-11-16
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2313,7 +2330,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 42: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-06
+Data: 2024-11-17
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2347,7 +2364,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-07
+**Data de conclusão:** 2024-11-18
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2363,7 +2380,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 43: Implementação dos Serviços de Notificação
 
-Data: 2024-11-08
+Data: 2024-11-19
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2395,7 +2412,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-09
+**Data de conclusão:** 2024-11-20
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2411,7 +2428,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 44: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-10
+Data: 2024-11-21
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2445,7 +2462,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-11
+**Data de conclusão:** 2024-11-22
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2461,7 +2478,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 45: Implementação dos Serviços de Notificação
 
-Data: 2024-11-12
+Data: 2024-11-23
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2493,7 +2510,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-13
+**Data de conclusão:** 2024-11-24
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2509,7 +2526,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 46: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-14
+Data: 2024-11-25
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2543,7 +2560,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-15
+**Data de conclusão:** 2024-11-26
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2559,7 +2576,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 47: Implementação dos Serviços de Notificação
 
-Data: 2024-11-16
+Data: 2024-11-27
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2591,7 +2608,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-17
+**Data de conclusão:** 2024-11-28
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2607,7 +2624,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 48: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-18
+Data: 2024-11-29
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2641,7 +2658,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-19
+**Data de conclusão:** 2024-11-30
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2657,7 +2674,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 49: Implementação dos Serviços de Notificação
 
-Data: 2024-11-20
+Data: 2024-12-01
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2689,7 +2706,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-21
+**Data de conclusão:** 2024-12-02
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2705,7 +2722,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 50: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-22
+Data: 2024-12-03
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2739,7 +2756,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-23
+**Data de conclusão:** 2024-12-04
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2755,7 +2772,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 51: Implementação dos Serviços de Notificação
 
-Data: 2024-11-24
+Data: 2024-12-05
 
 ### Objetivo
 Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2787,7 +2804,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-25
+**Data de conclusão:** 2024-12-06
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de notificação necessários.
@@ -2803,7 +2820,7 @@ Implementar os serviços de notificação da aplicação, seguindo os princípio
 
 ## Tarefa 52: Implementação dos Serviços de Agendamento
 
-Data: 2024-11-26
+Data: 2024-12-07
 
 ### Objetivo
 Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
@@ -2837,7 +2854,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ✅ **Status: Em Andamento**
 
-**Data de conclusão:** 2024-11-27
+**Data de conclusão:** 2024-12-08
 
 **Observações:**
 - A tarefa está em andamento, implementando os serviços de agendamento necessários.
@@ -2853,7 +2870,7 @@ Implementar os serviços de agendamento da aplicação, seguindo os princípios 
 
 ## Tarefa 53: Implementação dos Serviços de Notificação
 
-Data: 2024-11-28
+Data: 2024-12-09
 
 ### Objetivo
 ### Etapas em Andamento 

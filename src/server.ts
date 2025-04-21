@@ -16,6 +16,10 @@ import { AuthController } from './presentation/controllers/auth-controller.js';
 import { setupAuthRoutes } from './presentation/routes/auth-routes.js';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user-repository.js';
 import { PrismaLoginHistoryRepository } from './infrastructure/repositories/prisma-login-history-repository.js';
+import { PrismaNotificationRepositoryCached } from './infrastructure/repositories/prisma-notification-repository-cached.js';
+import { NotificationCache } from './infrastructure/cache/notification-cache.js';
+import { InMemoryCacheStore } from './infrastructure/cache/notification-cache.js';
+import { PerformanceMonitor } from './infrastructure/monitoring/performance-monitor.js';
 import { EmailService } from './infrastructure/services/email-service.js';
 import { setupPassportStrategies } from './infrastructure/auth/passport-strategies.js';
 
@@ -86,9 +90,19 @@ async function setupRoutes(): Promise<void> {
   const tokenBlacklistService = new TokenBlacklistService(redisUrl);
   await tokenBlacklistService.connect();
   
+  // Inicializar os serviços de cache e monitoramento
+  const cacheStore = new InMemoryCacheStore(300); // TTL padrão de 5 minutos
+  const notificationCache = new NotificationCache(cacheStore);
+  const notificationMonitor = new PerformanceMonitor('Notification');
+  
   // Repositórios
   const userRepository = new PrismaUserRepository(prismaClient);
   const loginHistoryRepository = new PrismaLoginHistoryRepository(prismaClient);
+  const notificationRepository = new PrismaNotificationRepositoryCached(
+    prismaClient,
+    notificationCache,
+    notificationMonitor
+  );
   
   // Serviço de autenticação
   const authService = new AuthService(
