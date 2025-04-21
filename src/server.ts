@@ -14,6 +14,7 @@ import { PasswordResetService } from './domain/services/auth/password-reset-serv
 import { AuthMiddleware } from './presentation/middlewares/auth-middleware.js';
 import { AuthController } from './presentation/controllers/auth-controller.js';
 import { setupAuthRoutes } from './presentation/routes/auth-routes.js';
+import { setupNotificationRoutes } from './presentation/routes/notification-routes.js';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user-repository.js';
 import { PrismaLoginHistoryRepository } from './infrastructure/repositories/prisma-login-history-repository.js';
 import { PrismaNotificationRepositoryCached } from './infrastructure/repositories/prisma-notification-repository-cached.js';
@@ -22,6 +23,12 @@ import { InMemoryCacheStore } from './infrastructure/cache/notification-cache.js
 import { PerformanceMonitor } from './infrastructure/monitoring/performance-monitor.js';
 import { EmailService } from './infrastructure/services/email-service.js';
 import { setupPassportStrategies } from './infrastructure/auth/passport-strategies.js';
+import { EmailNotificationProvider } from './infrastructure/services/email-notification-provider.js';
+import { NotificationService } from './domain/services/notification/notification-service.js';
+import { NotificationController } from './presentation/controllers/notification-controller.js';
+import { EmailNotificationController } from './presentation/controllers/email-notification-controller.js';
+import { SmsNotificationController } from './presentation/controllers/sms-notification-controller.js';
+import { WhatsAppNotificationController } from './presentation/controllers/whats-app-notification-controller.js';
 
 // Cria a instância do aplicativo Express
 const app = express();
@@ -119,6 +126,37 @@ async function setupRoutes(): Promise<void> {
   // Serviço de email
   const emailService = new EmailService();
   
+  // Serviço de notificação
+  const notificationService = new NotificationService(
+    notificationRepository,
+    new EmailNotificationProvider({
+      host: env.EMAIL_HOST,
+      port: parseInt(env.EMAIL_PORT, 10),
+      secure: env.EMAIL_SECURE === 'true',
+      user: env.EMAIL_USER,
+      password: env.EMAIL_PASSWORD,
+      fromEmail: env.EMAIL_FROM,
+      fromName: env.EMAIL_FROM_NAME,
+    })
+  );
+  
+  // Provedores de notificação
+  const emailProvider = new EmailNotificationProvider({
+    host: env.EMAIL_HOST,
+    port: parseInt(env.EMAIL_PORT, 10),
+    secure: env.EMAIL_SECURE === 'true',
+    user: env.EMAIL_USER,
+    password: env.EMAIL_PASSWORD,
+    fromEmail: env.EMAIL_FROM,
+    fromName: env.EMAIL_FROM_NAME,
+  });
+  
+  // Serviço de notificação principal
+  const notificationService = new NotificationService(
+    notificationRepository,
+    emailProvider
+  );
+  
   // Configura as estratégias do Passport
   setupPassportStrategies(userRepository);
   
@@ -134,10 +172,28 @@ async function setupRoutes(): Promise<void> {
     loginHistoryRepository
   );
   
+  // Controladores de notificação
+  const notificationController = new NotificationController(notificationService);
+  const emailNotificationController = new EmailNotificationController(notificationService);
+  const smsNotificationController = new SmsNotificationController(notificationService);
+  const whatsAppNotificationController = new WhatsAppNotificationController(notificationService);
+  
   // Configuração das rotas de autenticação
   const authRouter = express.Router();
   setupAuthRoutes(authRouter, authController, authMiddleware);
   app.use('/api/auth', authRouter);
+  
+  // Configuração das rotas de notificação
+  const notificationRouter = express.Router();
+  setupNotificationRoutes(
+    notificationRouter, 
+    notificationController,
+    emailNotificationController,
+    smsNotificationController,
+    whatsAppNotificationController,
+    authMiddleware
+  );
+  app.use('/api/notifications', notificationRouter);
   
   // Outras rotas serão adicionadas aqui
 }

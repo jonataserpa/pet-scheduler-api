@@ -357,4 +357,59 @@ export class NotificationService {
       year: 'numeric',
     });
   }
+  
+  /**
+   * Tenta reenviar uma notificação específica que falhou
+   * @param notificationId O ID da notificação para reenviar
+   * @returns A notificação atualizada após o reenvio
+   */
+  async resendFailedNotification(notificationId: string): Promise<Notification> {
+    // Buscar a notificação pelo ID
+    const notification = await this.notificationRepository.findById(notificationId);
+    
+    if (!notification) {
+      throw new Error(`Notificação não encontrada: ${notificationId}`);
+    }
+    
+    // Verificar se a notificação está com status de falha
+    if (notification.status !== NotificationStatus.FAILED) {
+      throw new Error(`Apenas notificações com falha podem ser reenviadas. Status atual: ${notification.status}`);
+    }
+    
+    // Preparar a notificação para uma nova tentativa
+    await this.notificationRepository.retry(notificationId);
+    
+    // Buscar a notificação atualizada
+    const updatedNotification = await this.notificationRepository.findById(notificationId);
+    
+    if (!updatedNotification) {
+      throw new Error(`Erro ao recuperar notificação após prepará-la para reenvio: ${notificationId}`);
+    }
+    
+    // Buscar o provedor adequado para o tipo de notificação
+    const config = this.typeConfigs[updatedNotification.type];
+    
+    if (!config) {
+      throw new Error(`Tipo de notificação não suportado: ${updatedNotification.type}`);
+    }
+    
+    try {
+      // Enviar a notificação usando o provedor adequado
+      await config.provider.send(updatedNotification);
+      
+      // Marcar como enviada
+      const sentNotification = await this.notificationRepository.markAsSent(notificationId);
+      
+      return sentNotification;
+    } catch (error) {
+      // Em caso de erro, marcar como falha novamente
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      const failedNotification = await this.notificationRepository.markAsFailed(
+        notificationId, 
+        `Falha no reenvio: ${errorMessage}`
+      );
+      
+      throw error;
+    }
+  }
 } 
