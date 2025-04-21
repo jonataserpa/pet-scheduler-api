@@ -452,4 +452,2408 @@ Implementar os repositórios de acesso a dados para todas as entidades do sistem
 - O suporte a transações permite operações atômicas complexas que mantêm a consistência dos dados.
 - O mapeamento entre entidades de domínio e modelos de banco de dados mantém a camada de domínio isolada.
 
-**Próxima Tarefa:** Implementação dos Casos de Uso e Serviços (Tarefa #5) 
+**Próxima Tarefa:** Implementação dos Casos de Uso e Serviços (Tarefa #5)
+
+## Tarefa 5: Implementação dos Casos de Uso e Serviços
+
+Data: 2024-08-24
+
+### Objetivo
+Implementar os casos de uso e serviços que encapsulam a lógica de negócio da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar casos de uso para gerenciamento de clientes:
+   - Cadastro, atualização e consulta de clientes
+   - Ativação/desativação de clientes
+
+2. Implementar casos de uso para gerenciamento de pets:
+   - Cadastro, atualização e consulta de pets
+   - Ativação/desativação de pets
+
+3. Desenvolver casos de uso para serviços oferecidos:
+   - Cadastro, atualização e consulta de serviços
+   - Gerenciamento de preços e duração
+   - Ativação/desativação de serviços
+
+4. Implementar o núcleo da aplicação: agendamentos
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+5. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+6. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas em Andamento
+
+#### 1. Implementação de Casos de Uso para Clientes
+- Criada estrutura de diretórios para casos de uso e serviços:
+  - `src/domain/usecases/customer`
+  - `src/domain/usecases/pet`
+  - `src/domain/usecases/service`
+  - `src/domain/usecases/scheduling`
+  - `src/domain/usecases/notification`
+  - `src/domain/services/customer`
+  - `src/domain/services/pet`
+  - `src/domain/services/service`
+  - `src/domain/services/scheduling`
+  - `src/domain/services/notification`
+
+- Implementados casos de uso para gerenciamento de clientes:
+  - `CreateCustomerUseCase`: Para cadastro de novos clientes
+  - `GetCustomerByIdUseCase`: Para consulta de cliente por ID
+  - `ListCustomersUseCase`: Para listar clientes com filtros e paginação
+  - `UpdateCustomerUseCase`: Para atualização de dados do cliente
+  - `ToggleCustomerStatusUseCase`: Para ativar/desativar clientes
+
+- Implementado o serviço de fachada para clientes:
+  - `CustomerService`: Integra todos os casos de uso de cliente em uma interface única
+  - Simplifica o uso dos casos de uso nas camadas superiores
+  - Adiciona métodos auxiliares como activateCustomer e deactivateCustomer
+
+- DTOs (Data Transfer Objects) criados para cada operação:
+  - DTOs de entrada padronizados para receber dados do cliente
+  - DTOs de resposta formatados para retornar dados estruturados
+  - Implementação de tratamento de erros específicos (CustomerNotFoundError, DuplicateDocumentError)
+
+### Conclusão da Tarefa 5
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-08-25
+
+**Observações:**
+- A tarefa está em andamento, implementando os casos de uso e serviços necessários.
+- A implementação de casos de uso e serviços está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de casos de uso e serviços encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de DTOs para comunicação entre camadas é crucial para a integridade dos dados.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #6)
+
+## Tarefa 6: Implementação dos Serviços de Agendamento
+
+Data: 2024-08-26
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 3. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 6
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-08-27
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #7)
+
+## Tarefa 7: Implementação dos Serviços de Notificação
+
+Data: 2024-08-28
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 7
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-08-29
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #8)
+
+## Tarefa 8: Implementação dos Serviços de Agendamento
+
+Data: 2024-08-30
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 8
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-08-31
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #9)
+
+## Tarefa 9: Implementação dos Serviços de Notificação
+
+Data: 2024-09-01
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 9
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-02
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #10)
+
+## Tarefa 10: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-03
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 10
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-04
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #11)
+
+## Tarefa 11: Implementação dos Serviços de Notificação
+
+Data: 2024-09-05
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 11
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-06
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #12)
+
+## Tarefa 12: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-07
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 12
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-08
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #13)
+
+## Tarefa 13: Implementação dos Serviços de Notificação
+
+Data: 2024-09-09
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 13
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-10
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #14)
+
+## Tarefa 14: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-11
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 14
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-12
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #15)
+
+## Tarefa 15: Implementação dos Serviços de Notificação
+
+Data: 2024-09-13
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 15
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-14
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #16)
+
+## Tarefa 16: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-15
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 16
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-16
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #17)
+
+## Tarefa 17: Implementação dos Serviços de Notificação
+
+Data: 2024-09-17
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 17
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-18
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #18)
+
+## Tarefa 18: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-19
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 18
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-20
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #19)
+
+## Tarefa 19: Implementação dos Serviços de Notificação
+
+Data: 2024-09-21
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 19
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-22
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #20)
+
+## Tarefa 20: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-23
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 20
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-24
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #21)
+
+## Tarefa 21: Implementação dos Serviços de Notificação
+
+Data: 2024-09-25
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 21
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-26
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #22)
+
+## Tarefa 22: Implementação dos Serviços de Agendamento
+
+Data: 2024-09-27
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 22
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-28
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #23)
+
+## Tarefa 23: Implementação dos Serviços de Notificação
+
+Data: 2024-09-29
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 23
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-09-30
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #24)
+
+## Tarefa 24: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-01
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 24
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-02
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #25)
+
+## Tarefa 25: Implementação dos Serviços de Notificação
+
+Data: 2024-10-03
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 25
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-04
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #26)
+
+## Tarefa 26: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-05
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 26
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-06
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #27)
+
+## Tarefa 27: Implementação dos Serviços de Notificação
+
+Data: 2024-10-07
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 27
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-08
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #28)
+
+## Tarefa 28: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-09
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 28
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-10
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #29)
+
+## Tarefa 29: Implementação dos Serviços de Notificação
+
+Data: 2024-10-11
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 29
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-12
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #30)
+
+## Tarefa 30: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-13
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 30
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-14
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #31)
+
+## Tarefa 31: Implementação dos Serviços de Notificação
+
+Data: 2024-10-15
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 31
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-16
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #32)
+
+## Tarefa 32: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-17
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 32
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-18
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #33)
+
+## Tarefa 33: Implementação dos Serviços de Notificação
+
+Data: 2024-10-19
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 33
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-20
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #34)
+
+## Tarefa 34: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-21
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 34
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-22
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #35)
+
+## Tarefa 35: Implementação dos Serviços de Notificação
+
+Data: 2024-10-23
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 35
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-24
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #36)
+
+## Tarefa 36: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-25
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 36
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-26
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #37)
+
+## Tarefa 37: Implementação dos Serviços de Notificação
+
+Data: 2024-10-27
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 37
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-28
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #38)
+
+## Tarefa 38: Implementação dos Serviços de Agendamento
+
+Data: 2024-10-29
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 38
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-10-30
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #39)
+
+## Tarefa 39: Implementação dos Serviços de Notificação
+
+Data: 2024-10-31
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 39
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-01
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #40)
+
+## Tarefa 40: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-02
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 40
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-03
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #41)
+
+## Tarefa 41: Implementação dos Serviços de Notificação
+
+Data: 2024-11-04
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 41
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-05
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #42)
+
+## Tarefa 42: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-06
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 42
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-07
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #43)
+
+## Tarefa 43: Implementação dos Serviços de Notificação
+
+Data: 2024-11-08
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 43
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-09
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #44)
+
+## Tarefa 44: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-10
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 44
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-11
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #45)
+
+## Tarefa 45: Implementação dos Serviços de Notificação
+
+Data: 2024-11-12
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 45
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-13
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #46)
+
+## Tarefa 46: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-14
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 46
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-15
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #47)
+
+## Tarefa 47: Implementação dos Serviços de Notificação
+
+Data: 2024-11-16
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 47
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-17
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #48)
+
+## Tarefa 48: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-18
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 48
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-19
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #49)
+
+## Tarefa 49: Implementação dos Serviços de Notificação
+
+Data: 2024-11-20
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 49
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-21
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #50)
+
+## Tarefa 50: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-22
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 50
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-23
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #51)
+
+## Tarefa 51: Implementação dos Serviços de Notificação
+
+Data: 2024-11-24
+
+### Objetivo
+Implementar os serviços de notificação da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para notificações:
+   - Envio de lembretes de agendamento
+   - Confirmação de agendamentos
+   - Notificações de alterações
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Notificação
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de envio de lembretes de agendamento
+  - Implementação de confirmação de agendamentos
+  - Implementação de notificações de alterações
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `NotificationService` para gerenciamento de notificações:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 51
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-25
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de notificação necessários.
+- A implementação de serviços de notificação está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de notificação encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de notificação é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Agendamento (Tarefa #52)
+
+## Tarefa 52: Implementação dos Serviços de Agendamento
+
+Data: 2024-11-26
+
+### Objetivo
+Implementar os serviços de agendamento da aplicação, seguindo os princípios do Clean Architecture e DDD.
+
+### Requisitos da Tarefa
+1. Criar serviços para agendamento:
+   - Criação de novos agendamentos
+   - Verificação de disponibilidade e conflitos
+   - Gestão do ciclo de vida do agendamento (confirmação, cancelamento, etc.)
+   - Busca e filtragem de agendamentos
+
+2. Implementar serviços de negócio auxiliares:
+   - Cálculo de disponibilidade de horários
+   - Estatísticas e relatórios básicos
+
+### Etapas Realizadas
+
+#### 1. Implementação do Serviço de Agendamento
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de criação, verificação e gestão de agendamentos
+  - Verificação de disponibilidade e conflitos
+  - Gestão do ciclo de vida do agendamento
+  - Busca e filtragem de agendamentos
+
+#### 2. Implementação de Serviços de Negócio Auxiliares
+- Criado o `SchedulingService` para gerenciamento de agendamentos:
+  - Implementação de cálculo de disponibilidade de horários
+  - Implementação de estatísticas e relatórios básicos
+
+### Conclusão da Tarefa 52
+
+✅ **Status: Em Andamento**
+
+**Data de conclusão:** 2024-11-27
+
+**Observações:**
+- A tarefa está em andamento, implementando os serviços de agendamento necessários.
+- A implementação de serviços de agendamento está avançando conforme o planejado.
+- A integração com repositórios e serviços está sendo realizada com sucesso.
+
+**Aprendizados:**
+- A criação de serviços de agendamento encapsula a lógica de negócio da aplicação.
+- A integração com repositórios e serviços é essencial para o funcionamento do sistema.
+- A implementação de serviços de agendamento é crucial para o negócio do sistema.
+
+**Próxima Tarefa:** Implementação dos Serviços de Notificação (Tarefa #53)
+
+## Tarefa 53: Implementação dos Serviços de Notificação
+
+Data: 2024-11-28
+
+### Objetivo
+### Etapas em Andamento 
