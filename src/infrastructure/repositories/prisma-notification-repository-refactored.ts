@@ -5,7 +5,7 @@ import { PrismaRepositoryBase } from './base/prisma-repository-base.js';
 import { NotificationMapper } from '../mappers/notification-mapper.js';
 import { NotificationValidator } from '../validators/notification-validator.js';
 import { NotificationStatusOperations } from './operations/notification-status-operations.js';
-import { Result } from '../../shared/utils/result.js';
+import { Result, DomainError } from '../../shared/utils/result.js';
 import { logger } from '../../shared/utils/logger.js';
 
 /**
@@ -33,7 +33,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
       );
       
       if (validationResult.isFailure) {
-        return this.handleError(validationResult.error, 'save', { notificationId: notification.id });
+        logger.error('Erro na validação:', validationResult.error);
+        throw new Error(`Erro ao validar notificação: ${(validationResult.error as DomainError).message}`);
       }
 
       const updatedNotification = await this.prisma.notification.update({
@@ -46,7 +47,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return NotificationMapper.toDomain(updatedNotification);
     } catch (error) {
-      return this.handleError(error, 'save', { notificationId: notification.id });
+      this.handleError(error, 'save', { notificationId: notification.id });
+      throw error;
     }
   }
 
@@ -66,7 +68,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
       );
       
       if (validationResult.isFailure) {
-        return this.handleError(validationResult.error, 'create', { id, type, schedulingId });
+        logger.error('Erro na validação:', validationResult.error);
+        throw new Error(`Erro ao validar notificação: ${(validationResult.error as DomainError).message}`);
       }
 
       const createdNotification = await this.prisma.notification.create({
@@ -82,7 +85,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return NotificationMapper.toDomain(createdNotification);
     } catch (error) {
-      return this.handleError(error, 'create', { id, type, schedulingId });
+      this.handleError(error, 'create', { id, type, schedulingId });
+      throw error;
     }
   }
 
@@ -96,7 +100,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
       );
       
       if (validationResult.isFailure) {
-        return this.handleError(validationResult.error, 'findById', { id });
+        logger.error('Erro na validação:', validationResult.error);
+        throw new Error(`Erro ao validar ID: ${(validationResult.error as DomainError).message}`);
       }
 
       const notification = await this.prisma.notification.findUnique({
@@ -109,7 +114,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return NotificationMapper.toDomain(notification);
     } catch (error) {
-      return this.handleError(error, 'findById', { id });
+      this.handleError(error, 'findById', { id });
+      throw error;
     }
   }
 
@@ -140,7 +146,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return notifications.map(notification => NotificationMapper.toDomain(notification));
     } catch (error) {
-      return this.handleError(error, 'findAll', filter as unknown as Record<string, unknown>);
+      this.handleError(error, 'findAll', filter as unknown as Record<string, unknown>);
+      throw error;
     }
   }
 
@@ -161,7 +168,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return notifications.map(notification => NotificationMapper.toDomain(notification));
     } catch (error) {
-      return this.handleError(error, 'findPendingNotifications', { limit });
+      this.handleError(error, 'findPendingNotifications', { limit });
+      throw error;
     }
   }
 
@@ -175,7 +183,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
       );
       
       if (validationResult.isFailure) {
-        return this.handleError(validationResult.error, 'findBySchedulingId', { schedulingId });
+        logger.error('Erro na validação:', validationResult.error);
+        throw new Error(`Erro ao validar agendamento: ${(validationResult.error as DomainError).message}`);
       }
 
       const notifications = await this.prisma.notification.findMany({
@@ -189,7 +198,8 @@ export class PrismaNotificationRepositoryRefactored extends PrismaRepositoryBase
 
       return notifications.map(notification => NotificationMapper.toDomain(notification));
     } catch (error) {
-      return this.handleError(error, 'findBySchedulingId', { schedulingId });
+      this.handleError(error, 'findBySchedulingId', { schedulingId });
+      throw error;
     }
   }
 

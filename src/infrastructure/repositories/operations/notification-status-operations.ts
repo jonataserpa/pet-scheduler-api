@@ -1,10 +1,10 @@
-import { Prisma, NotificationStatus as PrismaNotificationStatus } from "@prisma/client";
-import { Notification } from "../../../domain/entities/notification.js";
-import { Result, DomainError } from "../../../shared/utils/result.js";
-import { NotificationMapper } from "../../mappers/notification-mapper.js";
-import { NotificationValidator } from "../../validators/notification-validator.js";
-import { PrismaTransaction } from "../../database/prisma-transaction.js";
-import { logger } from "../../../shared/utils/logger.js";
+import { NotificationStatus as PrismaNotificationStatus } from '@prisma/client';
+import { Notification } from '../../../domain/entities/notification.js';
+import { Result } from '../../../shared/utils/result.js';
+import { NotificationMapper } from '../../mappers/notification-mapper.js';
+import { NotificationValidator } from '../../validators/notification-validator.js';
+import { PrismaTransaction } from '../../database/prisma-transaction.js';
+import { logger } from '../../../shared/utils/logger.js';
 
 /**
  * Classe que encapsula operações de mudança de status de notificações

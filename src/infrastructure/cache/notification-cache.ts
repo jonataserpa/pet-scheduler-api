@@ -69,9 +69,8 @@ export class InMemoryCacheStore implements CacheStore {
  * Serviço de cache para notificações
  */
 export class NotificationCache {
-  private readonly cacheKeyPrefix = 'notification:';
-  private readonly cacheKeySinglePrefix = 'notification:single:';
-  private readonly cacheKeyListPrefix = 'notification:list:';
+  private readonly cacheKeySinglePrefix: string = 'notification:single:';
+  private readonly cacheKeyListPrefix: string = 'notification:list:';
   private readonly store: CacheStore;
 
   constructor(store: CacheStore) {

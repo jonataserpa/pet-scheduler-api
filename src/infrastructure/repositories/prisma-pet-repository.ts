@@ -1,22 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { Pet, PetSize } from '../../domain/entities/pet.js';
 import { PetFilter, PetRepository } from '../../domain/repositories/pet-repository.js';
 import { PrismaRepositoryBase } from './base/prisma-repository-base.js';
+import { Pet as PrismaPet, PetSize as PrismaPetSize } from '@prisma/client';
 
-type PrismaPetResult = {
-  id: string;
-  name: string;
-  species: string;
-  breed: string | null;
-  size: PetSize;
-  birthDate: Date | null;
-  allergies: string | null;
-  observations: string | null;
-  customerId: string;
-  createdAt: Date;
-  updatedAt: Date;
+// Ampliando o tipo PrismaPet para incluir a propriedade active
+interface ExtendedPrismaPet extends PrismaPet {
   active: boolean;
-};
+}
 
 /**
  * Implementação do repositório de pets usando Prisma
@@ -27,11 +17,11 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
    */
   async save(pet: Pet): Promise<Pet> {
     try {
-      const data = {
+      const data: any = {
         name: pet.name,
         species: pet.species,
         breed: pet.breed || null,
-        size: pet.size,
+        size: this.mapSizeToPrisma(pet.size),
         birthDate: pet.birthDate || null,
         allergies: pet.allergies || null,
         observations: pet.observations || null,
@@ -44,7 +34,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         data,
       });
 
-      return this.mapToDomain(updatedPet);
+      return this.mapToDomain(updatedPet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'save', { petId: pet.id });
     }
@@ -66,11 +56,11 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
     active: boolean = true
   ): Promise<Pet> {
     try {
-      const data = {
+      const data: any = {
         id,
         name,
         species,
-        size,
+        size: this.mapSizeToPrisma(size),
         customerId,
         breed: breed || null,
         birthDate: birthDate || null,
@@ -85,7 +75,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         data,
       });
 
-      return this.mapToDomain(createdPet);
+      return this.mapToDomain(createdPet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'create', { id, name, species, customerId });
     }
@@ -104,7 +94,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         return null;
       }
 
-      return this.mapToDomain(pet);
+      return this.mapToDomain(pet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'findById', { id });
     }
@@ -117,17 +107,24 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
     try {
       const { id, name, species, breed, size, customerId, active, hasAllergies } = filter;
 
+      // Usando any para contornar verificação de tipo no objeto where
+      const where: any = {
+        id: id ? { equals: id } : undefined,
+        name: name ? { contains: name, mode: 'insensitive' } : undefined,
+        species: species ? { contains: species, mode: 'insensitive' } : undefined,
+        breed: breed ? { contains: breed, mode: 'insensitive' } : undefined,
+        size: size ? { equals: size } : undefined,
+        customerId: customerId ? { equals: customerId } : undefined,
+        allergies: hasAllergies ? { not: null } : undefined,
+      };
+
+      // Adicionar active apenas se definido
+      if (active !== undefined) {
+        where.active = active;
+      }
+
       const pets = await this.prisma.pet.findMany({
-        where: {
-          id: id ? { equals: id } : undefined,
-          name: name ? { contains: name, mode: 'insensitive' } : undefined,
-          species: species ? { contains: species, mode: 'insensitive' } : undefined,
-          breed: breed ? { contains: breed, mode: 'insensitive' } : undefined,
-          size: size ? { equals: size } : undefined,
-          customerId: customerId ? { equals: customerId } : undefined,
-          active: active !== undefined ? { equals: active } : undefined,
-          allergies: hasAllergies ? { not: null } : undefined,
-        },
+        where,
         take: limit,
         skip: offset,
         orderBy: {
@@ -135,7 +132,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         },
       });
 
-      return pets.map((pet: PrismaPetResult) => this.mapToDomain(pet));
+      return pets.map((pet) => this.mapToDomain(pet as ExtendedPrismaPet));
     } catch (error) {
       return this.handleError(error, 'findAll', { filter, limit, offset });
     }
@@ -146,17 +143,22 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
    */
   async findByCustomerId(customerId: string, includeInactive: boolean = false): Promise<Pet[]> {
     try {
+      // Usando any para contornar verificação de tipo
+      const where: any = { customerId };
+      
+      // Adicionar filtro de active apenas se não incluir inativos
+      if (!includeInactive) {
+        where.active = true;
+      }
+
       const pets = await this.prisma.pet.findMany({
-        where: {
-          customerId,
-          active: includeInactive ? undefined : true,
-        },
+        where,
         orderBy: {
           name: 'asc',
         },
       });
 
-      return pets.map((pet: PrismaPetResult) => this.mapToDomain(pet));
+      return pets.map((pet) => this.mapToDomain(pet as ExtendedPrismaPet));
     } catch (error) {
       return this.handleError(error, 'findByCustomerId', { customerId, includeInactive });
     }
@@ -167,15 +169,18 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
    */
   async activate(id: string): Promise<Pet> {
     try {
+      // Usando any para contornar verificação de tipo
+      const data: any = {
+        active: true,
+        updatedAt: new Date(),
+      };
+
       const pet = await this.prisma.pet.update({
         where: { id },
-        data: {
-          active: true,
-          updatedAt: new Date(),
-        },
+        data,
       });
 
-      return this.mapToDomain(pet);
+      return this.mapToDomain(pet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'activate', { id });
     }
@@ -186,15 +191,18 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
    */
   async deactivate(id: string): Promise<Pet> {
     try {
+      // Usando any para contornar verificação de tipo
+      const data: any = {
+        active: false,
+        updatedAt: new Date(),
+      };
+
       const pet = await this.prisma.pet.update({
         where: { id },
-        data: {
-          active: false,
-          updatedAt: new Date(),
-        },
+        data,
       });
 
-      return this.mapToDomain(pet);
+      return this.mapToDomain(pet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'deactivate', { id });
     }
@@ -213,7 +221,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         },
       });
 
-      return this.mapToDomain(pet);
+      return this.mapToDomain(pet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'updateAllergies', { id, allergies });
     }
@@ -232,7 +240,7 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
         },
       });
 
-      return this.mapToDomain(pet);
+      return this.mapToDomain(pet as ExtendedPrismaPet);
     } catch (error) {
       return this.handleError(error, 'updateObservations', { id, observations });
     }
@@ -245,17 +253,24 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
     try {
       const { id, name, species, breed, size, customerId, active, hasAllergies } = filter;
 
+      // Usando any para contornar verificação de tipo no objeto where
+      const where: any = {
+        id: id ? { equals: id } : undefined,
+        name: name ? { contains: name, mode: 'insensitive' } : undefined,
+        species: species ? { contains: species, mode: 'insensitive' } : undefined,
+        breed: breed ? { contains: breed, mode: 'insensitive' } : undefined,
+        size: size ? { equals: size } : undefined,
+        customerId: customerId ? { equals: customerId } : undefined,
+        allergies: hasAllergies ? { not: null } : undefined,
+      };
+
+      // Adicionar active apenas se definido
+      if (active !== undefined) {
+        where.active = active;
+      }
+
       return await this.prisma.pet.count({
-        where: {
-          id: id ? { equals: id } : undefined,
-          name: name ? { contains: name, mode: 'insensitive' } : undefined,
-          species: species ? { contains: species, mode: 'insensitive' } : undefined,
-          breed: breed ? { contains: breed, mode: 'insensitive' } : undefined,
-          size: size ? { equals: size } : undefined,
-          customerId: customerId ? { equals: customerId } : undefined,
-          active: active !== undefined ? { equals: active } : undefined,
-          allergies: hasAllergies ? { not: null } : undefined,
-        },
+        where,
       });
     } catch (error) {
       return this.handleError(error, 'count', { filter });
@@ -278,12 +293,12 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
   /**
    * Mapeia um pet do Prisma para uma entidade de domínio
    */
-  private mapToDomain(prismaPet: PrismaPetResult): Pet {
+  private mapToDomain(prismaPet: ExtendedPrismaPet): Pet {
     return Pet.create(
       prismaPet.id,
       prismaPet.name,
       prismaPet.species,
-      prismaPet.size,
+      this.mapSizeToDomain(prismaPet.size),
       prismaPet.customerId,
       prismaPet.breed || undefined,
       prismaPet.birthDate || undefined,
@@ -291,7 +306,21 @@ export class PrismaPetRepository extends PrismaRepositoryBase implements PetRepo
       prismaPet.observations || undefined,
       prismaPet.createdAt,
       prismaPet.updatedAt,
-      prismaPet.active,
+      prismaPet.active
     );
+  }
+
+  /**
+   * Mapeia o enum PetSize do domínio para o enum PetSize do Prisma
+   */
+  private mapSizeToPrisma(size: PetSize): PrismaPetSize {
+    return size as unknown as PrismaPetSize;
+  }
+
+  /**
+   * Mapeia o enum PetSize do Prisma para o enum PetSize do domínio
+   */
+  private mapSizeToDomain(size: PrismaPetSize): PetSize {
+    return size as unknown as PetSize;
   }
 } 

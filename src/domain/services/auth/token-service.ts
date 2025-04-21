@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 /**
  * Interface que define a estrutura de um payload JWT
@@ -55,11 +55,11 @@ export class TokenService {
   public generateTokens(payload: Omit<TokenPayload, 'iat' | 'exp'>): TokenPair {
     const accessToken = jwt.sign(payload, this.jwtSecret, {
       expiresIn: this.accessTokenExpiresIn,
-    });
+    } as SignOptions);
 
     const refreshToken = jwt.sign({ sub: payload.sub }, this.jwtRefreshSecret, {
       expiresIn: this.refreshTokenExpiresIn,
-    });
+    } as SignOptions);
 
     return {
       accessToken,

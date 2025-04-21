@@ -1,5 +1,5 @@
-import { NotificationService } from '../../../domain/services/notification/notification-service.js';
-import { Notification } from '../../../domain/entities/notification.js';
+import { NotificationService, CreateNotificationData } from '../../../domain/services/notification/notification-service.js';
+import { NotificationType } from '../../../domain/entities/notification.js';
 import { logger } from '../../../shared/utils/logger.js';
 
 interface SendSchedulingConfirmationRequest {
@@ -25,19 +25,19 @@ export class SendSchedulingConfirmationUseCase {
     try {
       logger.info('Enviando confirmação de agendamento', { schedulingId: request.schedulingId });
 
-      // Criar objeto de notificação
-      const notification = new Notification({
-        id: crypto.randomUUID(),
-        type: 'scheduling.confirmation',
-        schedulingId: request.schedulingId,
-        content: request.additionalInfo || '',
-        status: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
+      // Criar dados da notificação
+      const notificationData: CreateNotificationData = {
+        type: NotificationType.EMAIL,
+        templateCode: 'scheduling_confirmation',
+        templateData: {
+          schedulingId: request.schedulingId,
+          additionalInfo: request.additionalInfo || ''
+        },
+        schedulingId: request.schedulingId
+      };
 
-      // Enviar notificação
-      await this.notificationService.sendNotification(notification);
+      // Criar e enviar notificação usando o serviço
+      const notification = await this.notificationService.createAndSendNotification(notificationData);
 
       logger.info('Confirmação de agendamento enviada com sucesso', { 
         schedulingId: request.schedulingId,

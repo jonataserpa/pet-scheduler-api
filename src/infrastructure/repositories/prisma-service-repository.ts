@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { Service } from '../../domain/entities/service.js';
 import { ServiceFilter, ServiceRepository } from '../../domain/repositories/service-repository.js';
 import { PrismaRepositoryBase } from './base/prisma-repository-base.js';
+import { PetSize } from '../../domain/entities/pet.js';
 
 type PrismaServiceResult = {
   id: string;
@@ -9,10 +9,10 @@ type PrismaServiceResult = {
   description: string | null;
   duration: number;
   price: number;
-  category: string;
   createdAt: Date;
   updatedAt: Date;
   active: boolean;
+  petSizes: string[];
 };
 
 /**
@@ -24,14 +24,16 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    */
   async save(service: Service): Promise<Service> {
     try {
-      const data = {
+      const petSizesJson = service.petSizes.map(size => size.toString());
+      
+      const data: any = {
         name: service.name,
         description: service.description || null,
         duration: service.duration,
         price: service.price,
-        category: service.category,
         updatedAt: new Date(),
         active: service.active,
+        petSizes: petSizesJson
       };
 
       const updatedService = await this.prisma.service.update({
@@ -39,7 +41,7 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
         data,
       });
 
-      return this.mapToDomain(updatedService);
+      return this.mapToDomain(updatedService as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'save', { serviceId: service.id });
     }
@@ -51,32 +53,34 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
   async create(
     id: string,
     name: string,
-    category: string,
     duration: number,
     price: number,
+    petSizes: PetSize[],
     description?: string,
     active: boolean = true
   ): Promise<Service> {
     try {
-      const data = {
+      const petSizesJson = petSizes.map(size => size.toString());
+      
+      const data: any = {
         id,
         name,
         description: description || null,
         duration,
         price,
-        category,
+        active,
         createdAt: new Date(),
         updatedAt: new Date(),
-        active,
+        petSizes: petSizesJson
       };
 
       const createdService = await this.prisma.service.create({
         data,
       });
 
-      return this.mapToDomain(createdService);
+      return this.mapToDomain(createdService as PrismaServiceResult);
     } catch (error) {
-      return this.handleError(error, 'create', { id, name, category });
+      return this.handleError(error, 'create', { id, name, duration });
     }
   }
 
@@ -93,7 +97,7 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
         return null;
       }
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'findById', { id });
     }
@@ -104,31 +108,38 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    */
   async findAll(filter: ServiceFilter, limit?: number, offset?: number): Promise<Service[]> {
     try {
-      const { id, name, category, minPrice, maxPrice, minDuration, maxDuration, active } = filter;
+      const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
+
+      const where: any = {
+        id: id ? { equals: id } : undefined,
+        name: name ? { contains: name, mode: 'insensitive' } : undefined,
+        price: {
+          gte: minPrice !== undefined ? minPrice : undefined,
+          lte: maxPrice !== undefined ? maxPrice : undefined,
+        },
+        duration: {
+          gte: minDuration !== undefined ? minDuration : undefined,
+          lte: maxDuration !== undefined ? maxDuration : undefined,
+        },
+        active: active !== undefined ? active : undefined,
+      };
+
+      if (petSize) {
+        where.petSizes = {
+          has: petSize.toString()
+        };
+      }
 
       const services = await this.prisma.service.findMany({
-        where: {
-          id: id ? { equals: id } : undefined,
-          name: name ? { contains: name, mode: 'insensitive' } : undefined,
-          category: category ? { equals: category } : undefined,
-          price: {
-            gte: minPrice !== undefined ? minPrice : undefined,
-            lte: maxPrice !== undefined ? maxPrice : undefined,
-          },
-          duration: {
-            gte: minDuration !== undefined ? minDuration : undefined,
-            lte: maxDuration !== undefined ? maxDuration : undefined,
-          },
-          active: active !== undefined ? { equals: active } : undefined,
-        },
-        take: limit,
+        where,
         skip: offset,
+        take: limit,
         orderBy: {
           name: 'asc',
         },
       });
 
-      return services.map((service: PrismaServiceResult) => this.mapToDomain(service));
+      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
     } catch (error) {
       return this.handleError(error, 'findAll', { filter, limit, offset });
     }
@@ -137,21 +148,27 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
   /**
    * Encontra serviços por categoria
    */
-  async findByCategory(category: string, includeInactive: boolean = false): Promise<Service[]> {
+  async findByCategory(categoryName: string, includeInactive: boolean = false): Promise<Service[]> {
     try {
+      const where: any = {
+        name: { contains: categoryName, mode: 'insensitive' },
+        description: { contains: categoryName, mode: 'insensitive' },
+      };
+
+      if (!includeInactive) {
+        where.active = true;
+      }
+
       const services = await this.prisma.service.findMany({
-        where: {
-          category,
-          active: includeInactive ? undefined : true,
-        },
+        where,
         orderBy: {
           name: 'asc',
         },
       });
 
-      return services.map((service: PrismaServiceResult) => this.mapToDomain(service));
+      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
     } catch (error) {
-      return this.handleError(error, 'findByCategory', { category, includeInactive });
+      return this.handleError(error, 'findByCategory', { categoryName, includeInactive });
     }
   }
 
@@ -160,15 +177,17 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    */
   async activate(id: string): Promise<Service> {
     try {
+      const data: any = {
+        active: true,
+        updatedAt: new Date(),
+      };
+
       const service = await this.prisma.service.update({
         where: { id },
-        data: {
-          active: true,
-          updatedAt: new Date(),
-        },
+        data,
       });
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'activate', { id });
     }
@@ -179,15 +198,17 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    */
   async deactivate(id: string): Promise<Service> {
     try {
+      const data: any = {
+        active: false,
+        updatedAt: new Date(),
+      };
+
       const service = await this.prisma.service.update({
         where: { id },
-        data: {
-          active: false,
-          updatedAt: new Date(),
-        },
+        data,
       });
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'deactivate', { id });
     }
@@ -206,7 +227,7 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
         },
       });
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'updateDescription', { id, description });
     }
@@ -225,7 +246,7 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
         },
       });
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'updatePrice', { id, price });
     }
@@ -244,7 +265,7 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
         },
       });
 
-      return this.mapToDomain(service);
+      return this.mapToDomain(service as PrismaServiceResult);
     } catch (error) {
       return this.handleError(error, 'updateDuration', { id, duration });
     }
@@ -255,23 +276,30 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    */
   async count(filter: ServiceFilter): Promise<number> {
     try {
-      const { id, name, category, minPrice, maxPrice, minDuration, maxDuration, active } = filter;
+      const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
+
+      const where: any = {
+        id: id ? { equals: id } : undefined,
+        name: name ? { contains: name, mode: 'insensitive' } : undefined,
+        price: {
+          gte: minPrice !== undefined ? minPrice : undefined,
+          lte: maxPrice !== undefined ? maxPrice : undefined,
+        },
+        duration: {
+          gte: minDuration !== undefined ? minDuration : undefined,
+          lte: maxDuration !== undefined ? maxDuration : undefined,
+        },
+        active: active !== undefined ? active : undefined,
+      };
+
+      if (petSize) {
+        where.petSizes = {
+          has: petSize.toString()
+        };
+      }
 
       return await this.prisma.service.count({
-        where: {
-          id: id ? { equals: id } : undefined,
-          name: name ? { contains: name, mode: 'insensitive' } : undefined,
-          category: category ? { equals: category } : undefined,
-          price: {
-            gte: minPrice !== undefined ? minPrice : undefined,
-            lte: maxPrice !== undefined ? maxPrice : undefined,
-          },
-          duration: {
-            gte: minDuration !== undefined ? minDuration : undefined,
-            lte: maxDuration !== undefined ? maxDuration : undefined,
-          },
-          active: active !== undefined ? { equals: active } : undefined,
-        },
+        where,
       });
     } catch (error) {
       return this.handleError(error, 'count', { filter });
@@ -295,16 +323,48 @@ export class PrismaServiceRepository extends PrismaRepositoryBase implements Ser
    * Mapeia um serviço do Prisma para uma entidade de domínio
    */
   private mapToDomain(prismaService: PrismaServiceResult): Service {
+    const petSizesEnum = Array.isArray(prismaService.petSizes) 
+      ? prismaService.petSizes.map(size => size as unknown as PetSize)
+      : [];
+      
     return Service.create(
       prismaService.id,
       prismaService.name,
-      prismaService.category,
       prismaService.duration,
       prismaService.price,
+      petSizesEnum,
       prismaService.description || undefined,
       prismaService.createdAt,
       prismaService.updatedAt,
-      prismaService.active,
+      prismaService.active
     );
+  }
+
+  /**
+   * Implementação do método findByPetSize requerido pela interface
+   */
+  async findByPetSize(petSize: PetSize, activeOnly: boolean = true): Promise<Service[]> {
+    try {
+      const where: any = {
+        petSizes: {
+          has: petSize.toString()
+        }
+      };
+
+      if (activeOnly) {
+        where.active = true;
+      }
+
+      const services = await this.prisma.service.findMany({
+        where,
+        orderBy: {
+          name: 'asc',
+        },
+      });
+
+      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
+    } catch (error) {
+      return this.handleError(error, 'findByPetSize', { petSize, activeOnly });
+    }
   }
 } 

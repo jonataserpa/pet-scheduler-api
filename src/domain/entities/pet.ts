@@ -265,6 +265,7 @@ export class Pet {
       customerId: this._customerId,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
+      active: this._active,
     };
   }
 

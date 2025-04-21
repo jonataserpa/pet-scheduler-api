@@ -1,4 +1,4 @@
-import { Collection, Db, Document } from 'mongodb';
+import { Collection, Db, Document, ObjectId } from 'mongodb';
 import { LoginHistory } from '../../../domain/entities/login-history.js';
 import { LoginHistoryFilter, LoginHistoryRepository } from '../../../domain/repositories/login-history-repository.js';
 
@@ -36,14 +36,14 @@ export class MongoDBLoginHistoryRepository implements LoginHistoryRepository {
       timestamp: loginHistory.timestamp,
       ipAddress: loginHistory.ipAddress,
       userAgent: loginHistory.userAgent,
-      geoLocation: loginHistory.geoLocation,
+      location: loginHistory.location,
       authMethod: loginHistory.authMethod,
       details: loginHistory.details
     };
   }
 
   private toEntity(document: Document): LoginHistory {
-    return new LoginHistory(
+    return LoginHistory.create(
       document._id.toString(),
       document.userId,
       document.email,
@@ -51,7 +51,7 @@ export class MongoDBLoginHistoryRepository implements LoginHistoryRepository {
       new Date(document.timestamp),
       document.ipAddress,
       document.userAgent,
-      document.geoLocation,
+      document.location,
       document.authMethod,
       document.details
     );
@@ -93,11 +93,11 @@ export class MongoDBLoginHistoryRepository implements LoginHistoryRepository {
     if (offset) options.skip = offset;
     
     const documents = await this.collection.find(query, options).toArray();
-    return documents.map((doc) => this.toEntity(doc));
+    return documents.map((doc: Document) => this.toEntity(doc));
   }
 
   async findById(id: string): Promise<LoginHistory | null> {
-    const document = await this.collection.findOne({ _id: id });
+    const document = await this.collection.findOne({ _id: new ObjectId(id) });
     return document ? this.toEntity(document) : null;
   }
 
@@ -108,7 +108,7 @@ export class MongoDBLoginHistoryRepository implements LoginHistoryRepository {
       .limit(limit)
       .toArray();
     
-    return documents.map((doc) => this.toEntity(doc));
+    return documents.map((doc: Document) => this.toEntity(doc));
   }
 
   async findRecentByUserId(userId: string, limit: number): Promise<LoginHistory[]> {
@@ -118,7 +118,7 @@ export class MongoDBLoginHistoryRepository implements LoginHistoryRepository {
       .limit(limit)
       .toArray();
     
-    return documents.map((doc) => this.toEntity(doc));
+    return documents.map((doc: Document) => this.toEntity(doc));
   }
 
   async countFailedAttempts(email: string, timeWindowMinutes: number): Promise<number> {

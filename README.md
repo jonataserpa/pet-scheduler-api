@@ -1,18 +1,25 @@
 # Pet Scheduler API
 
-API para gerenciamento de agendamentos de serviços de banho e tosa para pets em petshops e clínicas veterinárias.
+API para gerenciamento de agendamentos de serviços para pets em petshops e clínicas veterinárias.
 
-## Tecnologias Utilizadas
+## Funcionalidades Principais
+
+- Gerenciamento de clientes e pets
+- Agendamento de serviços
+- Sistema de notificações (e-mail, SMS, WhatsApp)
+- Autenticação e controle de acesso
+- Relatórios e estatísticas
+
+## Tecnologias
 
 - Node.js
 - TypeScript
 - Express
 - Prisma ORM
 - PostgreSQL
-- Redis
-- Docker & Docker Compose
-- Jest
-- ESLint & Prettier
+- Redis (para cache e blacklist de tokens)
+- Nodemailer (para envio de emails)
+- Swagger (documentação da API)
 
 ## Arquitetura
 
@@ -29,99 +36,110 @@ src/
 
 ## Requisitos
 
-- Node.js 18+ 
-- Docker e Docker Compose
-- PostgreSQL 16
-- Redis 7
+- Node.js 18+
+- PostgreSQL 14+
+- Redis 6+
+- Yarn ou NPM
 
-## Configuração do Ambiente
+## Configuração e Instalação
 
-### Instalação
+1. Clone o repositório
+2. Instale as dependências: `npm install`
+3. Configure as variáveis de ambiente (veja o arquivo `.env.example`)
+4. Execute as migrações do banco de dados: `npx prisma migrate dev`
+5. Inicie o servidor: `npm run dev`
 
-1. Clone o repositório:
+## Variáveis de Ambiente
+
+O projeto utiliza diversas variáveis de ambiente para configuração. Veja abaixo as principais:
+
+### Configurações Gerais
+- `NODE_ENV`: ambiente de execução (development, production, test)
+- `PORT`: porta onde o servidor irá rodar
+- `API_URL`: URL base da API
+- `CORS_ORIGINS`: origens permitidas para CORS (separadas por vírgula)
+
+### Banco de Dados
+- `DATABASE_URL`: URL de conexão com o PostgreSQL
+
+### Redis
+- `REDIS_HOST`: host do Redis
+- `REDIS_PORT`: porta do Redis
+- `REDIS_PASSWORD`: senha do Redis (se necessário)
+
+### JWT
+- `JWT_SECRET`: chave secreta para tokens JWT
+- `JWT_EXPIRES_IN`: tempo de expiração dos tokens (ex: "1d")
+- `JWT_REFRESH_SECRET`: chave secreta para refresh tokens
+- `JWT_REFRESH_EXPIRES_IN`: tempo de expiração dos refresh tokens (ex: "7d")
+
+### Email
+- `EMAIL_HOST`: servidor SMTP
+- `EMAIL_PORT`: porta do servidor SMTP
+- `EMAIL_SECURE`: se deve usar SSL/TLS (true/false)
+- `EMAIL_USER`: usuário para autenticação SMTP
+- `EMAIL_PASSWORD`: senha para autenticação SMTP
+- `EMAIL_FROM`: email do remetente
+- `EMAIL_FROM_NAME`: nome do remetente
+
+### Jobs e Processos em Background
+- `ENABLE_NOTIFICATION_JOB`: habilita o job de processamento de notificações
+
+## Sistema de Notificações
+
+O Pet Scheduler API possui um sistema completo e extensível de notificações que suporta múltiplos canais:
+
+- **Email**: Notificações por email usando Nodemailer
+- **SMS**: Notificações por SMS (requer integração com serviço externo)
+- **WhatsApp**: Notificações por WhatsApp (requer integração com serviço externo)
+
+### Arquitetura de Notificações
+
+O sistema de notificações é composto por:
+
+1. **Controllers**: Gerenciam as requisições HTTP e validam os dados
+2. **Use Cases**: Implementam a lógica de negócio para cada operação de notificação
+3. **Services**: Coordenam o envio e o gerenciamento de notificações
+4. **Repositories**: Armazenam e recuperam dados de notificações
+5. **Providers**: Implementam o envio efetivo de notificações para cada canal
+6. **Templates**: Definem o conteúdo das notificações
+
+### Principais Funcionalidades
+
+- Envio de notificações de confirmação, lembrete e cancelamento de agendamentos
+- Envio de notificações de boas-vindas para novos clientes
+- Lembretes de checkup para pets
+- Processamento assíncrono de notificações pendentes
+- Retry automático para notificações com falha
+- Monitoramento de status (pendente, enviado, entregue, falha)
+
+## Documentação da API
+
+A API é totalmente documentada usando Swagger/OpenAPI:
+
+- **Documentação Interativa**: Disponível em `/api-docs` ao executar o servidor
+- **Especificação OpenAPI**: Disponível em `/api-docs.json`
+
+A documentação inclui detalhes sobre todos os endpoints, parâmetros, corpos de requisição, respostas e autenticação.
+
+## Executando Testes
+
 ```bash
-git clone https://github.com/seu-usuario/pet-scheduler-api.git
-cd pet-scheduler-api
+# Testes unitários
+npm test
+
+# Testes com cobertura
+npm run test:coverage
 ```
 
-2. Instale as dependências:
-```bash
-npm install
-```
+## Contribuindo
 
-3. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
-```
-Edite o arquivo `.env` com suas configurações.
-
-### Usando Docker
-
-O modo mais simples de executar a aplicação é usando Docker Compose:
-
-```bash
-docker-compose up
-```
-
-Isso irá iniciar todos os serviços necessários:
-- Aplicação principal (API)
-- Worker para processamento assíncrono
-- PostgreSQL
-- Redis
-- Banco de dados de teste
-
-### Desenvolvimento sem Docker
-
-1. Certifique-se de ter PostgreSQL e Redis rodando localmente.
-
-2. Configure as variáveis de ambiente no arquivo `.env`
-
-3. Execute as migrações do Prisma:
-```bash
-npx prisma migrate dev
-```
-
-4. Inicie o servidor em modo de desenvolvimento:
-```bash
-npm run dev
-```
-
-5. Para o worker de processamento assíncrono, abra outro terminal e execute:
-```bash
-node dist/infrastructure/messaging/worker.js
-```
-
-## Scripts Disponíveis
-
-- `npm run build`: Compila o projeto TypeScript
-- `npm start`: Inicia o servidor em produção
-- `npm run dev`: Inicia o servidor em modo de desenvolvimento com hot reload
-- `npm test`: Executa os testes
-- `npm run lint`: Verifica a qualidade do código com ESLint
-- `npm run lint:fix`: Corrige automaticamente problemas de lint
-- `npm run format`: Formata o código usando Prettier
-
-## Estrutura do Banco de Dados
-
-O projeto utiliza Prisma ORM para gerenciar o banco de dados PostgreSQL. As principais entidades são:
-
-- User: Usuários do sistema (admin/funcionário)
-- Customer: Clientes que agendam serviços
-- Pet: Animais de estimação vinculados aos clientes
-- Service: Serviços oferecidos (banho, tosa, etc.)
-- Scheduling: Agendamentos de serviços
-- Notification: Notificações enviadas para clientes
-
-Para visualizar ou modificar o schema, consulte o arquivo `prisma/schema.prisma`.
-
-## Contribuição
-
-1. Crie um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
+1. Faça um fork do projeto
+2. Crie sua branch de recurso (`git checkout -b feature/amazing-feature`)
+3. Commit suas alterações (`git commit -m 'Add some amazing feature'`)
+4. Push para a branch (`git push origin feature/amazing-feature`)
 5. Abra um Pull Request
 
 ## Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE.md](LICENSE.md) para detalhes.

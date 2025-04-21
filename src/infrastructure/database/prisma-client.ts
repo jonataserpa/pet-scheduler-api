@@ -38,7 +38,8 @@ class PrismaClientWithLogs extends PrismaClient {
       ],
     });
 
-    // Adiciona logs para queries
+    // Tipagem para compatibilidade com Prisma 5.10.0
+    // @ts-expect-error: Prisma Events Typings
     this.$on('query', (e: QueryEvent) => {
       logger.debug('Prisma Query', {
         query: e.query,
@@ -47,7 +48,7 @@ class PrismaClientWithLogs extends PrismaClient {
       });
     });
 
-    // Adiciona logs para erros
+    // @ts-expect-error: Prisma Events Typings
     this.$on('error', (e: LogEvent) => {
       logger.error('Prisma Error', {
         message: e.message,
@@ -55,7 +56,7 @@ class PrismaClientWithLogs extends PrismaClient {
       });
     });
 
-    // Adiciona logs para info
+    // @ts-expect-error: Prisma Events Typings
     this.$on('info', (e: LogEvent) => {
       logger.info('Prisma Info', {
         message: e.message,
@@ -63,7 +64,7 @@ class PrismaClientWithLogs extends PrismaClient {
       });
     });
 
-    // Adiciona logs para warns
+    // @ts-expect-error: Prisma Events Typings
     this.$on('warn', (e: LogEvent) => {
       logger.warn('Prisma Warn', {
         message: e.message,

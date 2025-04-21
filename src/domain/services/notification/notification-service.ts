@@ -58,41 +58,41 @@ export interface CreateNotificationData {
  * Serviço para gerenciamento de notificações
  */
 export class NotificationService {
-  private readonly typeConfigs: Record<NotificationType, NotificationTypeConfig>;
+  private readonly typeConfigs: Partial<Record<NotificationType, NotificationTypeConfig>> = {};
   
   /**
    * Cria uma nova instância do serviço de notificações
    * @param notificationRepository Repositório de notificações
-   * @param emailProvider Provedor de envio de email
-   * @param smsProvider Provedor de envio de SMS
-   * @param whatsappProvider Provedor de envio de WhatsApp
+   * @param providers Opções de provedores de notificação
    */
   constructor(
     private readonly notificationRepository: NotificationRepository,
-    private readonly emailProvider?: NotificationProvider,
-    private readonly smsProvider?: NotificationProvider,
-    private readonly whatsappProvider?: NotificationProvider
-  ) {
-    this.typeConfigs = {} as Record<NotificationType, NotificationTypeConfig>;
-    
+    providers: {
+      email?: NotificationProvider,
+      sms?: NotificationProvider,
+      whatsapp?: NotificationProvider
+    } = {}
+  ) {    
     // Configurar provedores disponíveis
-    if (emailProvider) {
+    const { email, sms, whatsapp } = providers;
+    
+    if (email) {
       this.typeConfigs[NotificationType.EMAIL] = {
-        provider: emailProvider,
+        provider: email,
         templates: this.getEmailTemplates(),
       };
     }
     
-    if (smsProvider) {
+    if (sms) {
       this.typeConfigs[NotificationType.SMS] = {
-        provider: smsProvider,
+        provider: sms,
         templates: this.getSmsTemplates(),
       };
     }
     
-    if (whatsappProvider) {
+    if (whatsapp) {
       this.typeConfigs[NotificationType.WHATSAPP] = {
-        provider: whatsappProvider,
+        provider: whatsapp,
         templates: this.getWhatsappTemplates(),
       };
     }
@@ -404,7 +404,7 @@ export class NotificationService {
     } catch (error) {
       // Em caso de erro, marcar como falha novamente
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      const failedNotification = await this.notificationRepository.markAsFailed(
+      await this.notificationRepository.markAsFailed(
         notificationId, 
         `Falha no reenvio: ${errorMessage}`
       );

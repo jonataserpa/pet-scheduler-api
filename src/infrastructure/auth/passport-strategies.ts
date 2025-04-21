@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { v4 as uuidv4 } from 'uuid';
-import { compare, hash } from 'bcrypt';
+import { hash } from 'bcrypt';
 import { env } from '../../shared/config/env.js';
 import { logger } from '../../shared/utils/logger.js';
 import { IUserRepository } from '../../domain/services/auth/auth-service.js';
@@ -39,7 +39,7 @@ export function setupPassportStrategies(userRepository: IUserRepository): void {
           callbackURL: env.OAUTH_CALLBACK_URL,
           scope: ['profile', 'email'],
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (_accessToken, _refreshToken, profile, done) => {
           try {
             // Informações do perfil
             const email = profile.emails?.[0]?.value;

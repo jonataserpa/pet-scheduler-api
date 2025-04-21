@@ -21,21 +21,23 @@ export class EmailService {
    * Inicializa o serviço de email
    */
   constructor() {
-    this.defaultFrom = env.EMAIL_FROM || 'noreply@petscheduler.com';
+    this.defaultFrom = env.EMAIL_FROM 
+      ? `"${env.EMAIL_FROM_NAME || 'Pet Scheduler'}" <${env.EMAIL_FROM}>`
+      : 'noreply@petscheduler.com';
 
-    // Verifica se temos configuração de SMTP
-    if (!env.SMTP_HOST || !env.SMTP_PORT) {
-      logger.warn('Configuração de SMTP incompleta. O serviço de email não funcionará corretamente.');
+    // Verifica se temos configuração de email
+    if (!env.EMAIL_HOST || !env.EMAIL_PORT) {
+      logger.warn('Configuração de email incompleta. O serviço de email não funcionará corretamente.');
     }
 
     // Configura o transporter do nodemailer
     this.transporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_SECURE,
-      auth: env.SMTP_USER && env.SMTP_PASS ? {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS,
+      host: env.EMAIL_HOST,
+      port: env.EMAIL_PORT,
+      secure: env.EMAIL_SECURE,
+      auth: env.EMAIL_USER && env.EMAIL_PASSWORD ? {
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASSWORD,
       } : undefined,
     });
   }
@@ -45,8 +47,8 @@ export class EmailService {
    */
   public async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
-      if (!env.SMTP_HOST || !env.SMTP_PORT) {
-        logger.warn('Tentativa de envio de email com configuração SMTP incompleta', { ...options });
+      if (!env.EMAIL_HOST || !env.EMAIL_PORT) {
+        logger.warn('Tentativa de envio de email com configuração incompleta', { ...options });
         return false;
       }
 
@@ -138,13 +140,13 @@ export class EmailService {
    */
   public async verifyConnection(): Promise<boolean> {
     try {
-      if (!env.SMTP_HOST || !env.SMTP_PORT) {
+      if (!env.EMAIL_HOST || !env.EMAIL_PORT) {
         return false;
       }
       await this.transporter.verify();
       return true;
     } catch (error) {
-      logger.error('Erro ao verificar conexão com servidor SMTP', { error });
+      logger.error('Erro ao verificar conexão com servidor de email', { error });
       return false;
     }
   }

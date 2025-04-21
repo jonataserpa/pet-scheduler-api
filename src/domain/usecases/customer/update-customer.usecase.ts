@@ -1,4 +1,3 @@
-import { Customer } from '../../entities/customer.js';
 import { Address } from '../../entities/value-objects/address.js';
 import { Contact } from '../../entities/value-objects/contact.js';
 import { CustomerRepository } from '../../repositories/customer-repository.js';

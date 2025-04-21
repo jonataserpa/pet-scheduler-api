@@ -29,13 +29,17 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(10),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   
-  // Email (para recuperação de senha)
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().transform((val) => parseInt(val, 10)).optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  SMTP_SECURE: z.string().transform((val) => val === 'true').default('false'),
-  EMAIL_FROM: z.string().optional(),
+  // Email (para notificações e recuperação de senha)
+  EMAIL_HOST: z.string().default('smtp.example.com'),
+  EMAIL_PORT: z.string().transform((val) => parseInt(val, 10)).default('587'),
+  EMAIL_USER: z.string().default('user@example.com'),
+  EMAIL_PASSWORD: z.string().default('password'),
+  EMAIL_SECURE: z.string().transform((val) => val === 'true').default('false'),
+  EMAIL_FROM: z.string().default('noreply@example.com'),
+  EMAIL_FROM_NAME: z.string().default('Pet Scheduler'),
+  
+  // Jobs e processos em background
+  ENABLE_NOTIFICATION_JOB: z.string().transform((val) => val === 'true').default('false'),
   
   // Recuperação de Senha
   PASSWORD_RESET_TOKEN_EXPIRES: z.string().transform((val) => parseInt(val, 10)).default('3600'), // 1 hora em segundos

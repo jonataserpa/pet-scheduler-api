@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { LoginHistory, LoginStatus as DomainLoginStatus, AuthMethod as DomainAuthMethod } from '../../domain/entities/login-history.js';
+import { LoginHistory, AuthMethod as DomainAuthMethod } from '../../domain/entities/login-history.js';
 import { LoginHistoryFilter, LoginHistoryRepository } from '../../domain/repositories/login-history-repository.js';
 import { logger } from '../../shared/utils/logger.js';
 

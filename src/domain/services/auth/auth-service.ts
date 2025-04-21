@@ -283,12 +283,23 @@ export class AuthService {
       // Verifica se o token está na lista negra
       const isBlacklisted = await this.tokenBlacklistService.isBlacklisted(accessToken);
       if (isBlacklisted) {
-        const reason = await this.tokenBlacklistService.getBlacklistReason(accessToken);
         throw new TokenBlacklistedError();
       }
 
       // Valida o token de acesso
-      const payload = this.tokenService.verifyAccessToken(accessToken);
+      let payload: TokenPayload;
+      try {
+        payload = this.tokenService.verifyAccessToken(accessToken);
+      } catch (tokenError) {
+        if (tokenError instanceof Error) {
+          if (tokenError.message.includes('expirado')) {
+            throw new InvalidTokenError('Token expirado');
+          } else if (tokenError.message.includes('inválido')) {
+            throw new InvalidTokenError('Token inválido');
+          }
+        }
+        throw new InvalidTokenError('Erro na validação do token');
+      }
 
       // Busca o usuário
       const user = await this.userRepository.findById(payload.sub);
@@ -306,7 +317,7 @@ export class AuthService {
       if (error instanceof AuthenticationError) {
         throw error;
       }
-      throw new InvalidTokenError('Token inválido ou expirado');
+      throw new InvalidTokenError(error instanceof Error ? error.message : 'Token inválido ou expirado');
     }
   }
 
@@ -388,41 +399,101 @@ export class AuthService {
     if (!this.loginHistoryRepository) return;
 
     try {
-      const loginHistory = LoginHistory.createFailedLogin(
-        uuidv4(),
-        email,
-        ipAddress,
-        userAgent,
-        reason
-      );
+      // Criar o registro de login falho
+      // Nota: A classe LoginHistory.createFailedLogin não aceita userId diretamente
+      // Precisamos criar manualmente o LoginHistory para incluir o userId
+      let loginHistory;
+      
+      if (userId) {
+        // Se temos um userId, criamos diretamente um LoginHistory com esse userId
+        loginHistory = LoginHistory.create(
+          uuidv4(),
+          userId,  // Passamos o userId aqui
+          email,
+          'failed',
+          new Date(),
+          ipAddress,
+          userAgent,
+          null, // location
+          'password',
+          { reason } // details
+        );
+      } else {
+        // Se não temos um userId, usamos o método padrão
+        loginHistory = LoginHistory.createFailedLogin(
+          uuidv4(),
+          email,
+          ipAddress,
+          userAgent,
+          reason
+        );
+      }
 
       await this.loginHistoryRepository.save(loginHistory);
 
       // Verifica se há muitas tentativas falhas para este email
       const failedAttempts = await this.loginHistoryRepository.countFailedAttempts(email, 30); // 30 minutos
       if (failedAttempts >= 5) {
-        // Registrar tentativa suspeita
-        const suspiciousLogin = LoginHistory.createSuspiciousLogin(
-          uuidv4(),
-          email,
-          ipAddress,
-          userAgent,
-          `Muitas tentativas falhas (${failedAttempts}) nos últimos 30 minutos`
-        );
+        // Registrar tentativa suspeita - usando o mesmo padrão para incluir userId
+        let suspiciousLogin;
+        const suspiciousReason = `Muitas tentativas falhas (${failedAttempts}) nos últimos 30 minutos`;
+        
+        if (userId) {
+          suspiciousLogin = LoginHistory.create(
+            uuidv4(),
+            userId,
+            email,
+            'suspicious',
+            new Date(),
+            ipAddress,
+            userAgent,
+            null, // location
+            'password',
+            { reason: suspiciousReason }
+          );
+        } else {
+          suspiciousLogin = LoginHistory.createSuspiciousLogin(
+            uuidv4(),
+            email,
+            ipAddress,
+            userAgent,
+            suspiciousReason
+          );
+        }
+        
         await this.loginHistoryRepository.save(suspiciousLogin);
       }
 
       // Verifica se o IP está sendo usado em muitas tentativas falhas
       const isSuspiciousIP = await this.loginHistoryRepository.isSuspiciousIpActivity(ipAddress, 60, 10); // 60 minutos, 10 tentativas
       if (isSuspiciousIP) {
-        // Registrar IP suspeito
-        const suspiciousLogin = LoginHistory.createSuspiciousLogin(
-          uuidv4(),
-          email,
-          ipAddress,
-          userAgent,
-          'IP com muitas tentativas falhas de login'
-        );
+        // Registrar IP suspeito - usando o mesmo padrão para incluir userId
+        let suspiciousLogin;
+        const suspiciousReason = 'IP com muitas tentativas falhas de login';
+        
+        if (userId) {
+          suspiciousLogin = LoginHistory.create(
+            uuidv4(),
+            userId,
+            email,
+            'suspicious',
+            new Date(),
+            ipAddress,
+            userAgent,
+            null, // location
+            'password',
+            { reason: suspiciousReason }
+          );
+        } else {
+          suspiciousLogin = LoginHistory.createSuspiciousLogin(
+            uuidv4(),
+            email,
+            ipAddress,
+            userAgent,
+            suspiciousReason
+          );
+        }
+        
         await this.loginHistoryRepository.save(suspiciousLogin);
       }
     } catch (error) {

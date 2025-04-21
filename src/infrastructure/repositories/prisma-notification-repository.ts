@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma, NotificationType as PrismaNotificationType, NotificationStatus as PrismaNotificationStatus, Notification as PrismaNotification } from '@prisma/client';
+import { NotificationType as PrismaNotificationType, NotificationStatus as PrismaNotificationStatus, Notification as PrismaNotification } from '@prisma/client';
 import { Notification, NotificationType, NotificationStatus } from '../../domain/entities/notification.js';
 import { NotificationFilter, NotificationRepository } from '../../domain/repositories/notification-repository.js';
 import { PrismaRepositoryBase } from './base/prisma-repository-base.js';

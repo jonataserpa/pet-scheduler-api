@@ -15,23 +15,33 @@ import { AuthMiddleware } from './presentation/middlewares/auth-middleware.js';
 import { AuthController } from './presentation/controllers/auth-controller.js';
 import { setupAuthRoutes } from './presentation/routes/auth-routes.js';
 import { setupNotificationRoutes } from './presentation/routes/notification-routes.js';
+import { setupCustomerNotificationRoutes } from './presentation/routes/customer-notification-routes.js';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user-repository.js';
 import { PrismaLoginHistoryRepository } from './infrastructure/repositories/prisma-login-history-repository.js';
-import { PrismaNotificationRepositoryCached } from './infrastructure/repositories/prisma-notification-repository-cached.js';
-import { NotificationCache } from './infrastructure/cache/notification-cache.js';
-import { InMemoryCacheStore } from './infrastructure/cache/notification-cache.js';
-import { PerformanceMonitor } from './infrastructure/monitoring/performance-monitor.js';
+import { NotificationControllersFactory } from './infrastructure/factory/notification-controllers-factory.js';
 import { EmailService } from './infrastructure/services/email-service.js';
 import { setupPassportStrategies } from './infrastructure/auth/passport-strategies.js';
-import { EmailNotificationProvider } from './infrastructure/services/email-notification-provider.js';
-import { NotificationService } from './domain/services/notification/notification-service.js';
-import { NotificationController } from './presentation/controllers/notification-controller.js';
-import { EmailNotificationController } from './presentation/controllers/email-notification-controller.js';
-import { SmsNotificationController } from './presentation/controllers/sms-notification-controller.js';
-import { WhatsAppNotificationController } from './presentation/controllers/whats-app-notification-controller.js';
+import { ScheduleNotificationJob } from './application/use-cases/scheduling/schedule-notification-job.js';
+
+// Ampliando a declaração de tipos do env para incluir as variáveis de email e configuração do job de notificações
+declare module './shared/config/env.js' {
+  interface Environment {
+    EMAIL_HOST: string;
+    EMAIL_PORT: number;
+    EMAIL_SECURE: boolean;
+    EMAIL_USER: string;
+    EMAIL_PASSWORD: string;
+    EMAIL_FROM: string;
+    EMAIL_FROM_NAME: string;
+    ENABLE_NOTIFICATION_JOB: boolean;
+  }
+}
 
 // Cria a instância do aplicativo Express
 const app = express();
+
+// Job de notificações
+let notificationJob: ScheduleNotificationJob | null = null;
 
 // Configura middlewares globais
 app.use(helmet());
@@ -97,19 +107,9 @@ async function setupRoutes(): Promise<void> {
   const tokenBlacklistService = new TokenBlacklistService(redisUrl);
   await tokenBlacklistService.connect();
   
-  // Inicializar os serviços de cache e monitoramento
-  const cacheStore = new InMemoryCacheStore(300); // TTL padrão de 5 minutos
-  const notificationCache = new NotificationCache(cacheStore);
-  const notificationMonitor = new PerformanceMonitor('Notification');
-  
-  // Repositórios
+  // Repositórios de autenticação
   const userRepository = new PrismaUserRepository(prismaClient);
   const loginHistoryRepository = new PrismaLoginHistoryRepository(prismaClient);
-  const notificationRepository = new PrismaNotificationRepositoryCached(
-    prismaClient,
-    notificationCache,
-    notificationMonitor
-  );
   
   // Serviço de autenticação
   const authService = new AuthService(
@@ -126,36 +126,11 @@ async function setupRoutes(): Promise<void> {
   // Serviço de email
   const emailService = new EmailService();
   
-  // Serviço de notificação
-  const notificationService = new NotificationService(
-    notificationRepository,
-    new EmailNotificationProvider({
-      host: env.EMAIL_HOST,
-      port: parseInt(env.EMAIL_PORT, 10),
-      secure: env.EMAIL_SECURE === 'true',
-      user: env.EMAIL_USER,
-      password: env.EMAIL_PASSWORD,
-      fromEmail: env.EMAIL_FROM,
-      fromName: env.EMAIL_FROM_NAME,
-    })
-  );
+  // Criar todos os controladores de notificação usando a fábrica
+  const notificationControllers = NotificationControllersFactory.createControllers(prismaClient);
   
-  // Provedores de notificação
-  const emailProvider = new EmailNotificationProvider({
-    host: env.EMAIL_HOST,
-    port: parseInt(env.EMAIL_PORT, 10),
-    secure: env.EMAIL_SECURE === 'true',
-    user: env.EMAIL_USER,
-    password: env.EMAIL_PASSWORD,
-    fromEmail: env.EMAIL_FROM,
-    fromName: env.EMAIL_FROM_NAME,
-  });
-  
-  // Serviço de notificação principal
-  const notificationService = new NotificationService(
-    notificationRepository,
-    emailProvider
-  );
+  // Obter os repositórios criados pela fábrica
+  const repositories = NotificationControllersFactory.getRepositories(prismaClient);
   
   // Configura as estratégias do Passport
   setupPassportStrategies(userRepository);
@@ -172,12 +147,6 @@ async function setupRoutes(): Promise<void> {
     loginHistoryRepository
   );
   
-  // Controladores de notificação
-  const notificationController = new NotificationController(notificationService);
-  const emailNotificationController = new EmailNotificationController(notificationService);
-  const smsNotificationController = new SmsNotificationController(notificationService);
-  const whatsAppNotificationController = new WhatsAppNotificationController(notificationService);
-  
   // Configuração das rotas de autenticação
   const authRouter = express.Router();
   setupAuthRoutes(authRouter, authController, authMiddleware);
@@ -187,13 +156,42 @@ async function setupRoutes(): Promise<void> {
   const notificationRouter = express.Router();
   setupNotificationRoutes(
     notificationRouter, 
-    notificationController,
-    emailNotificationController,
-    smsNotificationController,
-    whatsAppNotificationController,
+    notificationControllers.notificationController,
+    notificationControllers.emailNotificationController,
+    notificationControllers.smsNotificationController,
+    notificationControllers.whatsAppNotificationController,
     authMiddleware
   );
   app.use('/api/notifications', notificationRouter);
+  
+  // Configuração das rotas de notificação para clientes
+  const customerNotificationRouter = express.Router();
+  setupCustomerNotificationRoutes(
+    customerNotificationRouter,
+    notificationControllers.customerNotificationController,
+    authMiddleware
+  );
+  app.use('/api/customer-notifications', customerNotificationRouter);
+  
+  // Inicializar o job de notificações
+  const notificationService = notificationControllers.notificationService;
+  notificationJob = new ScheduleNotificationJob(
+    {
+      interval: 300000, // 5 minutos
+      batchSize: 50 // Processar até 50 notificações por vez
+    },
+    notificationService,
+    repositories.petRepository,
+    repositories.customerRepository
+  );
+  
+  // Iniciar o job apenas em ambiente de produção ou se explicitamente configurado
+  if (env.NODE_ENV === 'production' || env.ENABLE_NOTIFICATION_JOB) {
+    notificationJob.start();
+    logger.info('Job de notificações iniciado');
+  } else {
+    logger.info('Job de notificações não iniciado (apenas em produção)');
+  }
   
   // Outras rotas serão adicionadas aqui
 }
@@ -229,6 +227,7 @@ export async function startServer(): Promise<void> {
     // Inicia o servidor
     return new Promise((resolve) => {
       app.listen(env.PORT, () => {
+        logger.info(`Servidor inicializado na porta ${env.PORT}`);
         resolve();
       });
     });
@@ -236,4 +235,27 @@ export async function startServer(): Promise<void> {
     logger.error('Falha ao iniciar o servidor:', error);
     throw error;
   }
+}
+
+// Limpeza ao desligar o servidor
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+function gracefulShutdown() {
+  logger.info('Iniciando desligamento gracioso do servidor...');
+  
+  // Parar o job de notificações, se estiver em execução
+  if (notificationJob) {
+    notificationJob.stop();
+    logger.info('Job de notificações parado');
+  }
+  
+  // Desconectar do banco de dados
+  prismaClient.$disconnect().then(() => {
+    logger.info('Desconectado do banco de dados');
+    process.exit(0);
+  }).catch((err) => {
+    logger.error('Erro ao desconectar do banco de dados:', err);
+    process.exit(1);
+  });
 } 
