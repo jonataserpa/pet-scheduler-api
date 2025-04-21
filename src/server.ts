@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import session from 'express-session';
 import passport from 'passport';
+import swaggerUi from 'swagger-ui-express';
 import { env } from './shared/config/env.js';
 import { logger } from './shared/utils/logger.js';
 import { connectDatabase, prismaClient } from './infrastructure/database/prisma-client.js';
@@ -16,12 +17,25 @@ import { AuthController } from './presentation/controllers/auth-controller.js';
 import { setupAuthRoutes } from './presentation/routes/auth-routes.js';
 import { setupNotificationRoutes } from './presentation/routes/notification-routes.js';
 import { setupCustomerNotificationRoutes } from './presentation/routes/customer-notification-routes.js';
+import { setupPetRoutes } from './presentation/routes/pet-routes.js';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user-repository.js';
 import { PrismaLoginHistoryRepository } from './infrastructure/repositories/prisma-login-history-repository.js';
 import { NotificationControllersFactory } from './infrastructure/factory/notification-controllers-factory.js';
 import { EmailService } from './infrastructure/services/email-service.js';
 import { setupPassportStrategies } from './infrastructure/auth/passport-strategies.js';
 import { ScheduleNotificationJob } from './application/use-cases/scheduling/schedule-notification-job.js';
+import { swaggerSpec } from './shared/config/swagger.js';
+import { PetController } from './presentation/controllers/pet-controller.js';
+import { PrismaPetRepository } from './infrastructure/repositories/prisma-pet-repository.js';
+import { PrismaCustomerRepository } from './infrastructure/repositories/prisma-customer-repository.js';
+import { setupSchedulingRoutes } from './presentation/routes/scheduling-routes.js';
+import { setupCustomerRoutes } from './presentation/routes/customer-routes.js';
+import { SchedulingController } from './presentation/controllers/scheduling-controller.js';
+import { CustomerController } from './presentation/controllers/customer-controller.js';
+import { PrismaSchedulingRepository } from './infrastructure/repositories/prisma-scheduling-repository.js';
+import { ServiceController } from './presentation/controllers/service-controller.js';
+import { PrismaServiceRepository } from './infrastructure/repositories/prisma-service-repository.js';
+import { setupServiceRoutes } from './presentation/routes/service-routes.js';
 
 // Ampliando a declaração de tipos do env para incluir as variáveis de email e configuração do job de notificações
 declare module './shared/config/env.js' {
@@ -173,6 +187,38 @@ async function setupRoutes(): Promise<void> {
   );
   app.use('/api/customer-notifications', customerNotificationRouter);
   
+  // Configuração das rotas de pet
+  const petRouter = express.Router();
+  const petRepository = new PrismaPetRepository(prismaClient);
+  const customerRepository = new PrismaCustomerRepository(prismaClient);
+  const petController = new PetController(petRepository, customerRepository);
+  setupPetRoutes(petRouter, petController, authMiddleware);
+  app.use('/api/pets', petRouter);
+  
+  // Configuração das rotas de cliente
+  const customerRouter = express.Router();
+  const customerController = new CustomerController(customerRepository, petRepository);
+  setupCustomerRoutes(customerRouter, customerController, authMiddleware);
+  app.use('/api/customers', customerRouter);
+  
+  // Configuração das rotas de agendamento
+  const schedulingRouter = express.Router();
+  const schedulingRepository = new PrismaSchedulingRepository(prismaClient);
+  const schedulingController = new SchedulingController(
+    schedulingRepository,
+    petRepository,
+    customerRepository
+  );
+  setupSchedulingRoutes(schedulingRouter, schedulingController, authMiddleware);
+  app.use('/api/schedulings', schedulingRouter);
+  
+  // Configuração das rotas de serviço
+  const serviceRouter = express.Router();
+  const serviceRepository = new PrismaServiceRepository(prismaClient);
+  const serviceController = new ServiceController(serviceRepository);
+  setupServiceRoutes(serviceRouter, serviceController, authMiddleware);
+  app.use('/api/services', serviceRouter);
+  
   // Inicializar o job de notificações
   const notificationService = notificationControllers.notificationService;
   notificationJob = new ScheduleNotificationJob(
@@ -192,6 +238,15 @@ async function setupRoutes(): Promise<void> {
   } else {
     logger.info('Job de notificações não iniciado (apenas em produção)');
   }
+  
+  // Configuração do Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  
+  // Endpoint para obter a especificação OpenAPI como JSON
+  app.get('/api-docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
   
   // Outras rotas serão adicionadas aqui
 }

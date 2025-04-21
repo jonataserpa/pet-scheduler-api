@@ -835,3 +835,61 @@ Refatorar o EmailService para usar as novas variáveis de ambiente EMAIL_* em ve
   2. Adicionar exemplos mais detalhados para cada endpoint.
   3. Implementar testes automatizados para os componentes do sistema de notificações.
   4. Considerar a adição de um mecanismo de feedback para notificações (confirmação de leitura).
+
+## Tarefa 10: Análise e Verificação de Domínio das Entidades
+
+Data: 2024-09-20
+
+### Objetivo
+Verificar a implementação da classe `Pet` e entender como o atributo `active` é gerenciado na aplicação.
+
+### Requisitos da Tarefa
+1. Analisar a implementação da classe `Pet` no domínio
+2. Verificar como a propriedade `active` é tratada em toda a aplicação
+3. Analisar o repositório Prisma para manipulação de pets
+4. Entender como os controladores e rotas interagem com a entidade Pet
+
+### Etapas Realizadas
+
+#### 1. Análise da Classe Pet
+- Verificada a implementação da classe `Pet` em `src/domain/entities/pet.ts`
+- Identificadas as propriedades e métodos da entidade
+- Propriedade `_active` é gerenciada com default `true`
+- Métodos `activate()` e `deactivate()` para controlar o estado ativo
+- Validações robustas implementadas no método estático `create`
+
+#### 2. Verificação do Repositório PrismaPet
+- Analisado o repositório `PrismaPetRepository` em `src/infrastructure/repositories/prisma-pet-repository.ts`
+- Métodos `activate` e `deactivate` implementados para atualizar o status na base de dados
+- Método `mapToDomain` manipula corretamente a propriedade `active`
+- Filtragem por estado `active` implementada nos métodos de busca
+
+#### 3. Análise do Schema Prisma
+- Verificado o modelo `Pet` em `prisma/schema.prisma`
+- Campo `active` definido como `Boolean` com valor padrão `true`
+- Relacionamentos com `Customer` e `Scheduling` adequadamente implementados
+
+#### 4. Análise dos Controladores e Rotas
+- Analisadas as rotas em `src/presentation/routes/pet-routes.ts`
+- Verificados os métodos do controlador em `src/presentation/controllers/pet-controller.ts`
+- Implementação dos endpoints de ativação/desativação de pets
+- Confirmada a proteção dos endpoints com middleware de autenticação
+
+### Conclusão da Tarefa 10
+
+✅ **Status: Concluída**
+
+**Data de conclusão:** 2024-09-20
+
+**Observações:**
+- A entidade `Pet` e sua propriedade `active` estão corretamente implementadas em todas as camadas da aplicação
+- A manipulação do estado ativo/inativo segue os princípios da Clean Architecture e DDD
+- A validação de domínio na entidade `Pet` garante a integridade dos dados
+- A implementação do repositório garante que a propriedade `active` seja persistida corretamente no banco de dados
+
+**Aprendizados:**
+- A abordagem orientada a domínio permite um controle preciso do estado das entidades
+- A centralização da lógica de status na entidade garante consistência em toda a aplicação
+- O mapeamento adequado entre entidades de domínio e modelos do Prisma facilita a manutenção
+
+**Próxima Tarefa:** Implementação de notificações automatizadas para checkups de pets
