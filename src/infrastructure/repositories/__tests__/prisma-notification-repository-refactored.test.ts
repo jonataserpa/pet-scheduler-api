@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { PrismaClient } from "@prisma/client";
 import { NotificationType, NotificationStatus } from "../../../domain/entities/notification.js";
 import { Notification } from "../../../domain/entities/notification.js";
@@ -15,13 +16,18 @@ const mockPrismaClient = {
 		count: jest.fn(),
 		delete: jest.fn(),
 	},
-	$transaction: jest.fn((callback) => callback(mockPrismaClient)),
-} as unknown as PrismaClient;
+	// @ts-ignore - Ignorando tipagem para função de transaction
+	$transaction: jest.fn(callback => callback(mockPrismaClient)),
+};
+
+// Usamos type assertion para simplificar
+const prismaClientMock = mockPrismaClient as unknown as PrismaClient;
 
 // Mock para PrismaTransaction
 jest.mock("../../database/prisma-transaction.js", () => ({
 	PrismaTransaction: jest.fn().mockImplementation(() => ({
-		execute: jest.fn().mockImplementation((callback) => callback(mockPrismaClient)),
+		// @ts-ignore - Ignorando tipagem para função de execute
+		execute: jest.fn(callback => callback(prismaClientMock)),
 		executeMultiple: jest.fn(),
 	})),
 }));
@@ -41,7 +47,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		repository = new PrismaNotificationRepositoryRefactored(mockPrismaClient);
+		repository = new PrismaNotificationRepositoryRefactored(prismaClientMock);
 	});
 
 	describe("create", () => {
@@ -61,6 +67,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				sentAt: new Date(),
 			};
 
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.create.mockResolvedValue(mockNotification);
 
 			// Spy no NotificationMapper
@@ -126,7 +133,9 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				sentAt: new Date(),
 			};
 
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.update.mockResolvedValue(mockUpdatedNotification);
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.findUnique.mockResolvedValue(mockUpdatedNotification);
 
 			// Spy no NotificationMapper
@@ -176,7 +185,9 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				sentAt: new Date(),
 			};
 
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.update.mockResolvedValue(mockUpdatedNotification);
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.findUnique.mockResolvedValue(mockUpdatedNotification);
 
 			// Spy no NotificationMapper
@@ -239,6 +250,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				},
 			];
 
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.findMany.mockResolvedValue(mockNotifications);
 
 			// Spy no NotificationMapper
@@ -247,10 +259,10 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				.mockImplementation((prismaNotification) =>
 					Notification.create(
 						prismaNotification.id,
-						prismaNotification.type,
+						prismaNotification.type as NotificationType,
 						prismaNotification.content,
 						prismaNotification.schedulingId,
-						prismaNotification.status,
+						prismaNotification.status as NotificationStatus,
 						prismaNotification.sentAt,
 					),
 				);
@@ -270,6 +282,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				status: NotificationStatus.PENDING,
 			};
 
+			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.count.mockResolvedValue(5);
 
 			// Act

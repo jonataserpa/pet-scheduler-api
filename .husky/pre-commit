@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Verificando formatação do código..."
+npm run format
+
+echo "✅ Verificando se o código está formatado corretamente..."
+npm run format-check
+
+echo "🧪 Executando testes..."
+npm test

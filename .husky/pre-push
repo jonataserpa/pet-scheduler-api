@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Verificando o código antes de enviar para o repositório..."
+npm run lint
+
+echo "🧪 Executando testes com cobertura..."
+npm run test:coverage
