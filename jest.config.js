@@ -25,10 +25,19 @@ export default {
 				useESM: true,
 			},
 		],
+		"^.+\\.jsx?$": [
+			"babel-jest",
+			{
+				presets: [["@babel/preset-env", { targets: { node: "current" } }]],
+			},
+		],
 	},
 
+	// Add extensionsToTreatAsEsm for ESM support
+	extensionsToTreatAsEsm: [".ts", ".tsx", ".mts"],
+
 	// Disable transformations for node_modules
-	transformIgnorePatterns: ["/node_modules/"],
+	transformIgnorePatterns: ["/node_modules/(?!(@anthropic-ai|openai))"],
 
 	// Set moduleNameMapper for absolute paths
 	moduleNameMapper: {
