@@ -1,6 +1,7 @@
 # ADR 001 - Docker
 
 ## Status
+
 Proposto
 
 ## Contexto

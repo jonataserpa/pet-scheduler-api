@@ -2,12 +2,9 @@
  * Direct function wrapper for fixDependenciesCommand
  */
 
-import { fixDependenciesCommand } from '../../../../scripts/modules/dependency-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import fs from 'fs';
+import { fixDependenciesCommand } from "../../../../scripts/modules/dependency-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
+import fs from "fs";
 
 /**
  * Fix invalid dependencies in tasks.json automatically
@@ -24,13 +21,13 @@ export async function fixDependenciesDirect(args, log) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			log.error('fixDependenciesDirect called without tasksJsonPath');
+			log.error("fixDependenciesDirect called without tasksJsonPath");
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
-				}
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
+				},
 			};
 		}
 
@@ -42,9 +39,9 @@ export async function fixDependenciesDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'FILE_NOT_FOUND',
-					message: `Tasks file not found at ${tasksPath}`
-				}
+					code: "FILE_NOT_FOUND",
+					message: `Tasks file not found at ${tasksPath}`,
+				},
 			};
 		}
 
@@ -60,9 +57,9 @@ export async function fixDependenciesDirect(args, log) {
 		return {
 			success: true,
 			data: {
-				message: 'Dependencies fixed successfully',
-				tasksPath
-			}
+				message: "Dependencies fixed successfully",
+				tasksPath,
+			},
 		};
 	} catch (error) {
 		// Make sure to restore normal logging even if there's an error
@@ -72,9 +69,9 @@ export async function fixDependenciesDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'FIX_DEPENDENCIES_ERROR',
-				message: error.message
-			}
+				code: "FIX_DEPENDENCIES_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

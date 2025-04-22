@@ -3,13 +3,10 @@
  * Direct function implementation for showing task details
  */
 
-import { findTaskById } from '../../../../scripts/modules/utils.js';
-import { readJSON } from '../../../../scripts/modules/utils.js';
-import { getCachedOrExecute } from '../../tools/utils.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
+import { findTaskById } from "../../../../scripts/modules/utils.js";
+import { readJSON } from "../../../../scripts/modules/utils.js";
+import { getCachedOrExecute } from "../../tools/utils.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
 
 /**
  * Direct function wrapper for showing task details with error handling and caching.
@@ -25,28 +22,28 @@ export async function showTaskDirect(args, log) {
 	const { tasksJsonPath, id } = args;
 
 	if (!tasksJsonPath) {
-		log.error('showTaskDirect called without tasksJsonPath');
+		log.error("showTaskDirect called without tasksJsonPath");
 		return {
 			success: false,
 			error: {
-				code: 'MISSING_ARGUMENT',
-				message: 'tasksJsonPath is required'
+				code: "MISSING_ARGUMENT",
+				message: "tasksJsonPath is required",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 
 	// Validate task ID
 	const taskId = id;
 	if (!taskId) {
-		log.error('Task ID is required');
+		log.error("Task ID is required");
 		return {
 			success: false,
 			error: {
-				code: 'INPUT_VALIDATION_ERROR',
-				message: 'Task ID is required'
+				code: "INPUT_VALIDATION_ERROR",
+				message: "Task ID is required",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 
@@ -59,9 +56,7 @@ export async function showTaskDirect(args, log) {
 			// Enable silent mode to prevent console logs from interfering with JSON response
 			enableSilentMode();
 
-			log.info(
-				`Retrieving task details for ID: ${taskId} from ${tasksJsonPath}`
-			);
+			log.info(`Retrieving task details for ID: ${taskId} from ${tasksJsonPath}`);
 
 			// Read tasks data using the provided path
 			const data = readJSON(tasksJsonPath);
@@ -70,9 +65,9 @@ export async function showTaskDirect(args, log) {
 				return {
 					success: false,
 					error: {
-						code: 'INVALID_TASKS_FILE',
-						message: `No valid tasks found in ${tasksJsonPath}`
-					}
+						code: "INVALID_TASKS_FILE",
+						message: `No valid tasks found in ${tasksJsonPath}`,
+					},
 				};
 			}
 
@@ -84,9 +79,9 @@ export async function showTaskDirect(args, log) {
 				return {
 					success: false,
 					error: {
-						code: 'TASK_NOT_FOUND',
-						message: `Task with ID ${taskId} not found`
-					}
+						code: "TASK_NOT_FOUND",
+						message: `Task with ID ${taskId} not found`,
+					},
 				};
 			}
 
@@ -100,8 +95,8 @@ export async function showTaskDirect(args, log) {
 				success: true,
 				data: {
 					task,
-					allTasks: data.tasks
-				}
+					allTasks: data.tasks,
+				},
 			};
 		} catch (error) {
 			// Make sure to restore normal logging even if there's an error
@@ -111,9 +106,9 @@ export async function showTaskDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'CORE_FUNCTION_ERROR',
-					message: error.message || 'Failed to show task details'
-				}
+					code: "CORE_FUNCTION_ERROR",
+					message: error.message || "Failed to show task details",
+				},
 			};
 		}
 	};
@@ -123,23 +118,21 @@ export async function showTaskDirect(args, log) {
 		const result = await getCachedOrExecute({
 			cacheKey,
 			actionFn: coreShowTaskAction,
-			log
+			log,
 		});
 		log.info(`showTaskDirect completed. From cache: ${result.fromCache}`);
 		return result; // Returns { success, data/error, fromCache }
 	} catch (error) {
 		// Catch unexpected errors from getCachedOrExecute itself
 		disableSilentMode();
-		log.error(
-			`Unexpected error during getCachedOrExecute for showTask: ${error.message}`
-		);
+		log.error(`Unexpected error during getCachedOrExecute for showTask: ${error.message}`);
 		return {
 			success: false,
 			error: {
-				code: 'UNEXPECTED_ERROR',
-				message: error.message
+				code: "UNEXPECTED_ERROR",
+				message: error.message,
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

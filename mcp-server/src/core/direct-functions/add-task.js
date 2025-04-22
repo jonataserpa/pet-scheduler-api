@@ -3,20 +3,14 @@
  * Direct function implementation for adding a new task
  */
 
-import { addTask } from '../../../../scripts/modules/task-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import {
-	getAnthropicClientForMCP,
-	getModelConfig
-} from '../utils/ai-client-utils.js';
+import { addTask } from "../../../../scripts/modules/task-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
+import { getAnthropicClientForMCP, getModelConfig } from "../utils/ai-client-utils.js";
 import {
 	_buildAddTaskPrompt,
 	parseTaskJsonResponse,
-	_handleAnthropicStream
-} from '../../../../scripts/modules/ai-services.js';
+	_handleAnthropicStream,
+} from "../../../../scripts/modules/ai-services.js";
 
 /**
  * Direct function wrapper for adding a new task with error handling.
@@ -45,14 +39,14 @@ export async function addTaskDirect(args, log, context = {}) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			log.error('addTaskDirect called without tasksJsonPath');
+			log.error("addTaskDirect called without tasksJsonPath");
 			disableSilentMode(); // Disable before returning
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
-				}
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
+				},
 			};
 		}
 
@@ -64,17 +58,15 @@ export async function addTaskDirect(args, log, context = {}) {
 
 		// Check required parameters
 		if (!args.prompt && !isManualCreation) {
-			log.error(
-				'Missing required parameters: either prompt or title+description must be provided'
-			);
+			log.error("Missing required parameters: either prompt or title+description must be provided");
 			disableSilentMode();
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_PARAMETER',
+					code: "MISSING_PARAMETER",
 					message:
-						'Either the prompt parameter or both title and description parameters are required for adding a task'
-				}
+						"Either the prompt parameter or both title and description parameters are required for adding a task",
+				},
 			};
 		}
 
@@ -84,10 +76,10 @@ export async function addTaskDirect(args, log, context = {}) {
 			? dependencies
 			: dependencies
 				? String(dependencies)
-						.split(',')
+						.split(",")
 						.map((id) => parseInt(id.trim(), 10))
 				: [];
-		const taskPriority = priority || 'medium';
+		const taskPriority = priority || "medium";
 
 		// Extract context parameters for advanced functionality
 		const { session } = context;
@@ -99,12 +91,12 @@ export async function addTaskDirect(args, log, context = {}) {
 			manualTaskData = {
 				title: args.title,
 				description: args.description,
-				details: args.details || '',
-				testStrategy: args.testStrategy || ''
+				details: args.details || "",
+				testStrategy: args.testStrategy || "",
 			};
 
 			log.info(
-				`Adding new task manually with title: "${args.title}", dependencies: [${taskDependencies.join(', ')}], priority: ${priority}`
+				`Adding new task manually with title: "${args.title}", dependencies: [${taskDependencies.join(", ")}], priority: ${priority}`,
 			);
 
 			// Call the addTask function with manual task data
@@ -115,11 +107,11 @@ export async function addTaskDirect(args, log, context = {}) {
 				priority,
 				{
 					mcpLog: log,
-					session
+					session,
 				},
-				'json', // Use JSON output format to prevent console output
+				"json", // Use JSON output format to prevent console output
 				null, // No custom environment
-				manualTaskData // Pass the manual task data
+				manualTaskData, // Pass the manual task data
 			);
 
 			// Restore normal logging
@@ -129,13 +121,13 @@ export async function addTaskDirect(args, log, context = {}) {
 				success: true,
 				data: {
 					taskId: newTaskId,
-					message: `Successfully added new task #${newTaskId}`
-				}
+					message: `Successfully added new task #${newTaskId}`,
+				},
 			};
 		} else {
 			// AI-driven task creation
 			log.info(
-				`Adding new task with prompt: "${prompt}", dependencies: [${taskDependencies.join(', ')}], priority: ${priority}`
+				`Adding new task with prompt: "${prompt}", dependencies: [${taskDependencies.join(", ")}], priority: ${priority}`,
 			);
 
 			// Initialize AI client with session environment
@@ -148,9 +140,9 @@ export async function addTaskDirect(args, log, context = {}) {
 				return {
 					success: false,
 					error: {
-						code: 'AI_CLIENT_ERROR',
-						message: `Cannot initialize AI client: ${error.message}`
-					}
+						code: "AI_CLIENT_ERROR",
+						message: `Cannot initialize AI client: ${error.message}`,
+					},
 				};
 			}
 
@@ -160,18 +152,15 @@ export async function addTaskDirect(args, log, context = {}) {
 			// Read existing tasks to provide context
 			let tasksData;
 			try {
-				const fs = await import('fs');
-				tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+				const fs = await import("fs");
+				tasksData = JSON.parse(fs.readFileSync(tasksPath, "utf8"));
 			} catch (error) {
 				log.warn(`Could not read existing tasks for context: ${error.message}`);
 				tasksData = { tasks: [] };
 			}
 
 			// Build prompts for AI
-			const { systemPrompt, userPrompt } = _buildAddTaskPrompt(
-				prompt,
-				tasksData.tasks
-			);
+			const { systemPrompt, userPrompt } = _buildAddTaskPrompt(prompt, tasksData.tasks);
 
 			// Make the AI call using the streaming helper
 			let responseText;
@@ -182,12 +171,12 @@ export async function addTaskDirect(args, log, context = {}) {
 						model: modelConfig.model,
 						max_tokens: modelConfig.maxTokens,
 						temperature: modelConfig.temperature,
-						messages: [{ role: 'user', content: userPrompt }],
-						system: systemPrompt
+						messages: [{ role: "user", content: userPrompt }],
+						system: systemPrompt,
 					},
 					{
-						mcpLog: log
-					}
+						mcpLog: log,
+					},
 				);
 			} catch (error) {
 				log.error(`AI processing failed: ${error.message}`);
@@ -195,9 +184,9 @@ export async function addTaskDirect(args, log, context = {}) {
 				return {
 					success: false,
 					error: {
-						code: 'AI_PROCESSING_ERROR',
-						message: `Failed to generate task with AI: ${error.message}`
-					}
+						code: "AI_PROCESSING_ERROR",
+						message: `Failed to generate task with AI: ${error.message}`,
+					},
 				};
 			}
 
@@ -211,9 +200,9 @@ export async function addTaskDirect(args, log, context = {}) {
 				return {
 					success: false,
 					error: {
-						code: 'RESPONSE_PARSING_ERROR',
-						message: `Failed to parse AI response: ${error.message}`
-					}
+						code: "RESPONSE_PARSING_ERROR",
+						message: `Failed to parse AI response: ${error.message}`,
+					},
 				};
 			}
 
@@ -225,11 +214,11 @@ export async function addTaskDirect(args, log, context = {}) {
 				priority,
 				{
 					mcpLog: log,
-					session
+					session,
 				},
-				'json',
+				"json",
 				null,
-				taskDataFromAI // Pass the parsed AI result as the manual task data
+				taskDataFromAI, // Pass the parsed AI result as the manual task data
 			);
 
 			// Restore normal logging
@@ -239,8 +228,8 @@ export async function addTaskDirect(args, log, context = {}) {
 				success: true,
 				data: {
 					taskId: newTaskId,
-					message: `Successfully added new task #${newTaskId}`
-				}
+					message: `Successfully added new task #${newTaskId}`,
+				},
 			};
 		}
 	} catch (error) {
@@ -251,9 +240,9 @@ export async function addTaskDirect(args, log, context = {}) {
 		return {
 			success: false,
 			error: {
-				code: 'ADD_TASK_ERROR',
-				message: error.message
-			}
+				code: "ADD_TASK_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

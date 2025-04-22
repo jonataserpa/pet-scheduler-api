@@ -1,22 +1,21 @@
 // In tests/unit/parse-prd.test.js
 // Testing that parse-prd.js handles both .txt and .md files the same way
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
-describe('parse-prd file extension compatibility', () => {
+describe("parse-prd file extension compatibility", () => {
 	// Test directly that the parse-prd functionality works with different extensions
 	// by examining the parameter handling in mcp-server/src/tools/parse-prd.js
 
-	test('Parameter description mentions support for .md files', () => {
+	test("Parameter description mentions support for .md files", () => {
 		// The parameter description for 'input' in parse-prd.js includes .md files
-		const description =
-			'Absolute path to the PRD document file (.txt, .md, etc.)';
+		const description = "Absolute path to the PRD document file (.txt, .md, etc.)";
 
 		// Verify the description explicitly mentions .md files
-		expect(description).toContain('.md');
+		expect(description).toContain(".md");
 	});
 
-	test('File extension validation is not restricted to .txt files', () => {
+	test("File extension validation is not restricted to .txt files", () => {
 		// Check for absence of extension validation
 		const fileValidator = (filePath) => {
 			// Return a boolean value to ensure the test passes
@@ -27,14 +26,14 @@ describe('parse-prd file extension compatibility', () => {
 		};
 
 		// Test with different extensions
-		expect(fileValidator('/path/to/prd.txt')).toBe(true);
-		expect(fileValidator('/path/to/prd.md')).toBe(true);
+		expect(fileValidator("/path/to/prd.txt")).toBe(true);
+		expect(fileValidator("/path/to/prd.md")).toBe(true);
 
 		// Invalid cases should still fail regardless of extension
-		expect(fileValidator('')).toBe(false);
+		expect(fileValidator("")).toBe(false);
 	});
 
-	test('Implementation handles all file types the same way', () => {
+	test("Implementation handles all file types the same way", () => {
 		// This test confirms that the implementation treats all file types equally
 		// by simulating the core functionality
 
@@ -43,7 +42,7 @@ describe('parse-prd file extension compatibility', () => {
 			// not the file extension, which is what we want to verify
 
 			if (!filePath) {
-				return { success: false, error: { code: 'MISSING_INPUT_FILE' } };
+				return { success: false, error: { code: "MISSING_INPUT_FILE" } };
 			}
 
 			// In the real implementation, this would check if the file exists
@@ -55,8 +54,8 @@ describe('parse-prd file extension compatibility', () => {
 		};
 
 		// Verify same behavior for different extensions
-		const txtResult = mockImplementation('/path/to/prd.txt');
-		const mdResult = mockImplementation('/path/to/prd.md');
+		const txtResult = mockImplementation("/path/to/prd.txt");
+		const mdResult = mockImplementation("/path/to/prd.md");
 
 		// Both should succeed since there's no extension-specific logic
 		expect(txtResult.success).toBe(true);

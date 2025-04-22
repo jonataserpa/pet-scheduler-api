@@ -1,11 +1,11 @@
-import { FastMCP } from 'fastmcp';
-import path from 'path';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-import logger from './logger.js';
-import { registerTaskMasterTools } from './tools/index.js';
-import { asyncOperationManager } from './core/utils/async-manager.js';
+import { FastMCP } from "fastmcp";
+import path from "path";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import fs from "fs";
+import logger from "./logger.js";
+import { registerTaskMasterTools } from "./tools/index.js";
+import { asyncOperationManager } from "./core/utils/async-manager.js";
 
 // Load environment variables
 dotenv.config();
@@ -20,12 +20,12 @@ const __dirname = path.dirname(__filename);
 class TaskMasterMCPServer {
 	constructor() {
 		// Get version from package.json using synchronous fs
-		const packagePath = path.join(__dirname, '../../package.json');
-		const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+		const packagePath = path.join(__dirname, "../../package.json");
+		const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
 
 		this.options = {
-			name: 'Task Master MCP Server',
-			version: packageJson.version
+			name: "Task Master MCP Server",
+			version: packageJson.version,
 		};
 
 		this.server = new FastMCP(this.options);
@@ -71,8 +71,8 @@ class TaskMasterMCPServer {
 
 		// Start the FastMCP server with increased timeout
 		await this.server.start({
-			transportType: 'stdio',
-			timeout: 120000 // 2 minutes timeout (in milliseconds)
+			transportType: "stdio",
+			timeout: 120000, // 2 minutes timeout (in milliseconds)
 		});
 
 		return this;

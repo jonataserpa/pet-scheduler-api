@@ -3,14 +3,10 @@
  * Tool for automatically fixing invalid task dependencies
  */
 
-import { z } from 'zod';
-import {
-	handleApiResult,
-	createErrorResponse,
-	getProjectRootFromSession
-} from './utils.js';
-import { fixDependenciesDirect } from '../core/task-master-core.js';
-import { findTasksJsonPath } from '../core/utils/path-utils.js';
+import { z } from "zod";
+import { handleApiResult, createErrorResponse, getProjectRootFromSession } from "./utils.js";
+import { fixDependenciesDirect } from "../core/task-master-core.js";
+import { findTasksJsonPath } from "../core/utils/path-utils.js";
 
 /**
  * Register the fixDependencies tool with the MCP server
@@ -18,46 +14,38 @@ import { findTasksJsonPath } from '../core/utils/path-utils.js';
  */
 export function registerFixDependenciesTool(server) {
 	server.addTool({
-		name: 'fix_dependencies',
-		description: 'Fix invalid dependencies in tasks automatically',
+		name: "fix_dependencies",
+		description: "Fix invalid dependencies in tasks automatically",
 		parameters: z.object({
-			file: z.string().optional().describe('Absolute path to the tasks file'),
-			projectRoot: z
-				.string()
-				.describe('The directory of the project. Must be an absolute path.')
+			file: z.string().optional().describe("Absolute path to the tasks file"),
+			projectRoot: z.string().describe("The directory of the project. Must be an absolute path."),
 		}),
 		execute: async (args, { log, session }) => {
 			try {
 				log.info(`Fixing dependencies with args: ${JSON.stringify(args)}`);
 
 				// Get project root from args or session
-				const rootFolder =
-					args.projectRoot || getProjectRootFromSession(session, log);
+				const rootFolder = args.projectRoot || getProjectRootFromSession(session, log);
 
 				if (!rootFolder) {
 					return createErrorResponse(
-						'Could not determine project root. Please provide it explicitly or ensure your session contains valid root information.'
+						"Could not determine project root. Please provide it explicitly or ensure your session contains valid root information.",
 					);
 				}
 
 				let tasksJsonPath;
 				try {
-					tasksJsonPath = findTasksJsonPath(
-						{ projectRoot: rootFolder, file: args.file },
-						log
-					);
+					tasksJsonPath = findTasksJsonPath({ projectRoot: rootFolder, file: args.file }, log);
 				} catch (error) {
 					log.error(`Error finding tasks.json: ${error.message}`);
-					return createErrorResponse(
-						`Failed to find tasks.json: ${error.message}`
-					);
+					return createErrorResponse(`Failed to find tasks.json: ${error.message}`);
 				}
 
 				const result = await fixDependenciesDirect(
 					{
-						tasksJsonPath: tasksJsonPath
+						tasksJsonPath: tasksJsonPath,
 					},
-					log
+					log,
 				);
 
 				if (result.success) {
@@ -66,11 +54,11 @@ export function registerFixDependenciesTool(server) {
 					log.error(`Failed to fix dependencies: ${result.error.message}`);
 				}
 
-				return handleApiResult(result, log, 'Error fixing dependencies');
+				return handleApiResult(result, log, "Error fixing dependencies");
 			} catch (error) {
 				log.error(`Error in fixDependencies tool: ${error.message}`);
 				return createErrorResponse(error.message);
 			}
-		}
+		},
 	});
 }

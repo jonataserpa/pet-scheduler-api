@@ -3,24 +3,24 @@
  * Utility functions for the Task Master CLI
  */
 
-import fs from 'fs';
-import path from 'path';
-import chalk from 'chalk';
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
 
 // Global silent mode flag
 let silentMode = false;
 
 // Configuration and constants
 const CONFIG = {
-	model: process.env.MODEL || 'claude-3-7-sonnet-20250219',
-	maxTokens: parseInt(process.env.MAX_TOKENS || '4000'),
-	temperature: parseFloat(process.env.TEMPERATURE || '0.7'),
-	debug: process.env.DEBUG === 'true',
-	logLevel: process.env.LOG_LEVEL || 'info',
-	defaultSubtasks: parseInt(process.env.DEFAULT_SUBTASKS || '3'),
-	defaultPriority: process.env.DEFAULT_PRIORITY || 'medium',
-	projectName: process.env.PROJECT_NAME || 'Task Master',
-	projectVersion: '1.5.0' // Hardcoded version - ALWAYS use this value, ignore environment variable
+	model: process.env.MODEL || "claude-3-7-sonnet-20250219",
+	maxTokens: parseInt(process.env.MAX_TOKENS || "4000"),
+	temperature: parseFloat(process.env.TEMPERATURE || "0.7"),
+	debug: process.env.DEBUG === "true",
+	logLevel: process.env.LOG_LEVEL || "info",
+	defaultSubtasks: parseInt(process.env.DEFAULT_SUBTASKS || "3"),
+	defaultPriority: process.env.DEFAULT_PRIORITY || "medium",
+	projectName: process.env.PROJECT_NAME || "Task Master",
+	projectVersion: "1.5.0", // Hardcoded version - ALWAYS use this value, ignore environment variable
 };
 
 // Set up logging based on log level
@@ -29,7 +29,7 @@ const LOG_LEVELS = {
 	info: 1,
 	warn: 2,
 	error: 3,
-	success: 1 // Treat success like info level
+	success: 1, // Treat success like info level
 };
 
 /**
@@ -37,7 +37,7 @@ const LOG_LEVELS = {
  * @returns {Promise<Object>} The task manager module object
  */
 async function getTaskManager() {
-	return import('./task-manager.js');
+	return import("./task-manager.js");
 }
 
 /**
@@ -75,27 +75,25 @@ function log(level, ...args) {
 
 	// Use text prefixes instead of emojis
 	const prefixes = {
-		debug: chalk.gray('[DEBUG]'),
-		info: chalk.blue('[INFO]'),
-		warn: chalk.yellow('[WARN]'),
-		error: chalk.red('[ERROR]'),
-		success: chalk.green('[SUCCESS]')
+		debug: chalk.gray("[DEBUG]"),
+		info: chalk.blue("[INFO]"),
+		warn: chalk.yellow("[WARN]"),
+		error: chalk.red("[ERROR]"),
+		success: chalk.green("[SUCCESS]"),
 	};
 
 	// Ensure level exists, default to info if not
-	const currentLevel = LOG_LEVELS.hasOwnProperty(level) ? level : 'info';
-	const configLevel = CONFIG.logLevel || 'info'; // Ensure configLevel has a default
+	const currentLevel = LOG_LEVELS.hasOwnProperty(level) ? level : "info";
+	const configLevel = CONFIG.logLevel || "info"; // Ensure configLevel has a default
 
 	// Check log level configuration
-	if (
-		LOG_LEVELS[currentLevel] >= (LOG_LEVELS[configLevel] ?? LOG_LEVELS.info)
-	) {
-		const prefix = prefixes[currentLevel] || '';
+	if (LOG_LEVELS[currentLevel] >= (LOG_LEVELS[configLevel] ?? LOG_LEVELS.info)) {
+		const prefix = prefixes[currentLevel] || "";
 		// Use console.log for all levels, let chalk handle coloring
 		// Construct the message properly
 		const message = args
-			.map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : arg))
-			.join(' ');
+			.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg))
+			.join(" ");
 		console.log(`${prefix} ${message}`);
 	}
 }
@@ -107,13 +105,13 @@ function log(level, ...args) {
  */
 function readJSON(filepath) {
 	try {
-		const rawData = fs.readFileSync(filepath, 'utf8');
+		const rawData = fs.readFileSync(filepath, "utf8");
 		return JSON.parse(rawData);
 	} catch (error) {
-		log('error', `Error reading JSON file ${filepath}:`, error.message);
+		log("error", `Error reading JSON file ${filepath}:`, error.message);
 		if (CONFIG.debug) {
 			// Use log utility for debug output too
-			log('error', 'Full error details:', error);
+			log("error", "Full error details:", error);
 		}
 		return null;
 	}
@@ -130,12 +128,12 @@ function writeJSON(filepath, data) {
 		if (!fs.existsSync(dir)) {
 			fs.mkdirSync(dir, { recursive: true });
 		}
-		fs.writeFileSync(filepath, JSON.stringify(data, null, 2), 'utf8');
+		fs.writeFileSync(filepath, JSON.stringify(data, null, 2), "utf8");
 	} catch (error) {
-		log('error', `Error writing JSON file ${filepath}:`, error.message);
+		log("error", `Error writing JSON file ${filepath}:`, error.message);
 		if (CONFIG.debug) {
 			// Use log utility for debug output too
-			log('error', 'Full error details:', error);
+			log("error", "Full error details:", error);
 		}
 	}
 }
@@ -158,16 +156,15 @@ function sanitizePrompt(prompt) {
 function readComplexityReport(customPath = null) {
 	try {
 		const reportPath =
-			customPath ||
-			path.join(process.cwd(), 'scripts', 'task-complexity-report.json');
+			customPath || path.join(process.cwd(), "scripts", "task-complexity-report.json");
 		if (!fs.existsSync(reportPath)) {
 			return null;
 		}
 
-		const reportData = fs.readFileSync(reportPath, 'utf8');
+		const reportData = fs.readFileSync(reportPath, "utf8");
 		return JSON.parse(reportData);
 	} catch (error) {
-		log('warn', `Could not read complexity report: ${error.message}`);
+		log("warn", `Could not read complexity report: ${error.message}`);
 		return null;
 	}
 }
@@ -179,11 +176,7 @@ function readComplexityReport(customPath = null) {
  * @returns {Object|null} The task analysis or null if not found
  */
 function findTaskInComplexityReport(report, taskId) {
-	if (
-		!report ||
-		!report.complexityAnalysis ||
-		!Array.isArray(report.complexityAnalysis)
-	) {
+	if (!report || !report.complexityAnalysis || !Array.isArray(report.complexityAnalysis)) {
 		return null;
 	}
 
@@ -202,10 +195,8 @@ function taskExists(tasks, taskId) {
 	}
 
 	// Handle both regular task IDs and subtask IDs (e.g., "1.2")
-	if (typeof taskId === 'string' && taskId.includes('.')) {
-		const [parentId, subtaskId] = taskId
-			.split('.')
-			.map((id) => parseInt(id, 10));
+	if (typeof taskId === "string" && taskId.includes(".")) {
+		const [parentId, subtaskId] = taskId.split(".").map((id) => parseInt(id, 10));
 		const parentTask = tasks.find((t) => t.id === parentId);
 
 		if (!parentTask || !parentTask.subtasks) {
@@ -225,11 +216,11 @@ function taskExists(tasks, taskId) {
  * @returns {string} The formatted task ID
  */
 function formatTaskId(id) {
-	if (typeof id === 'string' && id.includes('.')) {
+	if (typeof id === "string" && id.includes(".")) {
 		return id; // Already formatted as a string with a dot (e.g., "1.2")
 	}
 
-	if (typeof id === 'number') {
+	if (typeof id === "number") {
 		return id.toString();
 	}
 
@@ -248,10 +239,8 @@ function findTaskById(tasks, taskId) {
 	}
 
 	// Check if it's a subtask ID (e.g., "1.2")
-	if (typeof taskId === 'string' && taskId.includes('.')) {
-		const [parentId, subtaskId] = taskId
-			.split('.')
-			.map((id) => parseInt(id, 10));
+	if (typeof taskId === "string" && taskId.includes(".")) {
+		const [parentId, subtaskId] = taskId.split(".").map((id) => parseInt(id, 10));
 		const parentTask = tasks.find((t) => t.id === parentId);
 
 		if (!parentTask || !parentTask.subtasks) {
@@ -264,7 +253,7 @@ function findTaskById(tasks, taskId) {
 			subtask.parentTask = {
 				id: parentTask.id,
 				title: parentTask.title,
-				status: parentTask.status
+				status: parentTask.status,
 			};
 			subtask.isSubtask = true;
 		}
@@ -287,7 +276,7 @@ function truncate(text, maxLength) {
 		return text;
 	}
 
-	return text.slice(0, maxLength - 3) + '...';
+	return text.slice(0, maxLength - 3) + "...";
 }
 
 /**
@@ -303,7 +292,7 @@ function findCycles(
 	dependencyMap,
 	visited = new Set(),
 	recursionStack = new Set(),
-	path = []
+	path = [],
 ) {
 	// Mark the current node as visited and part of recursion stack
 	visited.add(subtaskId);
@@ -319,9 +308,7 @@ function findCycles(
 	for (const depId of dependencies) {
 		// If not visited, recursively check for cycles
 		if (!visited.has(depId)) {
-			const cycles = findCycles(depId, dependencyMap, visited, recursionStack, [
-				...path
-			]);
+			const cycles = findCycles(depId, dependencyMap, visited, recursionStack, [...path]);
 			cyclesToBreak.push(...cycles);
 		}
 		// If the dependency is in the recursion stack, we found a cycle
@@ -349,21 +336,21 @@ function findCycles(
 const toKebabCase = (str) => {
 	// Special handling for common acronyms
 	const withReplacedAcronyms = str
-		.replace(/ID/g, 'Id')
-		.replace(/API/g, 'Api')
-		.replace(/UI/g, 'Ui')
-		.replace(/URL/g, 'Url')
-		.replace(/URI/g, 'Uri')
-		.replace(/JSON/g, 'Json')
-		.replace(/XML/g, 'Xml')
-		.replace(/HTML/g, 'Html')
-		.replace(/CSS/g, 'Css');
+		.replace(/ID/g, "Id")
+		.replace(/API/g, "Api")
+		.replace(/UI/g, "Ui")
+		.replace(/URL/g, "Url")
+		.replace(/URI/g, "Uri")
+		.replace(/JSON/g, "Json")
+		.replace(/XML/g, "Xml")
+		.replace(/HTML/g, "Html")
+		.replace(/CSS/g, "Css");
 
 	// Insert hyphens before capital letters and convert to lowercase
 	return withReplacedAcronyms
-		.replace(/([A-Z])/g, '-$1')
+		.replace(/([A-Z])/g, "-$1")
 		.toLowerCase()
-		.replace(/^-/, ''); // Remove leading hyphen if present
+		.replace(/^-/, ""); // Remove leading hyphen if present
 };
 
 /**
@@ -374,11 +361,11 @@ const toKebabCase = (str) => {
 function detectCamelCaseFlags(args) {
 	const camelCaseFlags = [];
 	for (const arg of args) {
-		if (arg.startsWith('--')) {
-			const flagName = arg.split('=')[0].slice(2); // Remove -- and anything after =
+		if (arg.startsWith("--")) {
+			const flagName = arg.split("=")[0].slice(2); // Remove -- and anything after =
 
 			// Skip single-word flags - they can't be camelCase
-			if (!flagName.includes('-') && !/[A-Z]/.test(flagName)) {
+			if (!flagName.includes("-") && !/[A-Z]/.test(flagName)) {
 				continue;
 			}
 
@@ -388,7 +375,7 @@ function detectCamelCaseFlags(args) {
 				if (kebabVersion !== flagName) {
 					camelCaseFlags.push({
 						original: flagName,
-						kebabCase: kebabVersion
+						kebabCase: kebabVersion,
 					});
 				}
 			}
@@ -417,5 +404,5 @@ export {
 	enableSilentMode,
 	disableSilentMode,
 	isSilentMode,
-	getTaskManager
+	getTaskManager,
 };

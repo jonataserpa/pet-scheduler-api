@@ -2,15 +2,15 @@
  * Direct function wrapper for expandAllTasks
  */
 
-import { expandAllTasks } from '../../../../scripts/modules/task-manager.js';
+import { expandAllTasks } from "../../../../scripts/modules/task-manager.js";
 import {
 	enableSilentMode,
 	disableSilentMode,
-	isSilentMode
-} from '../../../../scripts/modules/utils.js';
-import { getAnthropicClientForMCP } from '../utils/ai-client-utils.js';
-import path from 'path';
-import fs from 'fs';
+	isSilentMode,
+} from "../../../../scripts/modules/utils.js";
+import { getAnthropicClientForMCP } from "../utils/ai-client-utils.js";
+import path from "path";
+import fs from "fs";
 
 /**
  * Expand all pending tasks with subtasks
@@ -34,13 +34,13 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			log.error('expandAllTasksDirect called without tasksJsonPath');
+			log.error("expandAllTasksDirect called without tasksJsonPath");
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
-				}
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
+				},
 			};
 		}
 
@@ -58,15 +58,13 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 			// Parse parameters
 			const numSubtasks = num ? parseInt(num, 10) : undefined;
 			const useResearch = research === true;
-			const additionalContext = prompt || '';
+			const additionalContext = prompt || "";
 			const forceFlag = force === true;
 
-			log.info(
-				`Expanding all tasks with ${numSubtasks || 'default'} subtasks each...`
-			);
+			log.info(`Expanding all tasks with ${numSubtasks || "default"} subtasks each...`);
 
 			if (useResearch) {
-				log.info('Using Perplexity AI for research-backed subtask generation');
+				log.info("Using Perplexity AI for research-backed subtask generation");
 
 				// Initialize AI client for research-backed expansion
 				try {
@@ -79,9 +77,9 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 					return {
 						success: false,
 						error: {
-							code: 'AI_CLIENT_ERROR',
-							message: `Cannot initialize AI client: ${error.message}`
-						}
+							code: "AI_CLIENT_ERROR",
+							message: `Cannot initialize AI client: ${error.message}`,
+						},
 					};
 				}
 			}
@@ -90,7 +88,7 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 				log.info(`Additional context: "${additionalContext}"`);
 			}
 			if (forceFlag) {
-				log.info('Force regeneration of subtasks is enabled');
+				log.info("Force regeneration of subtasks is enabled");
 			}
 
 			// Call the core function with session context for AI operations
@@ -102,23 +100,23 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 				additionalContext,
 				forceFlag,
 				{ mcpLog: log, session },
-				'json' // Use JSON output format to prevent UI elements
+				"json", // Use JSON output format to prevent UI elements
 			);
 
 			// The expandAllTasks function now returns a result object
 			return {
 				success: true,
 				data: {
-					message: 'Successfully expanded all pending tasks with subtasks',
+					message: "Successfully expanded all pending tasks with subtasks",
 					details: {
 						numSubtasks: numSubtasks,
 						research: useResearch,
 						prompt: additionalContext,
 						force: forceFlag,
 						tasksExpanded: result.expandedCount,
-						totalEligibleTasks: result.tasksToExpand
-					}
-				}
+						totalEligibleTasks: result.tasksToExpand,
+					},
+				},
 			};
 		} finally {
 			// Restore normal logging in finally block to ensure it runs even if there's an error
@@ -134,9 +132,9 @@ export async function expandAllTasksDirect(args, log, context = {}) {
 		return {
 			success: false,
 			error: {
-				code: 'CORE_FUNCTION_ERROR',
-				message: error.message
-			}
+				code: "CORE_FUNCTION_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

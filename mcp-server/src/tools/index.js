@@ -3,31 +3,31 @@
  * Export all Task Master CLI tools for MCP server
  */
 
-import { registerListTasksTool } from './get-tasks.js';
-import logger from '../logger.js';
-import { registerSetTaskStatusTool } from './set-task-status.js';
-import { registerParsePRDTool } from './parse-prd.js';
-import { registerUpdateTool } from './update.js';
-import { registerUpdateTaskTool } from './update-task.js';
-import { registerUpdateSubtaskTool } from './update-subtask.js';
-import { registerGenerateTool } from './generate.js';
-import { registerShowTaskTool } from './get-task.js';
-import { registerNextTaskTool } from './next-task.js';
-import { registerExpandTaskTool } from './expand-task.js';
-import { registerAddTaskTool } from './add-task.js';
-import { registerAddSubtaskTool } from './add-subtask.js';
-import { registerRemoveSubtaskTool } from './remove-subtask.js';
-import { registerAnalyzeTool } from './analyze.js';
-import { registerClearSubtasksTool } from './clear-subtasks.js';
-import { registerExpandAllTool } from './expand-all.js';
-import { registerRemoveDependencyTool } from './remove-dependency.js';
-import { registerValidateDependenciesTool } from './validate-dependencies.js';
-import { registerFixDependenciesTool } from './fix-dependencies.js';
-import { registerComplexityReportTool } from './complexity-report.js';
-import { registerAddDependencyTool } from './add-dependency.js';
-import { registerRemoveTaskTool } from './remove-task.js';
-import { registerInitializeProjectTool } from './initialize-project.js';
-import { asyncOperationManager } from '../core/utils/async-manager.js';
+import { registerListTasksTool } from "./get-tasks.js";
+import logger from "../logger.js";
+import { registerSetTaskStatusTool } from "./set-task-status.js";
+import { registerParsePRDTool } from "./parse-prd.js";
+import { registerUpdateTool } from "./update.js";
+import { registerUpdateTaskTool } from "./update-task.js";
+import { registerUpdateSubtaskTool } from "./update-subtask.js";
+import { registerGenerateTool } from "./generate.js";
+import { registerShowTaskTool } from "./get-task.js";
+import { registerNextTaskTool } from "./next-task.js";
+import { registerExpandTaskTool } from "./expand-task.js";
+import { registerAddTaskTool } from "./add-task.js";
+import { registerAddSubtaskTool } from "./add-subtask.js";
+import { registerRemoveSubtaskTool } from "./remove-subtask.js";
+import { registerAnalyzeTool } from "./analyze.js";
+import { registerClearSubtasksTool } from "./clear-subtasks.js";
+import { registerExpandAllTool } from "./expand-all.js";
+import { registerRemoveDependencyTool } from "./remove-dependency.js";
+import { registerValidateDependenciesTool } from "./validate-dependencies.js";
+import { registerFixDependenciesTool } from "./fix-dependencies.js";
+import { registerComplexityReportTool } from "./complexity-report.js";
+import { registerAddDependencyTool } from "./add-dependency.js";
+import { registerRemoveTaskTool } from "./remove-task.js";
+import { registerInitializeProjectTool } from "./initialize-project.js";
+import { asyncOperationManager } from "../core/utils/async-manager.js";
 
 /**
  * Register all Task Master tools with the MCP server
@@ -67,5 +67,5 @@ export function registerTaskMasterTools(server, asyncManager) {
 }
 
 export default {
-	registerTaskMasterTools
+	registerTaskMasterTools,
 };

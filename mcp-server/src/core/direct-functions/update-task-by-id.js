@@ -3,15 +3,9 @@
  * Direct function implementation for updating a single task by ID with new information
  */
 
-import { updateTaskById } from '../../../../scripts/modules/task-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import {
-	getAnthropicClientForMCP,
-	getPerplexityClientForMCP
-} from '../utils/ai-client-utils.js';
+import { updateTaskById } from "../../../../scripts/modules/task-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
+import { getAnthropicClientForMCP, getPerplexityClientForMCP } from "../utils/ai-client-utils.js";
 
 /**
  * Direct function wrapper for updateTaskById with error handling.
@@ -31,43 +25,42 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			const errorMessage = 'tasksJsonPath is required but was not provided.';
+			const errorMessage = "tasksJsonPath is required but was not provided.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_ARGUMENT', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_ARGUMENT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		// Check required parameters (id and prompt)
 		if (!id) {
-			const errorMessage =
-				'No task ID specified. Please provide a task ID to update.';
+			const errorMessage = "No task ID specified. Please provide a task ID to update.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_TASK_ID', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_TASK_ID", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		if (!prompt) {
 			const errorMessage =
-				'No prompt specified. Please provide a prompt with new information for the task update.';
+				"No prompt specified. Please provide a prompt with new information for the task update.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_PROMPT', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_PROMPT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		// Parse taskId - handle both string and number values
 		let taskId;
-		if (typeof id === 'string') {
+		if (typeof id === "string") {
 			// Handle subtask IDs (e.g., "5.2")
-			if (id.includes('.')) {
+			if (id.includes(".")) {
 				taskId = id; // Keep as string for subtask IDs
 			} else {
 				// Parse as integer for main task IDs
@@ -77,8 +70,8 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 					log.error(errorMessage);
 					return {
 						success: false,
-						error: { code: 'INVALID_TASK_ID', message: errorMessage },
-						fromCache: false
+						error: { code: "INVALID_TASK_ID", message: errorMessage },
+						fromCache: false,
 					};
 				}
 			}
@@ -96,10 +89,10 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 		let aiClient;
 		try {
 			if (useResearch) {
-				log.info('Using Perplexity AI for research-backed task update');
+				log.info("Using Perplexity AI for research-backed task update");
 				aiClient = await getPerplexityClientForMCP(session, log);
 			} else {
-				log.info('Using Claude AI for task update');
+				log.info("Using Claude AI for task update");
 				aiClient = getAnthropicClientForMCP(session, log);
 			}
 		} catch (error) {
@@ -107,15 +100,15 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 			return {
 				success: false,
 				error: {
-					code: 'AI_CLIENT_ERROR',
-					message: `Cannot initialize AI client: ${error.message}`
+					code: "AI_CLIENT_ERROR",
+					message: `Cannot initialize AI client: ${error.message}`,
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 
 		log.info(
-			`Updating task with ID ${taskId} with prompt "${prompt}" and research: ${useResearch}`
+			`Updating task with ID ${taskId} with prompt "${prompt}" and research: ${useResearch}`,
 		);
 
 		try {
@@ -128,7 +121,7 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 				warn: (message) => log.warn(message),
 				error: (message) => log.error(message),
 				debug: (message) => log.debug && log.debug(message),
-				success: (message) => log.info(message) // Map success to info since many loggers don't have success
+				success: (message) => log.info(message), // Map success to info since many loggers don't have success
 			};
 
 			// Execute core updateTaskById function with proper parameters
@@ -139,9 +132,9 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 				useResearch,
 				{
 					mcpLog: logWrapper, // Use our wrapper object that has the expected method structure
-					session
+					session,
 				},
-				'json'
+				"json",
 			);
 
 			// Since updateTaskById doesn't return a value but modifies the tasks file,
@@ -152,19 +145,19 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 					message: `Successfully updated task with ID ${taskId} based on the prompt`,
 					taskId,
 					tasksPath: tasksPath, // Return the used path
-					useResearch
+					useResearch,
 				},
-				fromCache: false // This operation always modifies state and should never be cached
+				fromCache: false, // This operation always modifies state and should never be cached
 			};
 		} catch (error) {
 			log.error(`Error updating task by ID: ${error.message}`);
 			return {
 				success: false,
 				error: {
-					code: 'UPDATE_TASK_ERROR',
-					message: error.message || 'Unknown error updating task'
+					code: "UPDATE_TASK_ERROR",
+					message: error.message || "Unknown error updating task",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		} finally {
 			// Make sure to restore normal logging even if there's an error
@@ -178,10 +171,10 @@ export async function updateTaskByIdDirect(args, log, context = {}) {
 		return {
 			success: false,
 			error: {
-				code: 'UPDATE_TASK_ERROR',
-				message: error.message || 'Unknown error updating task'
+				code: "UPDATE_TASK_ERROR",
+				message: error.message || "Unknown error updating task",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

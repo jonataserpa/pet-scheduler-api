@@ -2,15 +2,15 @@
  * Direct function wrapper for analyzeTaskComplexity
  */
 
-import { analyzeTaskComplexity } from '../../../../scripts/modules/task-manager.js';
+import { analyzeTaskComplexity } from "../../../../scripts/modules/task-manager.js";
 import {
 	enableSilentMode,
 	disableSilentMode,
 	isSilentMode,
-	readJSON
-} from '../../../../scripts/modules/utils.js';
-import fs from 'fs';
-import path from 'path';
+	readJSON,
+} from "../../../../scripts/modules/utils.js";
+import fs from "fs";
+import path from "path";
 
 /**
  * Analyze task complexity and generate recommendations
@@ -34,20 +34,20 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 
 		// Check if required paths were provided
 		if (!tasksJsonPath) {
-			log.error('analyzeTaskComplexityDirect called without tasksJsonPath');
+			log.error("analyzeTaskComplexityDirect called without tasksJsonPath");
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
-				}
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
+				},
 			};
 		}
 		if (!outputPath) {
-			log.error('analyzeTaskComplexityDirect called without outputPath');
+			log.error("analyzeTaskComplexityDirect called without outputPath");
 			return {
 				success: false,
-				error: { code: 'MISSING_ARGUMENT', message: 'outputPath is required' }
+				error: { code: "MISSING_ARGUMENT", message: "outputPath is required" },
 			};
 		}
 
@@ -59,7 +59,7 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 		log.info(`Output report will be saved to: ${resolvedOutputPath}`);
 
 		if (research) {
-			log.info('Using Perplexity AI for research-backed complexity analysis');
+			log.info("Using Perplexity AI for research-backed complexity analysis");
 		}
 
 		// Create options object for analyzeTaskComplexity using provided paths
@@ -68,7 +68,7 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 			output: resolvedOutputPath,
 			model: model,
 			threshold: threshold,
-			research: research === true
+			research: research === true,
 		};
 
 		// Enable silent mode to prevent console logs from interfering with JSON response
@@ -83,23 +83,23 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 			warn: (message, ...args) => log.warn(message, ...args),
 			error: (message, ...args) => log.error(message, ...args),
 			debug: (message, ...args) => log.debug && log.debug(message, ...args),
-			success: (message, ...args) => log.info(message, ...args) // Map success to info
+			success: (message, ...args) => log.info(message, ...args), // Map success to info
 		};
 
 		try {
 			// Call the core function with session and logWrapper as mcpLog
 			await analyzeTaskComplexity(options, {
 				session,
-				mcpLog: logWrapper // Use the wrapper instead of passing log directly
+				mcpLog: logWrapper, // Use the wrapper instead of passing log directly
 			});
 		} catch (error) {
 			log.error(`Error in analyzeTaskComplexity: ${error.message}`);
 			return {
 				success: false,
 				error: {
-					code: 'ANALYZE_ERROR',
-					message: `Error running complexity analysis: ${error.message}`
-				}
+					code: "ANALYZE_ERROR",
+					message: `Error running complexity analysis: ${error.message}`,
+				},
 			};
 		} finally {
 			// Always restore normal logging in finally block, but only if we enabled it
@@ -113,33 +113,27 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 			return {
 				success: false,
 				error: {
-					code: 'ANALYZE_ERROR',
-					message: 'Analysis completed but no report file was created'
-				}
+					code: "ANALYZE_ERROR",
+					message: "Analysis completed but no report file was created",
+				},
 			};
 		}
 
 		// Read the report file
 		let report;
 		try {
-			report = JSON.parse(fs.readFileSync(resolvedOutputPath, 'utf8'));
+			report = JSON.parse(fs.readFileSync(resolvedOutputPath, "utf8"));
 
 			// Important: Handle different report formats
 			// The core function might return an array or an object with a complexityAnalysis property
-			const analysisArray = Array.isArray(report)
-				? report
-				: report.complexityAnalysis || [];
+			const analysisArray = Array.isArray(report) ? report : report.complexityAnalysis || [];
 
 			// Count tasks by complexity
-			const highComplexityTasks = analysisArray.filter(
-				(t) => t.complexityScore >= 8
-			).length;
+			const highComplexityTasks = analysisArray.filter((t) => t.complexityScore >= 8).length;
 			const mediumComplexityTasks = analysisArray.filter(
-				(t) => t.complexityScore >= 5 && t.complexityScore < 8
+				(t) => t.complexityScore >= 5 && t.complexityScore < 8,
 			).length;
-			const lowComplexityTasks = analysisArray.filter(
-				(t) => t.complexityScore < 5
-			).length;
+			const lowComplexityTasks = analysisArray.filter((t) => t.complexityScore < 5).length;
 
 			return {
 				success: true,
@@ -150,18 +144,18 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 						taskCount: analysisArray.length,
 						highComplexityTasks,
 						mediumComplexityTasks,
-						lowComplexityTasks
-					}
-				}
+						lowComplexityTasks,
+					},
+				},
 			};
 		} catch (parseError) {
 			log.error(`Error parsing report file: ${parseError.message}`);
 			return {
 				success: false,
 				error: {
-					code: 'REPORT_PARSE_ERROR',
-					message: `Error parsing complexity report: ${parseError.message}`
-				}
+					code: "REPORT_PARSE_ERROR",
+					message: `Error parsing complexity report: ${parseError.message}`,
+				},
 			};
 		}
 	} catch (error) {
@@ -174,9 +168,9 @@ export async function analyzeTaskComplexityDirect(args, log, context = {}) {
 		return {
 			success: false,
 			error: {
-				code: 'CORE_FUNCTION_ERROR',
-				message: error.message
-			}
+				code: "CORE_FUNCTION_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

@@ -1,54 +1,54 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import session from 'express-session';
-import passport from 'passport';
-import swaggerUi from 'swagger-ui-express';
-import { env } from './shared/config/env.js';
-import { logger } from './shared/utils/logger.js';
-import { connectDatabase, prismaClient } from './infrastructure/database/prisma-client.js';
-import { globalRateLimiter } from './presentation/middlewares/rate-limit-middleware.js';
-import { TokenService } from './domain/services/auth/token-service.js';
-import { TokenBlacklistService } from './domain/services/auth/token-blacklist-service.js';
-import { AuthService } from './domain/services/auth/auth-service.js';
-import { PasswordResetService } from './domain/services/auth/password-reset-service.js';
-import { AuthMiddleware } from './presentation/middlewares/auth-middleware.js';
-import { AuthController } from './presentation/controllers/auth-controller.js';
-import { setupAuthRoutes } from './presentation/routes/auth-routes.js';
-import { setupNotificationRoutes } from './presentation/routes/notification-routes.js';
-import { setupCustomerNotificationRoutes } from './presentation/routes/customer-notification-routes.js';
-import { setupPetRoutes } from './presentation/routes/pet-routes.js';
-import { PrismaUserRepository } from './infrastructure/repositories/prisma-user-repository.js';
-import { PrismaLoginHistoryRepository } from './infrastructure/repositories/prisma-login-history-repository.js';
-import { NotificationControllersFactory } from './infrastructure/factory/notification-controllers-factory.js';
-import { EmailService } from './infrastructure/services/email-service.js';
-import { setupPassportStrategies } from './infrastructure/auth/passport-strategies.js';
-import { ScheduleNotificationJob } from './application/use-cases/scheduling/schedule-notification-job.js';
-import { swaggerSpec } from './shared/config/swagger.js';
-import { PetController } from './presentation/controllers/pet-controller.js';
-import { PrismaPetRepository } from './infrastructure/repositories/prisma-pet-repository.js';
-import { PrismaCustomerRepository } from './infrastructure/repositories/prisma-customer-repository.js';
-import { setupSchedulingRoutes } from './presentation/routes/scheduling-routes.js';
-import { setupCustomerRoutes } from './presentation/routes/customer-routes.js';
-import { SchedulingController } from './presentation/controllers/scheduling-controller.js';
-import { CustomerController } from './presentation/controllers/customer-controller.js';
-import { PrismaSchedulingRepository } from './infrastructure/repositories/prisma-scheduling-repository.js';
-import { ServiceController } from './presentation/controllers/service-controller.js';
-import { PrismaServiceRepository } from './infrastructure/repositories/prisma-service-repository.js';
-import { setupServiceRoutes } from './presentation/routes/service-routes.js';
+import express, { Request, Response, NextFunction } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import session from "express-session";
+import passport from "passport";
+import swaggerUi from "swagger-ui-express";
+import { env } from "./shared/config/env.js";
+import { logger } from "./shared/utils/logger.js";
+import { connectDatabase, prismaClient } from "./infrastructure/database/prisma-client.js";
+import { globalRateLimiter } from "./presentation/middlewares/rate-limit-middleware.js";
+import { TokenService } from "./domain/services/auth/token-service.js";
+import { TokenBlacklistService } from "./domain/services/auth/token-blacklist-service.js";
+import { AuthService } from "./domain/services/auth/auth-service.js";
+import { PasswordResetService } from "./domain/services/auth/password-reset-service.js";
+import { AuthMiddleware } from "./presentation/middlewares/auth-middleware.js";
+import { AuthController } from "./presentation/controllers/auth-controller.js";
+import { setupAuthRoutes } from "./presentation/routes/auth-routes.js";
+import { setupNotificationRoutes } from "./presentation/routes/notification-routes.js";
+import { setupCustomerNotificationRoutes } from "./presentation/routes/customer-notification-routes.js";
+import { setupPetRoutes } from "./presentation/routes/pet-routes.js";
+import { PrismaUserRepository } from "./infrastructure/repositories/prisma-user-repository.js";
+import { PrismaLoginHistoryRepository } from "./infrastructure/repositories/prisma-login-history-repository.js";
+import { NotificationControllersFactory } from "./infrastructure/factory/notification-controllers-factory.js";
+import { EmailService } from "./infrastructure/services/email-service.js";
+import { setupPassportStrategies } from "./infrastructure/auth/passport-strategies.js";
+import { ScheduleNotificationJob } from "./application/use-cases/scheduling/schedule-notification-job.js";
+import { swaggerSpec } from "./shared/config/swagger.js";
+import { PetController } from "./presentation/controllers/pet-controller.js";
+import { PrismaPetRepository } from "./infrastructure/repositories/prisma-pet-repository.js";
+import { PrismaCustomerRepository } from "./infrastructure/repositories/prisma-customer-repository.js";
+import { setupSchedulingRoutes } from "./presentation/routes/scheduling-routes.js";
+import { setupCustomerRoutes } from "./presentation/routes/customer-routes.js";
+import { SchedulingController } from "./presentation/controllers/scheduling-controller.js";
+import { CustomerController } from "./presentation/controllers/customer-controller.js";
+import { PrismaSchedulingRepository } from "./infrastructure/repositories/prisma-scheduling-repository.js";
+import { ServiceController } from "./presentation/controllers/service-controller.js";
+import { PrismaServiceRepository } from "./infrastructure/repositories/prisma-service-repository.js";
+import { setupServiceRoutes } from "./presentation/routes/service-routes.js";
 
 // Ampliando a declaração de tipos do env para incluir as variáveis de email e configuração do job de notificações
-declare module './shared/config/env.js' {
-  interface Environment {
-    EMAIL_HOST: string;
-    EMAIL_PORT: number;
-    EMAIL_SECURE: boolean;
-    EMAIL_USER: string;
-    EMAIL_PASSWORD: string;
-    EMAIL_FROM: string;
-    EMAIL_FROM_NAME: string;
-    ENABLE_NOTIFICATION_JOB: boolean;
-  }
+declare module "./shared/config/env.js" {
+	interface Environment {
+		EMAIL_HOST: string;
+		EMAIL_PORT: number;
+		EMAIL_SECURE: boolean;
+		EMAIL_USER: string;
+		EMAIL_PASSWORD: string;
+		EMAIL_FROM: string;
+		EMAIL_FROM_NAME: string;
+		ENABLE_NOTIFICATION_JOB: boolean;
+	}
 }
 
 // Cria a instância do aplicativo Express
@@ -60,27 +60,27 @@ let notificationJob: ScheduleNotificationJob | null = null;
 // Configura middlewares globais
 app.use(helmet());
 app.use(
-  cors({
-    origin: env.CORS_ORIGINS,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  }),
+	cors({
+		origin: env.CORS_ORIGINS,
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
+	}),
 );
 app.use(express.json());
 
 // Configura express-session
 app.use(
-  session({
-    secret: env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
-    }
-  })
+	session({
+		secret: env.JWT_SECRET,
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			secure: env.NODE_ENV === "production",
+			httpOnly: true,
+			maxAge: 24 * 60 * 60 * 1000, // 24 horas
+		},
+	}),
 );
 
 // Inicializa o Passport e configura para usar sessões
@@ -92,225 +92,230 @@ app.use(globalRateLimiter);
 
 // Configuração de logs para requisições HTTP
 app.use((req, _res, next) => {
-  logger.info(`${req.method} ${req.path}`, {
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
-  });
-  next();
+	logger.info(`${req.method} ${req.path}`, {
+		ip: req.ip,
+		userAgent: req.get("User-Agent"),
+	});
+	next();
 });
 
 // Rota de saúde/verificação
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/health", (_req, res) => {
+	res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // Configuração das rotas e serviços
 async function setupRoutes(): Promise<void> {
-  // Configuração dos serviços de autenticação
-  const redisUrl = `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`;
-  
-  // Serviço de tokens
-  const tokenService = new TokenService(
-    env.JWT_SECRET,
-    env.JWT_REFRESH_SECRET,
-    env.JWT_EXPIRES_IN,
-    env.JWT_REFRESH_EXPIRES_IN
-  );
-  
-  // Serviço de blacklist de tokens
-  const tokenBlacklistService = new TokenBlacklistService(redisUrl);
-  await tokenBlacklistService.connect();
-  
-  // Repositórios de autenticação
-  const userRepository = new PrismaUserRepository(prismaClient);
-  const loginHistoryRepository = new PrismaLoginHistoryRepository(prismaClient);
-  
-  // Serviço de autenticação
-  const authService = new AuthService(
-    userRepository, 
-    tokenService, 
-    tokenBlacklistService,
-    loginHistoryRepository
-  );
-  
-  // Serviço de recuperação de senha
-  const passwordResetService = new PasswordResetService(redisUrl, userRepository);
-  await passwordResetService.connect();
-  
-  // Serviço de email
-  const emailService = new EmailService();
-  
-  // Criar todos os controladores de notificação usando a fábrica
-  const notificationControllers = NotificationControllersFactory.createControllers(prismaClient);
-  
-  // Obter os repositórios criados pela fábrica
-  const repositories = NotificationControllersFactory.getRepositories(prismaClient);
-  
-  // Configura as estratégias do Passport
-  setupPassportStrategies(userRepository);
-  
-  // Middleware de autenticação
-  const authMiddleware = new AuthMiddleware(authService, tokenService);
-  
-  // Controlador de autenticação
-  const authController = new AuthController(
-    authService,
-    tokenService,
-    passwordResetService,
-    emailService,
-    loginHistoryRepository
-  );
-  
-  // Configuração das rotas de autenticação
-  const authRouter = express.Router();
-  setupAuthRoutes(authRouter, authController, authMiddleware);
-  app.use('/api/auth', authRouter);
-  
-  // Configuração das rotas de notificação
-  const notificationRouter = express.Router();
-  setupNotificationRoutes(
-    notificationRouter, 
-    notificationControllers.notificationController,
-    notificationControllers.emailNotificationController,
-    notificationControllers.smsNotificationController,
-    notificationControllers.whatsAppNotificationController,
-    authMiddleware
-  );
-  app.use('/api/notifications', notificationRouter);
-  
-  // Configuração das rotas de notificação para clientes
-  const customerNotificationRouter = express.Router();
-  setupCustomerNotificationRoutes(
-    customerNotificationRouter,
-    notificationControllers.customerNotificationController,
-    authMiddleware
-  );
-  app.use('/api/customer-notifications', customerNotificationRouter);
-  
-  // Configuração das rotas de pet
-  const petRouter = express.Router();
-  const petRepository = new PrismaPetRepository(prismaClient);
-  const customerRepository = new PrismaCustomerRepository(prismaClient);
-  const petController = new PetController(petRepository, customerRepository);
-  setupPetRoutes(petRouter, petController, authMiddleware);
-  app.use('/api/pets', petRouter);
-  
-  // Configuração das rotas de cliente
-  const customerRouter = express.Router();
-  const customerController = new CustomerController(customerRepository, petRepository);
-  setupCustomerRoutes(customerRouter, customerController, authMiddleware);
-  app.use('/api/customers', customerRouter);
-  
-  // Configuração das rotas de agendamento
-  const schedulingRouter = express.Router();
-  const schedulingRepository = new PrismaSchedulingRepository(prismaClient);
-  const schedulingController = new SchedulingController(
-    schedulingRepository,
-    petRepository,
-    customerRepository
-  );
-  setupSchedulingRoutes(schedulingRouter, schedulingController, authMiddleware);
-  app.use('/api/schedulings', schedulingRouter);
-  
-  // Configuração das rotas de serviço
-  const serviceRouter = express.Router();
-  const serviceRepository = new PrismaServiceRepository(prismaClient);
-  const serviceController = new ServiceController(serviceRepository);
-  setupServiceRoutes(serviceRouter, serviceController, authMiddleware);
-  app.use('/api/services', serviceRouter);
-  
-  // Inicializar o job de notificações
-  const notificationService = notificationControllers.notificationService;
-  notificationJob = new ScheduleNotificationJob(
-    {
-      interval: 300000, // 5 minutos
-      batchSize: 50 // Processar até 50 notificações por vez
-    },
-    notificationService,
-    repositories.petRepository,
-    repositories.customerRepository
-  );
-  
-  // Iniciar o job apenas em ambiente de produção ou se explicitamente configurado
-  if (env.NODE_ENV === 'production' || env.ENABLE_NOTIFICATION_JOB) {
-    notificationJob.start();
-    logger.info('Job de notificações iniciado');
-  } else {
-    logger.info('Job de notificações não iniciado (apenas em produção)');
-  }
-  
-  // Configuração do Swagger UI
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-  
-  // Endpoint para obter a especificação OpenAPI como JSON
-  app.get('/api-docs.json', (_req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
-  
-  // Outras rotas serão adicionadas aqui
+	// Configuração dos serviços de autenticação
+	const redisUrl = `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`;
+
+	// Serviço de tokens
+	const tokenService = new TokenService(
+		env.JWT_SECRET,
+		env.JWT_REFRESH_SECRET,
+		env.JWT_EXPIRES_IN,
+		env.JWT_REFRESH_EXPIRES_IN,
+	);
+
+	// Serviço de blacklist de tokens
+	const tokenBlacklistService = new TokenBlacklistService(redisUrl);
+	await tokenBlacklistService.connect();
+
+	// Repositórios de autenticação
+	const userRepository = new PrismaUserRepository(prismaClient);
+	const loginHistoryRepository = new PrismaLoginHistoryRepository(prismaClient);
+
+	// Serviço de autenticação
+	const authService = new AuthService(
+		userRepository,
+		tokenService,
+		tokenBlacklistService,
+		loginHistoryRepository,
+	);
+
+	// Serviço de recuperação de senha
+	const passwordResetService = new PasswordResetService(redisUrl, userRepository);
+	await passwordResetService.connect();
+
+	// Serviço de email
+	const emailService = new EmailService();
+
+	// Criar todos os controladores de notificação usando a fábrica
+	const notificationControllers = NotificationControllersFactory.createControllers(prismaClient);
+
+	// Obter os repositórios criados pela fábrica
+	const repositories = NotificationControllersFactory.getRepositories(prismaClient);
+
+	// Configura as estratégias do Passport
+	setupPassportStrategies(userRepository);
+
+	// Middleware de autenticação
+	const authMiddleware = new AuthMiddleware(authService, tokenService);
+
+	// Controlador de autenticação
+	const authController = new AuthController(
+		authService,
+		tokenService,
+		passwordResetService,
+		emailService,
+		loginHistoryRepository,
+	);
+
+	// Configuração das rotas de autenticação
+	const authRouter = express.Router();
+	setupAuthRoutes(authRouter, authController, authMiddleware);
+	app.use("/api/auth", authRouter);
+
+	// Configuração das rotas de notificação
+	const notificationRouter = express.Router();
+	setupNotificationRoutes(
+		notificationRouter,
+		notificationControllers.notificationController,
+		notificationControllers.emailNotificationController,
+		notificationControllers.smsNotificationController,
+		notificationControllers.whatsAppNotificationController,
+		authMiddleware,
+	);
+	app.use("/api/notifications", notificationRouter);
+
+	// Configuração das rotas de notificação para clientes
+	const customerNotificationRouter = express.Router();
+	setupCustomerNotificationRoutes(
+		customerNotificationRouter,
+		notificationControllers.customerNotificationController,
+		authMiddleware,
+	);
+	app.use("/api/customer-notifications", customerNotificationRouter);
+
+	// Configuração das rotas de pet
+	const petRouter = express.Router();
+	const petRepository = new PrismaPetRepository(prismaClient);
+	const customerRepository = new PrismaCustomerRepository(prismaClient);
+	const petController = new PetController(petRepository, customerRepository);
+	setupPetRoutes(petRouter, petController, authMiddleware);
+	app.use("/api/pets", petRouter);
+
+	// Configuração das rotas de cliente
+	const customerRouter = express.Router();
+	const customerController = new CustomerController(customerRepository, petRepository);
+	setupCustomerRoutes(customerRouter, customerController, authMiddleware);
+	app.use("/api/customers", customerRouter);
+
+	// Configuração das rotas de agendamento
+	const schedulingRouter = express.Router();
+	const schedulingRepository = new PrismaSchedulingRepository(prismaClient);
+	const schedulingController = new SchedulingController(
+		schedulingRepository,
+		petRepository,
+		customerRepository,
+	);
+	setupSchedulingRoutes(schedulingRouter, schedulingController, authMiddleware);
+	app.use("/api/schedulings", schedulingRouter);
+
+	// Configuração das rotas de serviço
+	const serviceRouter = express.Router();
+	const serviceRepository = new PrismaServiceRepository(prismaClient);
+	const serviceController = new ServiceController(serviceRepository);
+	setupServiceRoutes(serviceRouter, serviceController, authMiddleware);
+	app.use("/api/services", serviceRouter);
+
+	// Inicializar o job de notificações
+	const notificationService = notificationControllers.notificationService;
+	notificationJob = new ScheduleNotificationJob(
+		{
+			interval: 300000, // 5 minutos
+			batchSize: 50, // Processar até 50 notificações por vez
+		},
+		notificationService,
+		repositories.petRepository,
+		repositories.customerRepository,
+	);
+
+	// Iniciar o job apenas em ambiente de produção ou se explicitamente configurado
+	if (env.NODE_ENV === "production" || env.ENABLE_NOTIFICATION_JOB) {
+		notificationJob.start();
+		logger.info("Job de notificações iniciado");
+	} else {
+		logger.info("Job de notificações não iniciado (apenas em produção)");
+	}
+
+	// Configuração do Swagger UI
+	app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+	// Endpoint para obter a especificação OpenAPI como JSON
+	app.get("/api-docs.json", (_req, res) => {
+		res.setHeader("Content-Type", "application/json");
+		res.send(swaggerSpec);
+	});
+
+	// Outras rotas serão adicionadas aqui
 }
 
 // Middleware global de tratamento de erros
-app.use((err: Error & { statusCode?: number }, req: Request, res: Response, _next: NextFunction) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Erro interno do servidor';
+app.use(
+	(err: Error & { statusCode?: number }, req: Request, res: Response, _next: NextFunction) => {
+		const statusCode = err.statusCode || 500;
+		const message = err.message || "Erro interno do servidor";
 
-  logger.error(`Error: ${message}`, {
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-  });
+		logger.error(`Error: ${message}`, {
+			stack: err.stack,
+			path: req.path,
+			method: req.method,
+		});
 
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message,
-    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
+		res.status(statusCode).json({
+			status: "error",
+			statusCode,
+			message,
+			...(env.NODE_ENV === "development" && { stack: err.stack }),
+		});
+	},
+);
 
 // Inicialização do servidor
 export async function startServer(): Promise<void> {
-  try {
-    // Verifica a conexão com o banco de dados
-    await connectDatabase();
-    
-    // Configura as rotas e serviços
-    await setupRoutes();
+	try {
+		// Verifica a conexão com o banco de dados
+		await connectDatabase();
 
-    // Inicia o servidor
-    return new Promise((resolve) => {
-      app.listen(env.PORT, () => {
-        logger.info(`Servidor inicializado na porta ${env.PORT}`);
-        resolve();
-      });
-    });
-  } catch (error) {
-    logger.error('Falha ao iniciar o servidor:', error);
-    throw error;
-  }
+		// Configura as rotas e serviços
+		await setupRoutes();
+
+		// Inicia o servidor
+		return new Promise((resolve) => {
+			app.listen(env.PORT, () => {
+				logger.info(`Servidor inicializado na porta ${env.PORT}`);
+				resolve();
+			});
+		});
+	} catch (error) {
+		logger.error("Falha ao iniciar o servidor:", error);
+		throw error;
+	}
 }
 
 // Limpeza ao desligar o servidor
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", gracefulShutdown);
 
 function gracefulShutdown() {
-  logger.info('Iniciando desligamento gracioso do servidor...');
-  
-  // Parar o job de notificações, se estiver em execução
-  if (notificationJob) {
-    notificationJob.stop();
-    logger.info('Job de notificações parado');
-  }
-  
-  // Desconectar do banco de dados
-  prismaClient.$disconnect().then(() => {
-    logger.info('Desconectado do banco de dados');
-    process.exit(0);
-  }).catch((err) => {
-    logger.error('Erro ao desconectar do banco de dados:', err);
-    process.exit(1);
-  });
-} 
+	logger.info("Iniciando desligamento gracioso do servidor...");
+
+	// Parar o job de notificações, se estiver em execução
+	if (notificationJob) {
+		notificationJob.stop();
+		logger.info("Job de notificações parado");
+	}
+
+	// Desconectar do banco de dados
+	prismaClient
+		.$disconnect()
+		.then(() => {
+			logger.info("Desconectado do banco de dados");
+			process.exit(0);
+		})
+		.catch((err) => {
+			logger.error("Erro ao desconectar do banco de dados:", err);
+			process.exit(1);
+		});
+}

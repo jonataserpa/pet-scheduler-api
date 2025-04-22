@@ -3,11 +3,8 @@
  * Direct function implementation for removing a task
  */
 
-import { removeTask } from '../../../../scripts/modules/task-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
+import { removeTask } from "../../../../scripts/modules/task-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
 
 /**
  * Direct function wrapper for removeTask with error handling.
@@ -24,28 +21,28 @@ export async function removeTaskDirect(args, log) {
 	try {
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			log.error('removeTaskDirect called without tasksJsonPath');
+			log.error("removeTaskDirect called without tasksJsonPath");
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 
 		// Validate task ID parameter
 		const taskId = id;
 		if (!taskId) {
-			log.error('Task ID is required');
+			log.error("Task ID is required");
 			return {
 				success: false,
 				error: {
-					code: 'INPUT_VALIDATION_ERROR',
-					message: 'Task ID is required'
+					code: "INPUT_VALIDATION_ERROR",
+					message: "Task ID is required",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 
@@ -71,9 +68,9 @@ export async function removeTaskDirect(args, log) {
 					message: result.message,
 					taskId: taskId,
 					tasksPath: tasksJsonPath,
-					removedTask: result.removedTask
+					removedTask: result.removedTask,
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		} catch (error) {
 			// Make sure to restore normal logging even if there's an error
@@ -83,10 +80,10 @@ export async function removeTaskDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: error.code || 'REMOVE_TASK_ERROR',
-					message: error.message || 'Failed to remove task'
+					code: error.code || "REMOVE_TASK_ERROR",
+					message: error.message || "Failed to remove task",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 	} catch (error) {
@@ -98,10 +95,10 @@ export async function removeTaskDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'UNEXPECTED_ERROR',
-				message: error.message
+				code: "UNEXPECTED_ERROR",
+				message: error.message,
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

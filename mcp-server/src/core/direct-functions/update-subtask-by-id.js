@@ -3,15 +3,9 @@
  * Direct function implementation for appending information to a specific subtask
  */
 
-import { updateSubtaskById } from '../../../../scripts/modules/task-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import {
-	getAnthropicClientForMCP,
-	getPerplexityClientForMCP
-} from '../utils/ai-client-utils.js';
+import { updateSubtaskById } from "../../../../scripts/modules/task-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
+import { getAnthropicClientForMCP, getPerplexityClientForMCP } from "../utils/ai-client-utils.js";
 
 /**
  * Direct function wrapper for updateSubtaskById with error handling.
@@ -30,58 +24,57 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			const errorMessage = 'tasksJsonPath is required but was not provided.';
+			const errorMessage = "tasksJsonPath is required but was not provided.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_ARGUMENT', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_ARGUMENT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		// Check required parameters (id and prompt)
 		if (!id) {
-			const errorMessage =
-				'No subtask ID specified. Please provide a subtask ID to update.';
+			const errorMessage = "No subtask ID specified. Please provide a subtask ID to update.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_SUBTASK_ID', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_SUBTASK_ID", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		if (!prompt) {
 			const errorMessage =
-				'No prompt specified. Please provide a prompt with information to add to the subtask.';
+				"No prompt specified. Please provide a prompt with information to add to the subtask.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_PROMPT', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_PROMPT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		// Validate subtask ID format
 		const subtaskId = id;
-		if (typeof subtaskId !== 'string' && typeof subtaskId !== 'number') {
+		if (typeof subtaskId !== "string" && typeof subtaskId !== "number") {
 			const errorMessage = `Invalid subtask ID type: ${typeof subtaskId}. Subtask ID must be a string or number.`;
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'INVALID_SUBTASK_ID_TYPE', message: errorMessage },
-				fromCache: false
+				error: { code: "INVALID_SUBTASK_ID_TYPE", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		const subtaskIdStr = String(subtaskId);
-		if (!subtaskIdStr.includes('.')) {
+		if (!subtaskIdStr.includes(".")) {
 			const errorMessage = `Invalid subtask ID format: ${subtaskIdStr}. Subtask ID must be in format "parentId.subtaskId" (e.g., "5.2").`;
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'INVALID_SUBTASK_ID_FORMAT', message: errorMessage },
-				fromCache: false
+				error: { code: "INVALID_SUBTASK_ID_FORMAT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
@@ -92,7 +85,7 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 		const useResearch = research === true;
 
 		log.info(
-			`Updating subtask with ID ${subtaskIdStr} with prompt "${prompt}" and research: ${useResearch}`
+			`Updating subtask with ID ${subtaskIdStr} with prompt "${prompt}" and research: ${useResearch}`,
 		);
 
 		// Initialize the appropriate AI client based on research flag
@@ -109,10 +102,10 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 			return {
 				success: false,
 				error: {
-					code: 'AI_CLIENT_ERROR',
-					message: error.message || 'Failed to initialize AI client'
+					code: "AI_CLIENT_ERROR",
+					message: error.message || "Failed to initialize AI client",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 
@@ -127,21 +120,15 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 				warn: (message) => log.warn(message),
 				error: (message) => log.error(message),
 				debug: (message) => log.debug && log.debug(message),
-				success: (message) => log.info(message) // Map success to info if needed
+				success: (message) => log.info(message), // Map success to info if needed
 			};
 
 			// Execute core updateSubtaskById function
 			// Pass both session and logWrapper as mcpLog to ensure outputFormat is 'json'
-			const updatedSubtask = await updateSubtaskById(
-				tasksPath,
-				subtaskIdStr,
-				prompt,
-				useResearch,
-				{
-					session,
-					mcpLog: logWrapper
-				}
-			);
+			const updatedSubtask = await updateSubtaskById(tasksPath, subtaskIdStr, prompt, useResearch, {
+				session,
+				mcpLog: logWrapper,
+			});
 
 			// Restore normal logging
 			disableSilentMode();
@@ -151,11 +138,11 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 				return {
 					success: false,
 					error: {
-						code: 'SUBTASK_UPDATE_FAILED',
+						code: "SUBTASK_UPDATE_FAILED",
 						message:
-							'Failed to update subtask. It may be marked as completed, or another error occurred.'
+							"Failed to update subtask. It may be marked as completed, or another error occurred.",
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
@@ -165,12 +152,12 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 				data: {
 					message: `Successfully updated subtask with ID ${subtaskIdStr}`,
 					subtaskId: subtaskIdStr,
-					parentId: subtaskIdStr.split('.')[0],
+					parentId: subtaskIdStr.split(".")[0],
 					subtask: updatedSubtask,
 					tasksPath,
-					useResearch
+					useResearch,
 				},
-				fromCache: false // This operation always modifies state and should never be cached
+				fromCache: false, // This operation always modifies state and should never be cached
 			};
 		} catch (error) {
 			// Make sure to restore normal logging even if there's an error
@@ -185,10 +172,10 @@ export async function updateSubtaskByIdDirect(args, log, context = {}) {
 		return {
 			success: false,
 			error: {
-				code: 'UPDATE_SUBTASK_ERROR',
-				message: error.message || 'Unknown error updating subtask'
+				code: "UPDATE_SUBTASK_ERROR",
+				message: error.message || "Unknown error updating subtask",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

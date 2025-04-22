@@ -3,8 +3,8 @@
  * Context and cache management for Task Master MCP Server
  */
 
-import { FastMCP } from 'fastmcp';
-import { LRUCache } from 'lru-cache';
+import { FastMCP } from "fastmcp";
+import { LRUCache } from "lru-cache";
 
 /**
  * Configuration options for the ContextManager
@@ -23,21 +23,21 @@ export class ContextManager {
 		this.config = {
 			maxCacheSize: config.maxCacheSize || 1000,
 			ttl: config.ttl || 1000 * 60 * 5, // 5 minutes default
-			maxContextSize: config.maxContextSize || 4000
+			maxContextSize: config.maxContextSize || 4000,
 		};
 
 		// Initialize LRU cache for context data
 		this.cache = new LRUCache({
 			max: this.config.maxCacheSize,
 			ttl: this.config.ttl,
-			updateAgeOnGet: true
+			updateAgeOnGet: true,
 		});
 
 		// Cache statistics
 		this.stats = {
 			hits: 0,
 			misses: 0,
-			invalidations: 0
+			invalidations: 0,
 		};
 	}
 
@@ -64,8 +64,8 @@ export class ContextManager {
 			id: contextId,
 			metadata: {
 				...metadata,
-				created: new Date().toISOString()
-			}
+				created: new Date().toISOString(),
+			},
 		};
 
 		// Cache the new context
@@ -151,7 +151,7 @@ export class ContextManager {
 			invalidations: this.stats.invalidations,
 			size: this.cache.size,
 			maxSize: this.config.maxCacheSize,
-			ttl: this.config.ttl
+			ttl: this.config.ttl,
 		};
 	}
 

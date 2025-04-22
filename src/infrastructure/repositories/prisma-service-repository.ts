@@ -1,370 +1,370 @@
-import { Service } from '../../domain/entities/service.js';
-import { ServiceFilter, ServiceRepository } from '../../domain/repositories/service-repository.js';
-import { PrismaRepositoryBase } from './base/prisma-repository-base.js';
-import { PetSize } from '../../domain/entities/pet.js';
+import { Service } from "../../domain/entities/service.js";
+import { ServiceFilter, ServiceRepository } from "../../domain/repositories/service-repository.js";
+import { PrismaRepositoryBase } from "./base/prisma-repository-base.js";
+import { PetSize } from "../../domain/entities/pet.js";
 
 type PrismaServiceResult = {
-  id: string;
-  name: string;
-  description: string | null;
-  duration: number;
-  price: number;
-  createdAt: Date;
-  updatedAt: Date;
-  active: boolean;
-  petSizes: string[];
+	id: string;
+	name: string;
+	description: string | null;
+	duration: number;
+	price: number;
+	createdAt: Date;
+	updatedAt: Date;
+	active: boolean;
+	petSizes: string[];
 };
 
 /**
  * Implementação do repositório de serviços usando Prisma
  */
 export class PrismaServiceRepository extends PrismaRepositoryBase implements ServiceRepository {
-  /**
-   * Salva um serviço (cria ou atualiza)
-   */
-  async save(service: Service): Promise<Service> {
-    try {
-      const petSizesJson = service.petSizes.map(size => size.toString());
-      
-      const data: any = {
-        name: service.name,
-        description: service.description || null,
-        duration: service.duration,
-        price: service.price,
-        updatedAt: new Date(),
-        active: service.active,
-        petSizes: petSizesJson
-      };
+	/**
+	 * Salva um serviço (cria ou atualiza)
+	 */
+	async save(service: Service): Promise<Service> {
+		try {
+			const petSizesJson = service.petSizes.map((size) => size.toString());
 
-      const updatedService = await this.prisma.service.update({
-        where: { id: service.id },
-        data,
-      });
+			const data: any = {
+				name: service.name,
+				description: service.description || null,
+				duration: service.duration,
+				price: service.price,
+				updatedAt: new Date(),
+				active: service.active,
+				petSizes: petSizesJson,
+			};
 
-      return this.mapToDomain(updatedService as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'save', { serviceId: service.id });
-    }
-  }
+			const updatedService = await this.prisma.service.update({
+				where: { id: service.id },
+				data,
+			});
 
-  /**
-   * Cria um novo serviço
-   */
-  async create(
-    id: string,
-    name: string,
-    duration: number,
-    price: number,
-    petSizes: PetSize[],
-    description?: string,
-    active: boolean = true
-  ): Promise<Service> {
-    try {
-      const petSizesJson = petSizes.map(size => size.toString());
-      
-      const data: any = {
-        id,
-        name,
-        description: description || null,
-        duration,
-        price,
-        active,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        petSizes: petSizesJson
-      };
+			return this.mapToDomain(updatedService as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "save", { serviceId: service.id });
+		}
+	}
 
-      const createdService = await this.prisma.service.create({
-        data,
-      });
+	/**
+	 * Cria um novo serviço
+	 */
+	async create(
+		id: string,
+		name: string,
+		duration: number,
+		price: number,
+		petSizes: PetSize[],
+		description?: string,
+		active: boolean = true,
+	): Promise<Service> {
+		try {
+			const petSizesJson = petSizes.map((size) => size.toString());
 
-      return this.mapToDomain(createdService as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'create', { id, name, duration });
-    }
-  }
+			const data: any = {
+				id,
+				name,
+				description: description || null,
+				duration,
+				price,
+				active,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				petSizes: petSizesJson,
+			};
 
-  /**
-   * Encontra um serviço pelo ID
-   */
-  async findById(id: string): Promise<Service | null> {
-    try {
-      const service = await this.prisma.service.findUnique({
-        where: { id },
-      });
+			const createdService = await this.prisma.service.create({
+				data,
+			});
 
-      if (!service) {
-        return null;
-      }
+			return this.mapToDomain(createdService as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "create", { id, name, duration });
+		}
+	}
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'findById', { id });
-    }
-  }
+	/**
+	 * Encontra um serviço pelo ID
+	 */
+	async findById(id: string): Promise<Service | null> {
+		try {
+			const service = await this.prisma.service.findUnique({
+				where: { id },
+			});
 
-  /**
-   * Procura serviços que correspondam aos filtros fornecidos
-   */
-  async findAll(filter: ServiceFilter, limit?: number, offset?: number): Promise<Service[]> {
-    try {
-      const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
+			if (!service) {
+				return null;
+			}
 
-      const where: any = {
-        id: id ? { equals: id } : undefined,
-        name: name ? { contains: name, mode: 'insensitive' } : undefined,
-        price: {
-          gte: minPrice !== undefined ? minPrice : undefined,
-          lte: maxPrice !== undefined ? maxPrice : undefined,
-        },
-        duration: {
-          gte: minDuration !== undefined ? minDuration : undefined,
-          lte: maxDuration !== undefined ? maxDuration : undefined,
-        },
-        active: active !== undefined ? active : undefined,
-      };
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "findById", { id });
+		}
+	}
 
-      if (petSize) {
-        where.petSizes = {
-          has: petSize.toString()
-        };
-      }
+	/**
+	 * Procura serviços que correspondam aos filtros fornecidos
+	 */
+	async findAll(filter: ServiceFilter, limit?: number, offset?: number): Promise<Service[]> {
+		try {
+			const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
 
-      const services = await this.prisma.service.findMany({
-        where,
-        skip: offset,
-        take: limit,
-        orderBy: {
-          name: 'asc',
-        },
-      });
+			const where: any = {
+				id: id ? { equals: id } : undefined,
+				name: name ? { contains: name, mode: "insensitive" } : undefined,
+				price: {
+					gte: minPrice !== undefined ? minPrice : undefined,
+					lte: maxPrice !== undefined ? maxPrice : undefined,
+				},
+				duration: {
+					gte: minDuration !== undefined ? minDuration : undefined,
+					lte: maxDuration !== undefined ? maxDuration : undefined,
+				},
+				active: active !== undefined ? active : undefined,
+			};
 
-      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
-    } catch (error) {
-      return this.handleError(error, 'findAll', { filter, limit, offset });
-    }
-  }
+			if (petSize) {
+				where.petSizes = {
+					has: petSize.toString(),
+				};
+			}
 
-  /**
-   * Encontra serviços por categoria
-   */
-  async findByCategory(categoryName: string, includeInactive: boolean = false): Promise<Service[]> {
-    try {
-      const where: any = {
-        name: { contains: categoryName, mode: 'insensitive' },
-        description: { contains: categoryName, mode: 'insensitive' },
-      };
+			const services = await this.prisma.service.findMany({
+				where,
+				skip: offset,
+				take: limit,
+				orderBy: {
+					name: "asc",
+				},
+			});
 
-      if (!includeInactive) {
-        where.active = true;
-      }
+			return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
+		} catch (error) {
+			return this.handleError(error, "findAll", { filter, limit, offset });
+		}
+	}
 
-      const services = await this.prisma.service.findMany({
-        where,
-        orderBy: {
-          name: 'asc',
-        },
-      });
+	/**
+	 * Encontra serviços por categoria
+	 */
+	async findByCategory(categoryName: string, includeInactive: boolean = false): Promise<Service[]> {
+		try {
+			const where: any = {
+				name: { contains: categoryName, mode: "insensitive" },
+				description: { contains: categoryName, mode: "insensitive" },
+			};
 
-      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
-    } catch (error) {
-      return this.handleError(error, 'findByCategory', { categoryName, includeInactive });
-    }
-  }
+			if (!includeInactive) {
+				where.active = true;
+			}
 
-  /**
-   * Ativa um serviço
-   */
-  async activate(id: string): Promise<Service> {
-    try {
-      const data: any = {
-        active: true,
-        updatedAt: new Date(),
-      };
+			const services = await this.prisma.service.findMany({
+				where,
+				orderBy: {
+					name: "asc",
+				},
+			});
 
-      const service = await this.prisma.service.update({
-        where: { id },
-        data,
-      });
+			return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
+		} catch (error) {
+			return this.handleError(error, "findByCategory", { categoryName, includeInactive });
+		}
+	}
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'activate', { id });
-    }
-  }
+	/**
+	 * Ativa um serviço
+	 */
+	async activate(id: string): Promise<Service> {
+		try {
+			const data: any = {
+				active: true,
+				updatedAt: new Date(),
+			};
 
-  /**
-   * Desativa um serviço
-   */
-  async deactivate(id: string): Promise<Service> {
-    try {
-      const data: any = {
-        active: false,
-        updatedAt: new Date(),
-      };
+			const service = await this.prisma.service.update({
+				where: { id },
+				data,
+			});
 
-      const service = await this.prisma.service.update({
-        where: { id },
-        data,
-      });
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "activate", { id });
+		}
+	}
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'deactivate', { id });
-    }
-  }
+	/**
+	 * Desativa um serviço
+	 */
+	async deactivate(id: string): Promise<Service> {
+		try {
+			const data: any = {
+				active: false,
+				updatedAt: new Date(),
+			};
 
-  /**
-   * Atualiza a descrição de um serviço
-   */
-  async updateDescription(id: string, description: string): Promise<Service> {
-    try {
-      const service = await this.prisma.service.update({
-        where: { id },
-        data: {
-          description,
-          updatedAt: new Date(),
-        },
-      });
+			const service = await this.prisma.service.update({
+				where: { id },
+				data,
+			});
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'updateDescription', { id, description });
-    }
-  }
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "deactivate", { id });
+		}
+	}
 
-  /**
-   * Atualiza o preço de um serviço
-   */
-  async updatePrice(id: string, price: number): Promise<Service> {
-    try {
-      const service = await this.prisma.service.update({
-        where: { id },
-        data: {
-          price,
-          updatedAt: new Date(),
-        },
-      });
+	/**
+	 * Atualiza a descrição de um serviço
+	 */
+	async updateDescription(id: string, description: string): Promise<Service> {
+		try {
+			const service = await this.prisma.service.update({
+				where: { id },
+				data: {
+					description,
+					updatedAt: new Date(),
+				},
+			});
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'updatePrice', { id, price });
-    }
-  }
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "updateDescription", { id, description });
+		}
+	}
 
-  /**
-   * Atualiza a duração de um serviço
-   */
-  async updateDuration(id: string, duration: number): Promise<Service> {
-    try {
-      const service = await this.prisma.service.update({
-        where: { id },
-        data: {
-          duration,
-          updatedAt: new Date(),
-        },
-      });
+	/**
+	 * Atualiza o preço de um serviço
+	 */
+	async updatePrice(id: string, price: number): Promise<Service> {
+		try {
+			const service = await this.prisma.service.update({
+				where: { id },
+				data: {
+					price,
+					updatedAt: new Date(),
+				},
+			});
 
-      return this.mapToDomain(service as PrismaServiceResult);
-    } catch (error) {
-      return this.handleError(error, 'updateDuration', { id, duration });
-    }
-  }
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "updatePrice", { id, price });
+		}
+	}
 
-  /**
-   * Conta o número total de serviços que correspondem aos filtros
-   */
-  async count(filter: ServiceFilter): Promise<number> {
-    try {
-      const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
+	/**
+	 * Atualiza a duração de um serviço
+	 */
+	async updateDuration(id: string, duration: number): Promise<Service> {
+		try {
+			const service = await this.prisma.service.update({
+				where: { id },
+				data: {
+					duration,
+					updatedAt: new Date(),
+				},
+			});
 
-      const where: any = {
-        id: id ? { equals: id } : undefined,
-        name: name ? { contains: name, mode: 'insensitive' } : undefined,
-        price: {
-          gte: minPrice !== undefined ? minPrice : undefined,
-          lte: maxPrice !== undefined ? maxPrice : undefined,
-        },
-        duration: {
-          gte: minDuration !== undefined ? minDuration : undefined,
-          lte: maxDuration !== undefined ? maxDuration : undefined,
-        },
-        active: active !== undefined ? active : undefined,
-      };
+			return this.mapToDomain(service as PrismaServiceResult);
+		} catch (error) {
+			return this.handleError(error, "updateDuration", { id, duration });
+		}
+	}
 
-      if (petSize) {
-        where.petSizes = {
-          has: petSize.toString()
-        };
-      }
+	/**
+	 * Conta o número total de serviços que correspondem aos filtros
+	 */
+	async count(filter: ServiceFilter): Promise<number> {
+		try {
+			const { id, name, minPrice, maxPrice, minDuration, maxDuration, active, petSize } = filter;
 
-      return await this.prisma.service.count({
-        where,
-      });
-    } catch (error) {
-      return this.handleError(error, 'count', { filter });
-    }
-  }
+			const where: any = {
+				id: id ? { equals: id } : undefined,
+				name: name ? { contains: name, mode: "insensitive" } : undefined,
+				price: {
+					gte: minPrice !== undefined ? minPrice : undefined,
+					lte: maxPrice !== undefined ? maxPrice : undefined,
+				},
+				duration: {
+					gte: minDuration !== undefined ? minDuration : undefined,
+					lte: maxDuration !== undefined ? maxDuration : undefined,
+				},
+				active: active !== undefined ? active : undefined,
+			};
 
-  /**
-   * Exclui um serviço pelo ID
-   */
-  async delete(id: string): Promise<void> {
-    try {
-      await this.prisma.service.delete({
-        where: { id },
-      });
-    } catch (error) {
-      this.handleError(error, 'delete', { id });
-    }
-  }
+			if (petSize) {
+				where.petSizes = {
+					has: petSize.toString(),
+				};
+			}
 
-  /**
-   * Mapeia um serviço do Prisma para uma entidade de domínio
-   */
-  private mapToDomain(prismaService: PrismaServiceResult): Service {
-    const petSizesEnum = Array.isArray(prismaService.petSizes) 
-      ? prismaService.petSizes.map(size => size as unknown as PetSize)
-      : [];
-      
-    return Service.create(
-      prismaService.id,
-      prismaService.name,
-      prismaService.duration,
-      prismaService.price,
-      petSizesEnum,
-      prismaService.description || undefined,
-      prismaService.createdAt,
-      prismaService.updatedAt,
-      prismaService.active
-    );
-  }
+			return await this.prisma.service.count({
+				where,
+			});
+		} catch (error) {
+			return this.handleError(error, "count", { filter });
+		}
+	}
 
-  /**
-   * Implementação do método findByPetSize requerido pela interface
-   */
-  async findByPetSize(petSize: PetSize, activeOnly: boolean = true): Promise<Service[]> {
-    try {
-      const where: any = {
-        petSizes: {
-          has: petSize.toString()
-        }
-      };
+	/**
+	 * Exclui um serviço pelo ID
+	 */
+	async delete(id: string): Promise<void> {
+		try {
+			await this.prisma.service.delete({
+				where: { id },
+			});
+		} catch (error) {
+			this.handleError(error, "delete", { id });
+		}
+	}
 
-      if (activeOnly) {
-        where.active = true;
-      }
+	/**
+	 * Mapeia um serviço do Prisma para uma entidade de domínio
+	 */
+	private mapToDomain(prismaService: PrismaServiceResult): Service {
+		const petSizesEnum = Array.isArray(prismaService.petSizes)
+			? prismaService.petSizes.map((size) => size as unknown as PetSize)
+			: [];
 
-      const services = await this.prisma.service.findMany({
-        where,
-        orderBy: {
-          name: 'asc',
-        },
-      });
+		return Service.create(
+			prismaService.id,
+			prismaService.name,
+			prismaService.duration,
+			prismaService.price,
+			petSizesEnum,
+			prismaService.description || undefined,
+			prismaService.createdAt,
+			prismaService.updatedAt,
+			prismaService.active,
+		);
+	}
 
-      return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
-    } catch (error) {
-      return this.handleError(error, 'findByPetSize', { petSize, activeOnly });
-    }
-  }
-} 
+	/**
+	 * Implementação do método findByPetSize requerido pela interface
+	 */
+	async findByPetSize(petSize: PetSize, activeOnly: boolean = true): Promise<Service[]> {
+		try {
+			const where: any = {
+				petSizes: {
+					has: petSize.toString(),
+				},
+			};
+
+			if (activeOnly) {
+				where.active = true;
+			}
+
+			const services = await this.prisma.service.findMany({
+				where,
+				orderBy: {
+					name: "asc",
+				},
+			});
+
+			return services.map((service) => this.mapToDomain(service as PrismaServiceResult));
+		} catch (error) {
+			return this.handleError(error, "findByPetSize", { petSize, activeOnly });
+		}
+	}
+}

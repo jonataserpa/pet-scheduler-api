@@ -3,17 +3,17 @@
  * Utility functions for initializing AI clients in MCP context
  */
 
-import { Anthropic } from '@anthropic-ai/sdk';
-import dotenv from 'dotenv';
+import { Anthropic } from "@anthropic-ai/sdk";
+import dotenv from "dotenv";
 
 // Load environment variables for CLI mode
 dotenv.config();
 
 // Default model configuration from CLI environment
 const DEFAULT_MODEL_CONFIG = {
-	model: 'claude-3-7-sonnet-20250219',
+	model: "claude-3-7-sonnet-20250219",
 	maxTokens: 64000,
-	temperature: 0.2
+	temperature: 0.2,
 };
 
 /**
@@ -26,21 +26,18 @@ const DEFAULT_MODEL_CONFIG = {
 export function getAnthropicClientForMCP(session, log = console) {
 	try {
 		// Extract API key from session.env or fall back to environment variables
-		const apiKey =
-			session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
+		const apiKey = session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
 
 		if (!apiKey) {
-			throw new Error(
-				'ANTHROPIC_API_KEY not found in session environment or process.env'
-			);
+			throw new Error("ANTHROPIC_API_KEY not found in session environment or process.env");
 		}
 
 		// Initialize and return a new Anthropic client
 		return new Anthropic({
 			apiKey,
 			defaultHeaders: {
-				'anthropic-beta': 'output-128k-2025-02-19' // Include header for increased token limit
-			}
+				"anthropic-beta": "output-128k-2025-02-19", // Include header for increased token limit
+			},
 		});
 	} catch (error) {
 		log.error(`Failed to initialize Anthropic client: ${error.message}`);
@@ -58,22 +55,19 @@ export function getAnthropicClientForMCP(session, log = console) {
 export async function getPerplexityClientForMCP(session, log = console) {
 	try {
 		// Extract API key from session.env or fall back to environment variables
-		const apiKey =
-			session?.env?.PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY;
+		const apiKey = session?.env?.PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY;
 
 		if (!apiKey) {
-			throw new Error(
-				'PERPLEXITY_API_KEY not found in session environment or process.env'
-			);
+			throw new Error("PERPLEXITY_API_KEY not found in session environment or process.env");
 		}
 
 		// Dynamically import OpenAI (it may not be used in all contexts)
-		const { default: OpenAI } = await import('openai');
+		const { default: OpenAI } = await import("openai");
 
 		// Initialize and return a new OpenAI client configured for Perplexity
 		return new OpenAI({
 			apiKey,
-			baseURL: 'https://api.perplexity.ai'
+			baseURL: "https://api.perplexity.ai",
 		});
 	} catch (error) {
 		log.error(`Failed to initialize Perplexity client: ${error.message}`);
@@ -92,7 +86,7 @@ export function getModelConfig(session, defaults = DEFAULT_MODEL_CONFIG) {
 	return {
 		model: session?.env?.MODEL || defaults.model,
 		maxTokens: parseInt(session?.env?.MAX_TOKENS || defaults.maxTokens),
-		temperature: parseFloat(session?.env?.TEMPERATURE || defaults.temperature)
+		temperature: parseFloat(session?.env?.TEMPERATURE || defaults.temperature),
 	};
 }
 
@@ -106,11 +100,7 @@ export function getModelConfig(session, defaults = DEFAULT_MODEL_CONFIG) {
  * @returns {Promise<Object>} Selected model info with type and client
  * @throws {Error} If no AI models are available
  */
-export async function getBestAvailableAIModel(
-	session,
-	options = {},
-	log = console
-) {
+export async function getBestAvailableAIModel(session, options = {}, log = console) {
 	const { requiresResearch = false, claudeOverloaded = false } = options;
 
 	// Test case: When research is needed but no Perplexity, use Claude
@@ -120,23 +110,20 @@ export async function getBestAvailableAIModel(
 		(session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY)
 	) {
 		try {
-			log.warn('Perplexity not available for research, using Claude');
+			log.warn("Perplexity not available for research, using Claude");
 			const client = getAnthropicClientForMCP(session, log);
-			return { type: 'claude', client };
+			return { type: "claude", client };
 		} catch (error) {
 			log.error(`Claude not available: ${error.message}`);
-			throw new Error('No AI models available for research');
+			throw new Error("No AI models available for research");
 		}
 	}
 
 	// Regular path: Perplexity for research when available
-	if (
-		requiresResearch &&
-		(session?.env?.PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY)
-	) {
+	if (requiresResearch && (session?.env?.PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY)) {
 		try {
 			const client = await getPerplexityClientForMCP(session, log);
-			return { type: 'perplexity', client };
+			return { type: "perplexity", client };
 		} catch (error) {
 			log.warn(`Perplexity not available: ${error.message}`);
 			// Fall through to Claude as backup
@@ -144,32 +131,24 @@ export async function getBestAvailableAIModel(
 	}
 
 	// Test case: Claude for overloaded scenario
-	if (
-		claudeOverloaded &&
-		(session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY)
-	) {
+	if (claudeOverloaded && (session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY)) {
 		try {
 			log.warn(
-				'Claude is overloaded but no alternatives are available. Proceeding with Claude anyway.'
+				"Claude is overloaded but no alternatives are available. Proceeding with Claude anyway.",
 			);
 			const client = getAnthropicClientForMCP(session, log);
-			return { type: 'claude', client };
+			return { type: "claude", client };
 		} catch (error) {
-			log.error(
-				`Claude not available despite being overloaded: ${error.message}`
-			);
-			throw new Error('No AI models available');
+			log.error(`Claude not available despite being overloaded: ${error.message}`);
+			throw new Error("No AI models available");
 		}
 	}
 
 	// Default case: Use Claude when available and not overloaded
-	if (
-		!claudeOverloaded &&
-		(session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY)
-	) {
+	if (!claudeOverloaded && (session?.env?.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY)) {
 		try {
 			const client = getAnthropicClientForMCP(session, log);
-			return { type: 'claude', client };
+			return { type: "claude", client };
 		} catch (error) {
 			log.warn(`Claude not available: ${error.message}`);
 			// Fall through to error if no other options
@@ -177,7 +156,7 @@ export async function getBestAvailableAIModel(
 	}
 
 	// If we got here, no models were successfully initialized
-	throw new Error('No AI models available. Please check your API keys.');
+	throw new Error("No AI models available. Please check your API keys.");
 }
 
 /**
@@ -187,25 +166,25 @@ export async function getBestAvailableAIModel(
  */
 export function handleClaudeError(error) {
 	// Check if it's a structured error response
-	if (error.type === 'error' && error.error) {
+	if (error.type === "error" && error.error) {
 		switch (error.error.type) {
-			case 'overloaded_error':
-				return 'Claude is currently experiencing high demand and is overloaded. Please wait a few minutes and try again.';
-			case 'rate_limit_error':
-				return 'You have exceeded the rate limit. Please wait a few minutes before making more requests.';
-			case 'invalid_request_error':
-				return 'There was an issue with the request format. If this persists, please report it as a bug.';
+			case "overloaded_error":
+				return "Claude is currently experiencing high demand and is overloaded. Please wait a few minutes and try again.";
+			case "rate_limit_error":
+				return "You have exceeded the rate limit. Please wait a few minutes before making more requests.";
+			case "invalid_request_error":
+				return "There was an issue with the request format. If this persists, please report it as a bug.";
 			default:
 				return `Claude API error: ${error.error.message}`;
 		}
 	}
 
 	// Check for network/timeout errors
-	if (error.message?.toLowerCase().includes('timeout')) {
-		return 'The request to Claude timed out. Please try again.';
+	if (error.message?.toLowerCase().includes("timeout")) {
+		return "The request to Claude timed out. Please try again.";
 	}
-	if (error.message?.toLowerCase().includes('network')) {
-		return 'There was a network error connecting to Claude. Please check your internet connection and try again.';
+	if (error.message?.toLowerCase().includes("network")) {
+		return "There was a network error connecting to Claude. Please check your internet connection and try again.";
 	}
 
 	// Default error message

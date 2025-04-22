@@ -1,6 +1,7 @@
 # ADR 007 - Contexto Geral do Projeto
 
 ## Status
+
 Proposto
 
 ## Contexto

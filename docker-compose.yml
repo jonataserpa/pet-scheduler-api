@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - "3000:3000"
     depends_on:
       - postgres
       - redis
@@ -51,7 +51,7 @@ services:
   postgres:
     image: postgres:16-alpine
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -64,7 +64,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -73,7 +73,7 @@ services:
   test-db:
     image: postgres:16-alpine
     ports:
-      - '5433:5432'
+      - "5433:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -87,4 +87,4 @@ volumes:
 
 networks:
   pet-scheduler-network:
-    driver: bridge 
+    driver: bridge

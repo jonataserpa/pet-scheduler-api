@@ -59,6 +59,7 @@ npm run seed
 ```
 
 O script irá criar:
+
 - Usuários (admin e funcionário)
 - Clientes
 - Pets (cães e gatos)
@@ -68,6 +69,7 @@ O script irá criar:
 - Histórico de login
 
 Dados de acesso para testes:
+
 - Admin: admin@petshop.com / senha: admin123
 - Funcionário: funcionario@petshop.com / senha: employee123
 
@@ -76,26 +78,31 @@ Dados de acesso para testes:
 O projeto utiliza diversas variáveis de ambiente para configuração. Veja abaixo as principais:
 
 ### Configurações Gerais
+
 - `NODE_ENV`: ambiente de execução (development, production, test)
 - `PORT`: porta onde o servidor irá rodar
 - `API_URL`: URL base da API
 - `CORS_ORIGINS`: origens permitidas para CORS (separadas por vírgula)
 
 ### Banco de Dados
+
 - `DATABASE_URL`: URL de conexão com o PostgreSQL
 
 ### Redis
+
 - `REDIS_HOST`: host do Redis
 - `REDIS_PORT`: porta do Redis
 - `REDIS_PASSWORD`: senha do Redis (se necessário)
 
 ### JWT
+
 - `JWT_SECRET`: chave secreta para tokens JWT
 - `JWT_EXPIRES_IN`: tempo de expiração dos tokens (ex: "1d")
 - `JWT_REFRESH_SECRET`: chave secreta para refresh tokens
 - `JWT_REFRESH_EXPIRES_IN`: tempo de expiração dos refresh tokens (ex: "7d")
 
 ### Email
+
 - `EMAIL_HOST`: servidor SMTP
 - `EMAIL_PORT`: porta do servidor SMTP
 - `EMAIL_SECURE`: se deve usar SSL/TLS (true/false)
@@ -105,6 +112,7 @@ O projeto utiliza diversas variáveis de ambiente para configuração. Veja abai
 - `EMAIL_FROM_NAME`: nome do remetente
 
 ### Jobs e Processos em Background
+
 - `ENABLE_NOTIFICATION_JOB`: habilita o job de processamento de notificações
 
 ## Sistema de Notificações

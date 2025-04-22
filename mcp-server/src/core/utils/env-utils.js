@@ -6,11 +6,7 @@
  * @returns {Promise<any>} The result of the actionFn.
  */
 export async function withSessionEnv(sessionEnv, actionFn) {
-	if (
-		!sessionEnv ||
-		typeof sessionEnv !== 'object' ||
-		Object.keys(sessionEnv).length === 0
-	) {
+	if (!sessionEnv || typeof sessionEnv !== "object" || Object.keys(sessionEnv).length === 0) {
 		// If no sessionEnv is provided, just run the action directly
 		return await actionFn();
 	}

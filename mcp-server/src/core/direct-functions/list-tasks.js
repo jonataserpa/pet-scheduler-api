@@ -3,12 +3,9 @@
  * Direct function implementation for listing tasks
  */
 
-import { listTasks } from '../../../../scripts/modules/task-manager.js';
-import { getCachedOrExecute } from '../../tools/utils.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
+import { listTasks } from "../../../../scripts/modules/task-manager.js";
+import { getCachedOrExecute } from "../../tools/utils.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
 
 /**
  * Direct function wrapper for listTasks with error handling and caching.
@@ -22,19 +19,19 @@ export async function listTasksDirect(args, log) {
 	const { tasksJsonPath, status, withSubtasks } = args;
 
 	if (!tasksJsonPath) {
-		log.error('listTasksDirect called without tasksJsonPath');
+		log.error("listTasksDirect called without tasksJsonPath");
 		return {
 			success: false,
 			error: {
-				code: 'MISSING_ARGUMENT',
-				message: 'tasksJsonPath is required'
+				code: "MISSING_ARGUMENT",
+				message: "tasksJsonPath is required",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 
 	// Use the explicit tasksJsonPath for cache key
-	const statusFilter = status || 'all';
+	const statusFilter = status || "all";
 	const withSubtasksFilter = withSubtasks || false;
 	const cacheKey = `listTasks:${tasksJsonPath}:${statusFilter}:${withSubtasksFilter}`;
 
@@ -45,29 +42,22 @@ export async function listTasksDirect(args, log) {
 			enableSilentMode();
 
 			log.info(
-				`Executing core listTasks function for path: ${tasksJsonPath}, filter: ${statusFilter}, subtasks: ${withSubtasksFilter}`
+				`Executing core listTasks function for path: ${tasksJsonPath}, filter: ${statusFilter}, subtasks: ${withSubtasksFilter}`,
 			);
 			// Pass the explicit tasksJsonPath to the core function
-			const resultData = listTasks(
-				tasksJsonPath,
-				statusFilter,
-				withSubtasksFilter,
-				'json'
-			);
+			const resultData = listTasks(tasksJsonPath, statusFilter, withSubtasksFilter, "json");
 
 			if (!resultData || !resultData.tasks) {
-				log.error('Invalid or empty response from listTasks core function');
+				log.error("Invalid or empty response from listTasks core function");
 				return {
 					success: false,
 					error: {
-						code: 'INVALID_CORE_RESPONSE',
-						message: 'Invalid or empty response from listTasks core function'
-					}
+						code: "INVALID_CORE_RESPONSE",
+						message: "Invalid or empty response from listTasks core function",
+					},
 				};
 			}
-			log.info(
-				`Core listTasks function retrieved ${resultData.tasks.length} tasks`
-			);
+			log.info(`Core listTasks function retrieved ${resultData.tasks.length} tasks`);
 
 			// Restore normal logging
 			disableSilentMode();
@@ -81,9 +71,9 @@ export async function listTasksDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'LIST_TASKS_CORE_ERROR',
-					message: error.message || 'Failed to list tasks'
-				}
+					code: "LIST_TASKS_CORE_ERROR",
+					message: error.message || "Failed to list tasks",
+				},
 			};
 		}
 	};
@@ -93,20 +83,18 @@ export async function listTasksDirect(args, log) {
 		const result = await getCachedOrExecute({
 			cacheKey,
 			actionFn: coreListTasksAction,
-			log
+			log,
 		});
 		log.info(`listTasksDirect completed. From cache: ${result.fromCache}`);
 		return result; // Returns { success, data/error, fromCache }
 	} catch (error) {
 		// Catch unexpected errors from getCachedOrExecute itself (though unlikely)
-		log.error(
-			`Unexpected error during getCachedOrExecute for listTasks: ${error.message}`
-		);
+		log.error(`Unexpected error during getCachedOrExecute for listTasks: ${error.message}`);
 		console.error(error.stack);
 		return {
 			success: false,
-			error: { code: 'CACHE_UTIL_ERROR', message: error.message },
-			fromCache: false
+			error: { code: "CACHE_UTIL_ERROR", message: error.message },
+			fromCache: false,
 		};
 	}
 }

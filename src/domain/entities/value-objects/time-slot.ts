@@ -3,192 +3,190 @@
  * Value Objects são imutáveis e não possuem identidade
  */
 export class TimeSlot {
-  private readonly _startTime: Date;
-  private readonly _endTime: Date;
-  private readonly _durationMinutes: number;
+	private readonly _startTime: Date;
+	private readonly _endTime: Date;
+	private readonly _durationMinutes: number;
 
-  private constructor(startTime: Date, endTime: Date) {
-    this._startTime = startTime;
-    this._endTime = endTime;
-    this._durationMinutes = this.calculateDurationInMinutes();
+	private constructor(startTime: Date, endTime: Date) {
+		this._startTime = startTime;
+		this._endTime = endTime;
+		this._durationMinutes = this.calculateDurationInMinutes();
 
-    Object.freeze(this);
-  }
+		Object.freeze(this);
+	}
 
-  /**
-   * Cria uma nova instância de TimeSlot a partir de datas de início e fim
-   */
-  public static create(startTime: Date, endTime: Date): TimeSlot {
-    // Validações
-    if (!(startTime instanceof Date) || isNaN(startTime.getTime())) {
-      throw new Error('TimeSlot: data de início inválida');
-    }
+	/**
+	 * Cria uma nova instância de TimeSlot a partir de datas de início e fim
+	 */
+	public static create(startTime: Date, endTime: Date): TimeSlot {
+		// Validações
+		if (!(startTime instanceof Date) || isNaN(startTime.getTime())) {
+			throw new Error("TimeSlot: data de início inválida");
+		}
 
-    if (!(endTime instanceof Date) || isNaN(endTime.getTime())) {
-      throw new Error('TimeSlot: data de fim inválida');
-    }
+		if (!(endTime instanceof Date) || isNaN(endTime.getTime())) {
+			throw new Error("TimeSlot: data de fim inválida");
+		}
 
-    if (startTime >= endTime) {
-      throw new Error('TimeSlot: a data de início deve ser anterior à data de fim');
-    }
+		if (startTime >= endTime) {
+			throw new Error("TimeSlot: a data de início deve ser anterior à data de fim");
+		}
 
-    return new TimeSlot(
-      new Date(startTime), // Cria cópias para garantir imutabilidade
-      new Date(endTime),
-    );
-  }
+		return new TimeSlot(
+			new Date(startTime), // Cria cópias para garantir imutabilidade
+			new Date(endTime),
+		);
+	}
 
-  /**
-   * Cria uma nova instância de TimeSlot a partir de uma data de início e duração em minutos
-   */
-  public static createFromDuration(startTime: Date, durationMinutes: number): TimeSlot {
-    // Validações
-    if (!(startTime instanceof Date) || isNaN(startTime.getTime())) {
-      throw new Error('TimeSlot: data de início inválida');
-    }
+	/**
+	 * Cria uma nova instância de TimeSlot a partir de uma data de início e duração em minutos
+	 */
+	public static createFromDuration(startTime: Date, durationMinutes: number): TimeSlot {
+		// Validações
+		if (!(startTime instanceof Date) || isNaN(startTime.getTime())) {
+			throw new Error("TimeSlot: data de início inválida");
+		}
 
-    if (!Number.isInteger(durationMinutes) || durationMinutes <= 0) {
-      throw new Error('TimeSlot: duração deve ser um número inteiro positivo em minutos');
-    }
+		if (!Number.isInteger(durationMinutes) || durationMinutes <= 0) {
+			throw new Error("TimeSlot: duração deve ser um número inteiro positivo em minutos");
+		}
 
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
-    return new TimeSlot(
-      new Date(startTime), // Cria cópias para garantir imutabilidade
-      endTime,
-    );
-  }
+		const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
+		return new TimeSlot(
+			new Date(startTime), // Cria cópias para garantir imutabilidade
+			endTime,
+		);
+	}
 
-  /**
-   * Cria uma instância de TimeSlot a partir de strings ISO 8601
-   */
-  public static createFromISOStrings(startTimeISO: string, endTimeISO: string): TimeSlot {
-    const startTime = new Date(startTimeISO);
-    const endTime = new Date(endTimeISO);
-    
-    return TimeSlot.create(startTime, endTime);
-  }
+	/**
+	 * Cria uma instância de TimeSlot a partir de strings ISO 8601
+	 */
+	public static createFromISOStrings(startTimeISO: string, endTimeISO: string): TimeSlot {
+		const startTime = new Date(startTimeISO);
+		const endTime = new Date(endTimeISO);
 
-  /**
-   * Calcula a duração do período em minutos
-   */
-  private calculateDurationInMinutes(): number {
-    return Math.round((this._endTime.getTime() - this._startTime.getTime()) / 60000);
-  }
+		return TimeSlot.create(startTime, endTime);
+	}
 
-  /**
-   * Verifica se este período tem alguma sobreposição com outro período
-   */
-  public overlaps(other: TimeSlot): boolean {
-    return (
-      (this._startTime < other._endTime && this._endTime > other._startTime) ||
-      (other._startTime < this._endTime && other._endTime > this._startTime)
-    );
-  }
+	/**
+	 * Calcula a duração do período em minutos
+	 */
+	private calculateDurationInMinutes(): number {
+		return Math.round((this._endTime.getTime() - this._startTime.getTime()) / 60000);
+	}
 
-  /**
-   * Verifica se este período contém completamente outro período
-   */
-  public contains(other: TimeSlot): boolean {
-    return (
-      this._startTime <= other._startTime && this._endTime >= other._endTime
-    );
-  }
+	/**
+	 * Verifica se este período tem alguma sobreposição com outro período
+	 */
+	public overlaps(other: TimeSlot): boolean {
+		return (
+			(this._startTime < other._endTime && this._endTime > other._startTime) ||
+			(other._startTime < this._endTime && other._endTime > this._startTime)
+		);
+	}
 
-  /**
-   * Verifica se uma data/hora específica está dentro deste período
-   */
-  public includesTime(time: Date): boolean {
-    return time >= this._startTime && time <= this._endTime;
-  }
+	/**
+	 * Verifica se este período contém completamente outro período
+	 */
+	public contains(other: TimeSlot): boolean {
+		return this._startTime <= other._startTime && this._endTime >= other._endTime;
+	}
 
-  /**
-   * Retorna um objeto com os dados do período
-   */
-  public toObject(): {
-    startTime: Date;
-    endTime: Date;
-    durationMinutes: number;
-  } {
-    return {
-      startTime: new Date(this._startTime),
-      endTime: new Date(this._endTime),
-      durationMinutes: this._durationMinutes,
-    };
-  }
+	/**
+	 * Verifica se uma data/hora específica está dentro deste período
+	 */
+	public includesTime(time: Date): boolean {
+		return time >= this._startTime && time <= this._endTime;
+	}
 
-  /**
-   * Serializa o objeto para JSON
-   */
-  public toJSON(): string {
-    return JSON.stringify({
-      startTime: this._startTime.toISOString(),
-      endTime: this._endTime.toISOString(),
-      durationMinutes: this._durationMinutes
-    });
-  }
+	/**
+	 * Retorna um objeto com os dados do período
+	 */
+	public toObject(): {
+		startTime: Date;
+		endTime: Date;
+		durationMinutes: number;
+	} {
+		return {
+			startTime: new Date(this._startTime),
+			endTime: new Date(this._endTime),
+			durationMinutes: this._durationMinutes,
+		};
+	}
 
-  /**
-   * Deserializa um JSON para TimeSlot
-   */
-  public static fromJSON(json: string): TimeSlot {
-    const data = JSON.parse(json);
-    return TimeSlot.createFromISOStrings(data.startTime, data.endTime);
-  }
+	/**
+	 * Serializa o objeto para JSON
+	 */
+	public toJSON(): string {
+		return JSON.stringify({
+			startTime: this._startTime.toISOString(),
+			endTime: this._endTime.toISOString(),
+			durationMinutes: this._durationMinutes,
+		});
+	}
 
-  // Getters
-  get startTime(): Date {
-    return new Date(this._startTime); // Retorna uma cópia para prevenir mutações
-  }
+	/**
+	 * Deserializa um JSON para TimeSlot
+	 */
+	public static fromJSON(json: string): TimeSlot {
+		const data = JSON.parse(json);
+		return TimeSlot.createFromISOStrings(data.startTime, data.endTime);
+	}
 
-  get endTime(): Date {
-    return new Date(this._endTime); // Retorna uma cópia para prevenir mutações
-  }
+	// Getters
+	get startTime(): Date {
+		return new Date(this._startTime); // Retorna uma cópia para prevenir mutações
+	}
 
-  get durationMinutes(): number {
-    return this._durationMinutes;
-  }
+	get endTime(): Date {
+		return new Date(this._endTime); // Retorna uma cópia para prevenir mutações
+	}
 
-  /**
-   * Formata o período como string
-   */
-  public toString(): string {
-    const formatDate = (date: Date): string => {
-      return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    };
+	get durationMinutes(): number {
+		return this._durationMinutes;
+	}
 
-    return `${formatDate(this._startTime)} até ${formatDate(this._endTime)} (${this._durationMinutes} minutos)`;
-  }
+	/**
+	 * Formata o período como string
+	 */
+	public toString(): string {
+		const formatDate = (date: Date): string => {
+			return date.toLocaleString("pt-BR", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		};
 
-  /**
-   * Retorna as datas de início e fim em formato ISO 8601
-   */
-  public toISOStrings(): {
-    startTimeISO: string;
-    endTimeISO: string;
-  } {
-    return {
-      startTimeISO: this._startTime.toISOString(),
-      endTimeISO: this._endTime.toISOString()
-    };
-  }
+		return `${formatDate(this._startTime)} até ${formatDate(this._endTime)} (${this._durationMinutes} minutos)`;
+	}
 
-  /**
-   * Compara dois períodos por igualdade de valores
-   */
-  public equals(other: TimeSlot): boolean {
-    if (!(other instanceof TimeSlot)) {
-      return false;
-    }
+	/**
+	 * Retorna as datas de início e fim em formato ISO 8601
+	 */
+	public toISOStrings(): {
+		startTimeISO: string;
+		endTimeISO: string;
+	} {
+		return {
+			startTimeISO: this._startTime.toISOString(),
+			endTimeISO: this._endTime.toISOString(),
+		};
+	}
 
-    return (
-      this._startTime.getTime() === other._startTime.getTime() &&
-      this._endTime.getTime() === other._endTime.getTime()
-    );
-  }
-} 
+	/**
+	 * Compara dois períodos por igualdade de valores
+	 */
+	public equals(other: TimeSlot): boolean {
+		if (!(other instanceof TimeSlot)) {
+			return false;
+		}
+
+		return (
+			this._startTime.getTime() === other._startTime.getTime() &&
+			this._endTime.getTime() === other._endTime.getTime()
+		);
+	}
+}

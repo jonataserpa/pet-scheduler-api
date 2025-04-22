@@ -1,6 +1,7 @@
 # ADR 006 - Estratégia Geral Sistêmica
 
 ## Status
+
 Proposto
 
 ## Contexto

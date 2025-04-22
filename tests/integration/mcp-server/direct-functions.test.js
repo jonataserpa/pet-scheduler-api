@@ -2,18 +2,18 @@
  * Integration test for direct function imports in MCP server
  */
 
-import { jest } from '@jest/globals';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { jest } from "@jest/globals";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 // Get the current module's directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Test file paths
-const testProjectRoot = path.join(__dirname, '../../fixtures');
-const testTasksPath = path.join(testProjectRoot, 'test-tasks.json');
+const testProjectRoot = path.join(__dirname, "../../fixtures");
+const testTasksPath = path.join(testProjectRoot, "test-tasks.json");
 
 // Create explicit mock functions
 const mockExistsSync = jest.fn().mockReturnValue(true);
@@ -34,162 +34,160 @@ const mockHandleAnthropicStream = jest.fn().mockResolvedValue(
 	JSON.stringify([
 		{
 			id: 1,
-			title: 'Mock Subtask 1',
-			description: 'First mock subtask',
+			title: "Mock Subtask 1",
+			description: "First mock subtask",
 			dependencies: [],
-			details: 'Implementation details for mock subtask 1'
+			details: "Implementation details for mock subtask 1",
 		},
 		{
 			id: 2,
-			title: 'Mock Subtask 2',
-			description: 'Second mock subtask',
+			title: "Mock Subtask 2",
+			description: "Second mock subtask",
 			dependencies: [1],
-			details: 'Implementation details for mock subtask 2'
-		}
-	])
+			details: "Implementation details for mock subtask 2",
+		},
+	]),
 );
 const mockParseSubtasksFromText = jest.fn().mockReturnValue([
 	{
 		id: 1,
-		title: 'Mock Subtask 1',
-		description: 'First mock subtask',
-		status: 'pending',
-		dependencies: []
+		title: "Mock Subtask 1",
+		description: "First mock subtask",
+		status: "pending",
+		dependencies: [],
 	},
 	{
 		id: 2,
-		title: 'Mock Subtask 2',
-		description: 'Second mock subtask',
-		status: 'pending',
-		dependencies: [1]
-	}
+		title: "Mock Subtask 2",
+		description: "Second mock subtask",
+		status: "pending",
+		dependencies: [1],
+	},
 ]);
 
 // Create a mock for expandTask that returns predefined responses instead of making real calls
 const mockExpandTask = jest
 	.fn()
-	.mockImplementation(
-		(taskId, numSubtasks, useResearch, additionalContext, options) => {
-			const task = {
-				...(sampleTasks.tasks.find((t) => t.id === taskId) || {}),
-				subtasks: useResearch
-					? [
-							{
-								id: 1,
-								title: 'Research-Backed Subtask 1',
-								description: 'First research-backed subtask',
-								status: 'pending',
-								dependencies: []
-							},
-							{
-								id: 2,
-								title: 'Research-Backed Subtask 2',
-								description: 'Second research-backed subtask',
-								status: 'pending',
-								dependencies: [1]
-							}
-						]
-					: [
-							{
-								id: 1,
-								title: 'Mock Subtask 1',
-								description: 'First mock subtask',
-								status: 'pending',
-								dependencies: []
-							},
-							{
-								id: 2,
-								title: 'Mock Subtask 2',
-								description: 'Second mock subtask',
-								status: 'pending',
-								dependencies: [1]
-							}
-						]
-			};
+	.mockImplementation((taskId, numSubtasks, useResearch, additionalContext, options) => {
+		const task = {
+			...(sampleTasks.tasks.find((t) => t.id === taskId) || {}),
+			subtasks: useResearch
+				? [
+						{
+							id: 1,
+							title: "Research-Backed Subtask 1",
+							description: "First research-backed subtask",
+							status: "pending",
+							dependencies: [],
+						},
+						{
+							id: 2,
+							title: "Research-Backed Subtask 2",
+							description: "Second research-backed subtask",
+							status: "pending",
+							dependencies: [1],
+						},
+					]
+				: [
+						{
+							id: 1,
+							title: "Mock Subtask 1",
+							description: "First mock subtask",
+							status: "pending",
+							dependencies: [],
+						},
+						{
+							id: 2,
+							title: "Mock Subtask 2",
+							description: "Second mock subtask",
+							status: "pending",
+							dependencies: [1],
+						},
+					],
+		};
 
-			return Promise.resolve(task);
-		}
-	);
+		return Promise.resolve(task);
+	});
 
 const mockGenerateTaskFiles = jest.fn().mockResolvedValue(true);
 const mockFindTaskById = jest.fn();
 const mockTaskExists = jest.fn().mockReturnValue(true);
 
 // Mock fs module to avoid file system operations
-jest.mock('fs', () => ({
+jest.mock("fs", () => ({
 	existsSync: mockExistsSync,
 	writeFileSync: mockWriteFileSync,
 	readFileSync: mockReadFileSync,
 	unlinkSync: mockUnlinkSync,
-	mkdirSync: mockMkdirSync
+	mkdirSync: mockMkdirSync,
 }));
 
 // Mock utils functions to avoid actual file operations
-jest.mock('../../../scripts/modules/utils.js', () => ({
+jest.mock("../../../scripts/modules/utils.js", () => ({
 	readJSON: mockReadJSON,
 	writeJSON: mockWriteJSON,
 	enableSilentMode: mockEnableSilentMode,
 	disableSilentMode: mockDisableSilentMode,
 	CONFIG: {
-		model: 'claude-3-7-sonnet-20250219',
+		model: "claude-3-7-sonnet-20250219",
 		maxTokens: 64000,
 		temperature: 0.2,
-		defaultSubtasks: 5
-	}
+		defaultSubtasks: 5,
+	},
 }));
 
 // Mock path-utils with findTasksJsonPath
-jest.mock('../../../mcp-server/src/core/utils/path-utils.js', () => ({
-	findTasksJsonPath: mockFindTasksJsonPath
+jest.mock("../../../mcp-server/src/core/utils/path-utils.js", () => ({
+	findTasksJsonPath: mockFindTasksJsonPath,
 }));
 
 // Mock the AI module to prevent any real API calls
-jest.mock('../../../scripts/modules/ai-services.js', () => ({
+jest.mock("../../../scripts/modules/ai-services.js", () => ({
 	getAnthropicClient: mockGetAnthropicClient,
 	getConfiguredAnthropicClient: mockGetConfiguredAnthropicClient,
 	_handleAnthropicStream: mockHandleAnthropicStream,
-	parseSubtasksFromText: mockParseSubtasksFromText
+	parseSubtasksFromText: mockParseSubtasksFromText,
 }));
 
 // Mock task-manager.js to avoid real operations
-jest.mock('../../../scripts/modules/task-manager.js', () => ({
+jest.mock("../../../scripts/modules/task-manager.js", () => ({
 	expandTask: mockExpandTask,
 	generateTaskFiles: mockGenerateTaskFiles,
 	findTaskById: mockFindTaskById,
-	taskExists: mockTaskExists
+	taskExists: mockTaskExists,
 }));
 
 // Import dependencies after mocks are set up
-import fs from 'fs';
+import fs from "fs";
 import {
 	readJSON,
 	writeJSON,
 	enableSilentMode,
-	disableSilentMode
-} from '../../../scripts/modules/utils.js';
-import { expandTask } from '../../../scripts/modules/task-manager.js';
-import { findTasksJsonPath } from '../../../mcp-server/src/core/utils/path-utils.js';
-import { sampleTasks } from '../../fixtures/sample-tasks.js';
+	disableSilentMode,
+} from "../../../scripts/modules/utils.js";
+import { expandTask } from "../../../scripts/modules/task-manager.js";
+import { findTasksJsonPath } from "../../../mcp-server/src/core/utils/path-utils.js";
+import { sampleTasks } from "../../fixtures/sample-tasks.js";
 
 // Mock logger
 const mockLogger = {
 	info: jest.fn(),
 	error: jest.fn(),
 	debug: jest.fn(),
-	warn: jest.fn()
+	warn: jest.fn(),
 };
 
 // Mock session
 const mockSession = {
 	env: {
-		ANTHROPIC_API_KEY: 'mock-api-key',
-		MODEL: 'claude-3-sonnet-20240229',
+		ANTHROPIC_API_KEY: "mock-api-key",
+		MODEL: "claude-3-sonnet-20240229",
 		MAX_TOKENS: 4000,
-		TEMPERATURE: '0.2'
-	}
+		TEMPERATURE: "0.2",
+	},
 };
 
-describe('MCP Server Direct Functions', () => {
+describe("MCP Server Direct Functions", () => {
 	// Set up before each test
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -212,26 +210,26 @@ describe('MCP Server Direct Functions', () => {
 		// Default findTasksJsonPath implementation
 		mockFindTasksJsonPath.mockImplementation((args) => {
 			// Mock returning null for non-existent files
-			if (args.file === 'non-existent-file.json') {
+			if (args.file === "non-existent-file.json") {
 				return null;
 			}
 			return testTasksPath;
 		});
 	});
 
-	describe('listTasksDirect', () => {
+	describe("listTasksDirect", () => {
 		// Test wrapper function that doesn't rely on the actual implementation
 		async function testListTasks(args, mockLogger) {
 			// File not found case
-			if (args.file === 'non-existent-file.json') {
-				mockLogger.error('Tasks file not found');
+			if (args.file === "non-existent-file.json") {
+				mockLogger.error("Tasks file not found");
 				return {
 					success: false,
 					error: {
-						code: 'FILE_NOT_FOUND_ERROR',
-						message: 'Tasks file not found'
+						code: "FILE_NOT_FOUND_ERROR",
+						message: "Tasks file not found",
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
@@ -243,24 +241,18 @@ describe('MCP Server Direct Functions', () => {
 						tasks: sampleTasks.tasks,
 						stats: {
 							total: sampleTasks.tasks.length,
-							completed: sampleTasks.tasks.filter((t) => t.status === 'done')
-								.length,
-							inProgress: sampleTasks.tasks.filter(
-								(t) => t.status === 'in-progress'
-							).length,
-							pending: sampleTasks.tasks.filter((t) => t.status === 'pending')
-								.length
-						}
+							completed: sampleTasks.tasks.filter((t) => t.status === "done").length,
+							inProgress: sampleTasks.tasks.filter((t) => t.status === "in-progress").length,
+							pending: sampleTasks.tasks.filter((t) => t.status === "pending").length,
+						},
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
 			// Status filter case
 			if (args.status) {
-				const filteredTasks = sampleTasks.tasks.filter(
-					(t) => t.status === args.status
-				);
+				const filteredTasks = sampleTasks.tasks.filter((t) => t.status === args.status);
 				return {
 					success: true,
 					data: {
@@ -268,10 +260,10 @@ describe('MCP Server Direct Functions', () => {
 						filter: args.status,
 						stats: {
 							total: sampleTasks.tasks.length,
-							filtered: filteredTasks.length
-						}
+							filtered: filteredTasks.length,
+						},
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
@@ -283,25 +275,25 @@ describe('MCP Server Direct Functions', () => {
 						tasks: sampleTasks.tasks,
 						includeSubtasks: true,
 						stats: {
-							total: sampleTasks.tasks.length
-						}
+							total: sampleTasks.tasks.length,
+						},
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
 			// Default case
 			return {
 				success: true,
-				data: { tasks: [] }
+				data: { tasks: [] },
 			};
 		}
 
-		test('should return all tasks when no filter is provided', async () => {
+		test("should return all tasks when no filter is provided", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
-				file: testTasksPath
+				file: testTasksPath,
 			};
 
 			// Act
@@ -313,12 +305,12 @@ describe('MCP Server Direct Functions', () => {
 			expect(result.data.stats.total).toBe(sampleTasks.tasks.length);
 		});
 
-		test('should filter tasks by status', async () => {
+		test("should filter tasks by status", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				status: 'pending'
+				status: "pending",
 			};
 
 			// Act
@@ -326,19 +318,19 @@ describe('MCP Server Direct Functions', () => {
 
 			// Assert
 			expect(result.success).toBe(true);
-			expect(result.data.filter).toBe('pending');
+			expect(result.data.filter).toBe("pending");
 			// Should only include pending tasks
 			result.data.tasks.forEach((task) => {
-				expect(task.status).toBe('pending');
+				expect(task.status).toBe("pending");
 			});
 		});
 
-		test('should include subtasks when requested', async () => {
+		test("should include subtasks when requested", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				withSubtasks: true
+				withSubtasks: true,
 			};
 
 			// Act
@@ -350,16 +342,16 @@ describe('MCP Server Direct Functions', () => {
 
 			// Verify subtasks are included for tasks that have them
 			const tasksWithSubtasks = result.data.tasks.filter(
-				(t) => t.subtasks && t.subtasks.length > 0
+				(t) => t.subtasks && t.subtasks.length > 0,
 			);
 			expect(tasksWithSubtasks.length).toBeGreaterThan(0);
 		});
 
-		test('should handle file not found errors', async () => {
+		test("should handle file not found errors", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
-				file: 'non-existent-file.json'
+				file: "non-existent-file.json",
 			};
 
 			// Act
@@ -367,52 +359,50 @@ describe('MCP Server Direct Functions', () => {
 
 			// Assert
 			expect(result.success).toBe(false);
-			expect(result.error.code).toBe('FILE_NOT_FOUND_ERROR');
+			expect(result.error.code).toBe("FILE_NOT_FOUND_ERROR");
 			expect(mockLogger.error).toHaveBeenCalled();
 		});
 	});
 
-	describe('expandTaskDirect', () => {
+	describe("expandTaskDirect", () => {
 		// Test wrapper function that returns appropriate results based on the test case
 		async function testExpandTask(args, mockLogger, options = {}) {
 			// Missing task ID case
 			if (!args.id) {
-				mockLogger.error('Task ID is required');
+				mockLogger.error("Task ID is required");
 				return {
 					success: false,
 					error: {
-						code: 'INPUT_VALIDATION_ERROR',
-						message: 'Task ID is required'
+						code: "INPUT_VALIDATION_ERROR",
+						message: "Task ID is required",
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
 			// Non-existent task ID case
-			if (args.id === '999') {
+			if (args.id === "999") {
 				mockLogger.error(`Task with ID ${args.id} not found`);
 				return {
 					success: false,
 					error: {
-						code: 'TASK_NOT_FOUND',
-						message: `Task with ID ${args.id} not found`
+						code: "TASK_NOT_FOUND",
+						message: `Task with ID ${args.id} not found`,
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
 			// Completed task case
-			if (args.id === '1') {
-				mockLogger.error(
-					`Task ${args.id} is already marked as done and cannot be expanded`
-				);
+			if (args.id === "1") {
+				mockLogger.error(`Task ${args.id} is already marked as done and cannot be expanded`);
 				return {
 					success: false,
 					error: {
-						code: 'TASK_COMPLETED',
-						message: `Task ${args.id} is already marked as done and cannot be expanded`
+						code: "TASK_COMPLETED",
+						message: `Task ${args.id} is already marked as done and cannot be expanded`,
 					},
-					fromCache: false
+					fromCache: false,
 				};
 			}
 
@@ -425,8 +415,8 @@ describe('MCP Server Direct Functions', () => {
 				parseInt(args.id, 10),
 				args.num,
 				args.research || false,
-				args.prompt || '',
-				{ mcpLog: mockLogger, session: options.session }
+				args.prompt || "",
+				{ mcpLog: mockLogger, session: options.session },
 			);
 
 			mockDisableSilentMode();
@@ -436,24 +426,24 @@ describe('MCP Server Direct Functions', () => {
 				data: {
 					task: expandedTask,
 					subtasksAdded: expandedTask.subtasks.length,
-					hasExistingSubtasks: false
+					hasExistingSubtasks: false,
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 
-		test('should expand a task with subtasks', async () => {
+		test("should expand a task with subtasks", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				id: '3', // ID 3 exists in sampleTasks with status 'pending'
-				num: 2
+				id: "3", // ID 3 exists in sampleTasks with status 'pending'
+				num: 2,
 			};
 
 			// Act
 			const result = await testExpandTask(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
@@ -465,91 +455,91 @@ describe('MCP Server Direct Functions', () => {
 				3, // Task ID as number
 				2, // num parameter
 				false, // useResearch
-				'', // prompt
+				"", // prompt
 				expect.objectContaining({
 					mcpLog: mockLogger,
-					session: mockSession
-				})
+					session: mockSession,
+				}),
 			);
 			expect(mockEnableSilentMode).toHaveBeenCalled();
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});
 
-		test('should handle missing task ID', async () => {
+		test("should handle missing task ID", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
-				file: testTasksPath
+				file: testTasksPath,
 				// id is intentionally missing
 			};
 
 			// Act
 			const result = await testExpandTask(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
 			expect(result.success).toBe(false);
-			expect(result.error.code).toBe('INPUT_VALIDATION_ERROR');
+			expect(result.error.code).toBe("INPUT_VALIDATION_ERROR");
 			expect(mockLogger.error).toHaveBeenCalled();
 			// Make sure no real expand calls were made
 			expect(mockExpandTask).not.toHaveBeenCalled();
 		});
 
-		test('should handle non-existent task ID', async () => {
+		test("should handle non-existent task ID", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				id: '999' // Non-existent task ID
+				id: "999", // Non-existent task ID
 			};
 
 			// Act
 			const result = await testExpandTask(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
 			expect(result.success).toBe(false);
-			expect(result.error.code).toBe('TASK_NOT_FOUND');
+			expect(result.error.code).toBe("TASK_NOT_FOUND");
 			expect(mockLogger.error).toHaveBeenCalled();
 			// Make sure no real expand calls were made
 			expect(mockExpandTask).not.toHaveBeenCalled();
 		});
 
-		test('should handle completed tasks', async () => {
+		test("should handle completed tasks", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				id: '1' // Task with 'done' status in sampleTasks
+				id: "1", // Task with 'done' status in sampleTasks
 			};
 
 			// Act
 			const result = await testExpandTask(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
 			expect(result.success).toBe(false);
-			expect(result.error.code).toBe('TASK_COMPLETED');
+			expect(result.error.code).toBe("TASK_COMPLETED");
 			expect(mockLogger.error).toHaveBeenCalled();
 			// Make sure no real expand calls were made
 			expect(mockExpandTask).not.toHaveBeenCalled();
 		});
 
-		test('should use AI client when research flag is set', async () => {
+		test("should use AI client when research flag is set", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				id: '3',
-				research: true
+				id: "3",
+				research: true,
 			};
 
 			// Act
 			const result = await testExpandTask(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
@@ -558,18 +548,18 @@ describe('MCP Server Direct Functions', () => {
 				3, // Task ID as number
 				undefined, // args.num is undefined
 				true, // useResearch should be true
-				'', // prompt
+				"", // prompt
 				expect.objectContaining({
 					mcpLog: mockLogger,
-					session: mockSession
-				})
+					session: mockSession,
+				}),
 			);
 			// Verify the result includes research-backed subtasks
-			expect(result.data.task.subtasks[0].title).toContain('Research-Backed');
+			expect(result.data.task.subtasks[0].title).toContain("Research-Backed");
 		});
 	});
 
-	describe('expandAllTasksDirect', () => {
+	describe("expandAllTasksDirect", () => {
 		// Test wrapper function that returns appropriate results based on the test case
 		async function testExpandAllTasks(args, mockLogger, options = {}) {
 			// For successful cases, record that functions were called but don't make real calls
@@ -585,9 +575,9 @@ describe('MCP Server Direct Functions', () => {
 			await mockExpandAll(
 				args.num,
 				args.research || false,
-				args.prompt || '',
+				args.prompt || "",
 				args.force || false,
-				{ mcpLog: mockLogger, session: options.session }
+				{ mcpLog: mockLogger, session: options.session },
 			);
 
 			mockDisableSilentMode();
@@ -595,52 +585,50 @@ describe('MCP Server Direct Functions', () => {
 			return {
 				success: true,
 				data: {
-					message: 'Successfully expanded all pending tasks with subtasks',
+					message: "Successfully expanded all pending tasks with subtasks",
 					details: {
 						numSubtasks: args.num,
 						research: args.research || false,
-						prompt: args.prompt || '',
-						force: args.force || false
-					}
-				}
+						prompt: args.prompt || "",
+						force: args.force || false,
+					},
+				},
 			};
 		}
 
-		test('should expand all pending tasks with subtasks', async () => {
+		test("should expand all pending tasks with subtasks", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				num: 3
+				num: 3,
 			};
 
 			// Act
 			const result = await testExpandAllTasks(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
 			expect(result.success).toBe(true);
-			expect(result.data.message).toBe(
-				'Successfully expanded all pending tasks with subtasks'
-			);
+			expect(result.data.message).toBe("Successfully expanded all pending tasks with subtasks");
 			expect(result.data.details.numSubtasks).toBe(3);
 			expect(mockEnableSilentMode).toHaveBeenCalled();
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});
 
-		test('should handle research flag', async () => {
+		test("should handle research flag", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
 				research: true,
-				num: 2
+				num: 2,
 			};
 
 			// Act
 			const result = await testExpandAllTasks(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
@@ -650,17 +638,17 @@ describe('MCP Server Direct Functions', () => {
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});
 
-		test('should handle force flag', async () => {
+		test("should handle force flag", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				force: true
+				force: true,
 			};
 
 			// Act
 			const result = await testExpandAllTasks(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
@@ -670,24 +658,22 @@ describe('MCP Server Direct Functions', () => {
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});
 
-		test('should handle additional context/prompt', async () => {
+		test("should handle additional context/prompt", async () => {
 			// Arrange
 			const args = {
 				projectRoot: testProjectRoot,
 				file: testTasksPath,
-				prompt: 'Additional context for subtasks'
+				prompt: "Additional context for subtasks",
 			};
 
 			// Act
 			const result = await testExpandAllTasks(args, mockLogger, {
-				session: mockSession
+				session: mockSession,
 			});
 
 			// Assert
 			expect(result.success).toBe(true);
-			expect(result.data.details.prompt).toBe(
-				'Additional context for subtasks'
-			);
+			expect(result.data.details.prompt).toBe("Additional context for subtasks");
 			expect(mockEnableSilentMode).toHaveBeenCalled();
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});

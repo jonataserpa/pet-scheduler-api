@@ -1,6 +1,7 @@
 # ADR 001 - Arquitetura para Sistema de Agendamento de Banho e Tosa de Pets
 
 ## Status
+
 Proposto
 
 ## Contexto
@@ -8,6 +9,7 @@ Proposto
 Precisamos desenvolver um sistema de agendamento de serviços (banho e tosa) para pets com regras de negócios específicas, visando garantir integridade nos agendamentos (evitar conflitos de horários), validações de clientes, e diferenciação de preços conforme combos de serviços. O sistema deverá ser disponibilizado como uma API RESTful com autenticação JWT e arquitetura baseada em Clean Architecture e DDD.
 
 A complexidade do domínio envolve regras como:
+
 - Restrições de horários e feriados;
 - Lógica condicional para serviços (combos);
 - Tipos de clientes com restrições (porte, alergia);
@@ -19,6 +21,7 @@ A complexidade do domínio envolve regras como:
 Optamos por implementar o sistema como um **monolito modular baseado em Clean Architecture com um Worker assíncrono para notificações e relatórios**, utilizando **Node.js com TypeScript**, **Prisma ORM** e **PostgreSQL** como banco de dados relacional.
 
 As camadas serão organizadas conforme:
+
 - **Domínio**: entidades com regras de negócio (ex: regras de agendamento, validações)
 - **UseCases**: orquestram regras do domínio e chamam interfaces de repositórios
 - **Interfaces**: rotas (Express/Fastify), DTOs, validadores
@@ -26,6 +29,7 @@ As camadas serão organizadas conforme:
 - **Worker**: responsável por notificações e relatórios assíncronos
 
 Rotas da API:
+
 - `/login` (JWT)
 - `/scheduling` (CRUD + lógica de regras)
 - `/customers` (CRUD + validações específicas)
@@ -34,21 +38,25 @@ Rotas da API:
 - `/dashboard` (dados em tempo real)
 
 Regras importantes implementadas no domínio:
+
 - Agendamento: não pode haver conflitos, nem datas em feriados; só com 7 dias de antecedência.
 - Services: combos alteram o preço automaticamente.
 - Customers: porte grande e alergias bloqueiam o cadastro.
 
 Para tratamento de concorrência:
+
 - Transações atômicas via Prisma.
 - Índices únicos em `(date, time)` para garantir unicidade no nível do banco.
 - Validações de domínio antes da persistência.
 
 Mensageria:
+
 - Worker assíncrono que consome fila para envio de notificações e geração de relatórios.
 - Limite de envio com controle de taxa.
 - Suporte a backoff exponencial e retries.
 
 Testes:
+
 - Unitários no domínio
 - Integração nos UseCases
 - E2E nas rotas REST
@@ -58,6 +66,7 @@ Testes:
 ### 1. Microsserviços Independentes por Domínio
 
 **Prós:**
+
 - Escalabilidade por serviço
 - Separação clara de responsabilidade
 - Alta disponibilidade por módulo
@@ -65,6 +74,7 @@ Testes:
 - Failover mais simples
 
 **Contras:**
+
 - Overhead de comunicação interserviços
 - Complexidade arquitetural maior
 - Latência mais alta nas chamadas
@@ -74,6 +84,7 @@ Testes:
 ### 2. Monolito Simples sem Worker
 
 **Prós:**
+
 - Rápido de implementar
 - Estrutura simples
 - Menor curva de aprendizado
@@ -81,6 +92,7 @@ Testes:
 - Menos componentes para gerenciar
 
 **Contras:**
+
 - Baixa escalabilidade
 - Difícil lidar com tarefas assíncronas
 - Alto acoplamento
@@ -90,6 +102,7 @@ Testes:
 ### 3. Arquitetura Escolhida: Monolito Modular com Worker
 
 **Prós:**
+
 - Simples o suficiente para iniciar o projeto
 - Capacidade de evoluir para microsserviços
 - Assíncrono para tarefas intensivas (notificações/relatórios)
@@ -97,6 +110,7 @@ Testes:
 - Boa divisão de responsabilidades com Clean Architecture
 
 **Contras:**
+
 - Complexidade moderada
 - Ainda exige boa cobertura de testes
 - Manutenção do worker assíncrono
@@ -168,3 +182,4 @@ pet-scheduler-api/
 ├── package.json
 ├── tsconfig.json
 └── README.md
+```

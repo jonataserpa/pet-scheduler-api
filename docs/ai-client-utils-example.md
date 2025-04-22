@@ -9,8 +9,8 @@ This document provides examples of how to use the new AI client utilities with A
 import {
 	getAnthropicClientForMCP,
 	getModelConfig,
-	handleClaudeError
-} from '../utils/ai-client-utils.js';
+	handleClaudeError,
+} from "../utils/ai-client-utils.js";
 
 export async function someAiOperationDirect(args, log, context) {
 	try {
@@ -26,12 +26,12 @@ export async function someAiOperationDirect(args, log, context) {
 				model: modelConfig.model,
 				max_tokens: modelConfig.maxTokens,
 				temperature: modelConfig.temperature,
-				messages: [{ role: 'user', content: 'Your prompt here' }]
+				messages: [{ role: "user", content: "Your prompt here" }],
 			});
 
 			return {
 				success: true,
-				data: response
+				data: response,
 			};
 		} catch (apiError) {
 			// Use helper to get user-friendly error message
@@ -40,9 +40,9 @@ export async function someAiOperationDirect(args, log, context) {
 			return {
 				success: false,
 				error: {
-					code: 'AI_API_ERROR',
-					message: friendlyMessage
-				}
+					code: "AI_API_ERROR",
+					message: friendlyMessage,
+				},
 			};
 		}
 	} catch (error) {
@@ -50,9 +50,9 @@ export async function someAiOperationDirect(args, log, context) {
 		return {
 			success: false,
 			error: {
-				code: 'AI_CLIENT_ERROR',
-				message: error.message
-			}
+				code: "AI_CLIENT_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }
@@ -62,11 +62,8 @@ export async function someAiOperationDirect(args, log, context) {
 
 ```javascript
 // In your MCP tool implementation:
-import {
-	AsyncOperationManager,
-	StatusCodes
-} from '../../utils/async-operation-manager.js';
-import { someAiOperationDirect } from '../../core/direct-functions/some-ai-operation.js';
+import { AsyncOperationManager, StatusCodes } from "../../utils/async-operation-manager.js";
+import { someAiOperationDirect } from "../../core/direct-functions/some-ai-operation.js";
 
 export async function someAiOperation(args, context) {
 	const { session, mcpLog } = context;
@@ -84,22 +81,22 @@ export async function someAiOperation(args, context) {
 					// Initial progress report
 					reportProgress({
 						progress: 0,
-						status: 'Starting AI operation...'
+						status: "Starting AI operation...",
 					});
 
 					// Call direct function with session and progress reporting
 					const result = await someAiOperationDirect(args, log, {
 						reportProgress,
 						mcpLog: log,
-						session
+						session,
 					});
 
 					// Final progress update
 					reportProgress({
 						progress: 100,
-						status: result.success ? 'Operation completed' : 'Operation failed',
+						status: result.success ? "Operation completed" : "Operation failed",
 						result: result.data,
-						error: result.error
+						error: result.error,
 					});
 
 					return result;
@@ -107,15 +104,15 @@ export async function someAiOperation(args, context) {
 					// Handle errors in the operation
 					reportProgress({
 						progress: 100,
-						status: 'Operation failed',
+						status: "Operation failed",
 						error: {
 							message: error.message,
-							code: error.code || 'OPERATION_FAILED'
-						}
+							code: error.code || "OPERATION_FAILED",
+						},
 					});
 					throw error;
 				}
-			}
+			},
 		);
 
 		// Return immediate response with operation ID
@@ -123,9 +120,9 @@ export async function someAiOperation(args, context) {
 			status: StatusCodes.ACCEPTED,
 			body: {
 				success: true,
-				message: 'Operation started',
-				operationId: operation.id
-			}
+				message: "Operation started",
+				operationId: operation.id,
+			},
 		};
 	} catch (error) {
 		// Handle errors in the MCP tool
@@ -135,10 +132,10 @@ export async function someAiOperation(args, context) {
 			body: {
 				success: false,
 				error: {
-					code: 'OPERATION_FAILED',
-					message: error.message
-				}
-			}
+					code: "OPERATION_FAILED",
+					message: error.message,
+				},
+			},
 		};
 	}
 }
@@ -148,10 +145,7 @@ export async function someAiOperation(args, context) {
 
 ```javascript
 // In your direct function:
-import {
-	getPerplexityClientForMCP,
-	getBestAvailableAIModel
-} from '../utils/ai-client-utils.js';
+import { getPerplexityClientForMCP, getBestAvailableAIModel } from "../utils/ai-client-utils.js";
 
 export async function researchOperationDirect(args, log, context) {
 	try {
@@ -159,29 +153,29 @@ export async function researchOperationDirect(args, log, context) {
 		const { type, client } = await getBestAvailableAIModel(
 			context.session,
 			{ requiresResearch: true },
-			log
+			log,
 		);
 
 		// Report which model we're using
 		if (context.reportProgress) {
 			await context.reportProgress({
 				progress: 10,
-				status: `Using ${type} model for research...`
+				status: `Using ${type} model for research...`,
 			});
 		}
 
 		// Make API call based on the model type
-		if (type === 'perplexity') {
+		if (type === "perplexity") {
 			// Call Perplexity
 			const response = await client.chat.completions.create({
-				model: context.session?.env?.PERPLEXITY_MODEL || 'sonar-medium-online',
-				messages: [{ role: 'user', content: args.researchQuery }],
-				temperature: 0.1
+				model: context.session?.env?.PERPLEXITY_MODEL || "sonar-medium-online",
+				messages: [{ role: "user", content: args.researchQuery }],
+				temperature: 0.1,
 			});
 
 			return {
 				success: true,
-				data: response.choices[0].message.content
+				data: response.choices[0].message.content,
 			};
 		} else {
 			// Call Claude as fallback
@@ -193,9 +187,9 @@ export async function researchOperationDirect(args, log, context) {
 		return {
 			success: false,
 			error: {
-				code: 'RESEARCH_ERROR',
-				message: error.message
-			}
+				code: "RESEARCH_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }
@@ -205,13 +199,13 @@ export async function researchOperationDirect(args, log, context) {
 
 ```javascript
 // In your direct function:
-import { getModelConfig } from '../utils/ai-client-utils.js';
+import { getModelConfig } from "../utils/ai-client-utils.js";
 
 // Using custom defaults for a specific operation
 const operationDefaults = {
-	model: 'claude-3-haiku-20240307', // Faster, smaller model
+	model: "claude-3-haiku-20240307", // Faster, smaller model
 	maxTokens: 1000, // Lower token limit
-	temperature: 0.2 // Lower temperature for more deterministic output
+	temperature: 0.2, // Lower temperature for more deterministic output
 };
 
 // Get model config with operation-specific defaults
@@ -221,7 +215,7 @@ const modelConfig = getModelConfig(context.session, operationDefaults);
 const response = await client.messages.create({
 	model: modelConfig.model,
 	max_tokens: modelConfig.maxTokens,
-	temperature: modelConfig.temperature
+	temperature: modelConfig.temperature,
 	// Other parameters...
 });
 ```

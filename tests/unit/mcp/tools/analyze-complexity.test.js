@@ -10,30 +10,30 @@
  * We do NOT import the real implementation - everything is mocked
  */
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 // Mock EVERYTHING
 const mockAnalyzeTaskComplexityDirect = jest.fn();
-jest.mock('../../../../mcp-server/src/core/task-master-core.js', () => ({
-	analyzeTaskComplexityDirect: mockAnalyzeTaskComplexityDirect
+jest.mock("../../../../mcp-server/src/core/task-master-core.js", () => ({
+	analyzeTaskComplexityDirect: mockAnalyzeTaskComplexityDirect,
 }));
 
 const mockHandleApiResult = jest.fn((result) => result);
-const mockGetProjectRootFromSession = jest.fn(() => '/mock/project/root');
+const mockGetProjectRootFromSession = jest.fn(() => "/mock/project/root");
 const mockCreateErrorResponse = jest.fn((msg) => ({
 	success: false,
-	error: { code: 'ERROR', message: msg }
+	error: { code: "ERROR", message: msg },
 }));
 
-jest.mock('../../../../mcp-server/src/tools/utils.js', () => ({
+jest.mock("../../../../mcp-server/src/tools/utils.js", () => ({
 	getProjectRootFromSession: mockGetProjectRootFromSession,
 	handleApiResult: mockHandleApiResult,
 	createErrorResponse: mockCreateErrorResponse,
 	createContentResponse: jest.fn((content) => ({
 		success: true,
-		data: content
+		data: content,
 	})),
-	executeTaskMasterCommand: jest.fn()
+	executeTaskMasterCommand: jest.fn(),
 }));
 
 // This is a more complex mock of Zod to test actual validation
@@ -41,11 +41,11 @@ const createZodMock = () => {
 	// Storage for validation rules
 	const validationRules = {
 		threshold: {
-			type: 'coerce.number',
+			type: "coerce.number",
 			min: 1,
 			max: 10,
-			optional: true
-		}
+			optional: true,
+		},
 	};
 
 	// Create validator functions
@@ -55,7 +55,7 @@ const createZodMock = () => {
 		}
 
 		// Attempt to coerce to number (if string)
-		const numValue = typeof value === 'string' ? Number(value) : value;
+		const numValue = typeof value === "string" ? Number(value) : value;
 
 		// Check if it's a valid number
 		if (isNaN(numValue)) {
@@ -64,15 +64,11 @@ const createZodMock = () => {
 
 		// Check min/max constraints
 		if (numValue < validationRules.threshold.min) {
-			throw new Error(
-				`Threshold must be at least ${validationRules.threshold.min}`
-			);
+			throw new Error(`Threshold must be at least ${validationRules.threshold.min}`);
 		}
 
 		if (numValue > validationRules.threshold.max) {
-			throw new Error(
-				`Threshold must be at most ${validationRules.threshold.max}`
-			);
+			throw new Error(`Threshold must be at most ${validationRules.threshold.max}`);
 		}
 
 		return true;
@@ -80,7 +76,7 @@ const createZodMock = () => {
 
 	// Create actual validators for parameters
 	const validators = {
-		threshold: validateThreshold
+		threshold: validateThreshold,
 	};
 
 	// Main validation function for the entire object
@@ -101,7 +97,7 @@ const createZodMock = () => {
 		},
 		describe: (desc) => {
 			return zodBase;
-		}
+		},
 	};
 
 	// Number-specific methods
@@ -112,7 +108,7 @@ const createZodMock = () => {
 		},
 		max: (value) => {
 			return zodNumber;
-		}
+		},
 	};
 
 	// Main mock implementation
@@ -120,13 +116,13 @@ const createZodMock = () => {
 		object: () => ({
 			...zodBase,
 			// This parse method will be called by the tool execution
-			parse: validateObject
+			parse: validateObject,
 		}),
 		string: () => zodBase,
 		boolean: () => zodBase,
 		number: () => zodNumber,
 		coerce: {
-			number: () => zodNumber
+			number: () => zodNumber,
 		},
 		union: (schemas) => zodBase,
 		_def: {
@@ -136,9 +132,9 @@ const createZodMock = () => {
 				threshold: {},
 				file: {},
 				research: {},
-				projectRoot: {}
-			})
-		}
+				projectRoot: {},
+			}),
+		},
 	};
 
 	return mockZod;
@@ -147,8 +143,8 @@ const createZodMock = () => {
 // Create our Zod mock
 const mockZod = createZodMock();
 
-jest.mock('zod', () => ({
-	z: mockZod
+jest.mock("zod", () => ({
+	z: mockZod,
 }));
 
 // DO NOT import the real module - create a fake implementation
@@ -156,9 +152,8 @@ jest.mock('zod', () => ({
 const registerAnalyzeTool = (server) => {
 	// Create simplified version of the tool config
 	const toolConfig = {
-		name: 'analyze_project_complexity',
-		description:
-			'Analyze task complexity and generate expansion recommendations',
+		name: "analyze_project_complexity",
+		description: "Analyze task complexity and generate expansion recommendations",
 		parameters: mockZod.object(),
 
 		// Create a simplified mock of the execute function
@@ -166,10 +161,7 @@ const registerAnalyzeTool = (server) => {
 			const { log, session } = context;
 
 			try {
-				log.info &&
-					log.info(
-						`Analyzing task complexity with args: ${JSON.stringify(args)}`
-					);
+				log.info && log.info(`Analyzing task complexity with args: ${JSON.stringify(args)}`);
 
 				// Get project root
 				const rootFolder = mockGetProjectRootFromSession(session, log);
@@ -178,10 +170,10 @@ const registerAnalyzeTool = (server) => {
 				const result = mockAnalyzeTaskComplexityDirect(
 					{
 						...args,
-						projectRoot: rootFolder
+						projectRoot: rootFolder,
 					},
 					log,
-					{ session }
+					{ session },
 				);
 
 				// Handle result
@@ -190,14 +182,14 @@ const registerAnalyzeTool = (server) => {
 				log.error && log.error(`Error in analyze tool: ${error.message}`);
 				return mockCreateErrorResponse(error.message);
 			}
-		}
+		},
 	};
 
 	// Register the tool with the server
 	server.addTool(toolConfig);
 };
 
-describe('MCP Tool: analyze_project_complexity', () => {
+describe("MCP Tool: analyze_project_complexity", () => {
 	// Create mock server
 	let mockServer;
 	let executeFunction;
@@ -207,38 +199,38 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		debug: jest.fn(),
 		info: jest.fn(),
 		warn: jest.fn(),
-		error: jest.fn()
+		error: jest.fn(),
 	};
 
 	// Test data
 	const validArgs = {
-		output: 'output/path/report.json',
-		model: 'claude-3-opus-20240229',
+		output: "output/path/report.json",
+		model: "claude-3-opus-20240229",
 		threshold: 5,
-		research: true
+		research: true,
 	};
 
 	// Standard responses
 	const successResponse = {
 		success: true,
 		data: {
-			message: 'Task complexity analysis complete',
-			reportPath: '/mock/project/root/output/path/report.json',
+			message: "Task complexity analysis complete",
+			reportPath: "/mock/project/root/output/path/report.json",
 			reportSummary: {
 				taskCount: 10,
 				highComplexityTasks: 3,
 				mediumComplexityTasks: 5,
-				lowComplexityTasks: 2
-			}
-		}
+				lowComplexityTasks: 2,
+			},
+		},
 	};
 
 	const errorResponse = {
 		success: false,
 		error: {
-			code: 'ANALYZE_ERROR',
-			message: 'Failed to analyze task complexity'
-		}
+			code: "ANALYZE_ERROR",
+			message: "Failed to analyze task complexity",
+		},
 	};
 
 	beforeEach(() => {
@@ -249,7 +241,7 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		mockServer = {
 			addTool: jest.fn((config) => {
 				executeFunction = config.execute;
-			})
+			}),
 		};
 
 		// Setup default successful response
@@ -259,29 +251,28 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		registerAnalyzeTool(mockServer);
 	});
 
-	test('should register the tool correctly', () => {
+	test("should register the tool correctly", () => {
 		// Verify tool was registered
 		expect(mockServer.addTool).toHaveBeenCalledWith(
 			expect.objectContaining({
-				name: 'analyze_project_complexity',
-				description:
-					'Analyze task complexity and generate expansion recommendations',
+				name: "analyze_project_complexity",
+				description: "Analyze task complexity and generate expansion recommendations",
 				parameters: expect.any(Object),
-				execute: expect.any(Function)
-			})
+				execute: expect.any(Function),
+			}),
 		);
 
 		// Verify the tool config was passed
 		const toolConfig = mockServer.addTool.mock.calls[0][0];
-		expect(toolConfig).toHaveProperty('parameters');
-		expect(toolConfig).toHaveProperty('execute');
+		expect(toolConfig).toHaveProperty("parameters");
+		expect(toolConfig).toHaveProperty("execute");
 	});
 
-	test('should execute the tool with valid threshold as number', () => {
+	test("should execute the tool with valid threshold as number", () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Test with valid numeric threshold
@@ -292,46 +283,43 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
 				threshold: 7,
-				projectRoot: '/mock/project/root'
+				projectRoot: "/mock/project/root",
 			}),
 			mockLogger,
-			{ session: mockContext.session }
+			{ session: mockContext.session },
 		);
 
 		// Verify handleApiResult was called
-		expect(mockHandleApiResult).toHaveBeenCalledWith(
-			successResponse,
-			mockLogger
-		);
+		expect(mockHandleApiResult).toHaveBeenCalledWith(successResponse, mockLogger);
 	});
 
-	test('should execute the tool with valid threshold as string', () => {
+	test("should execute the tool with valid threshold as string", () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Test with valid string threshold
-		const args = { ...validArgs, threshold: '7' };
+		const args = { ...validArgs, threshold: "7" };
 		executeFunction(args, mockContext);
 
 		// The mock doesn't actually coerce the string, just verify that the string is passed correctly
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
-				threshold: '7', // Expect string value, not coerced to number in our mock
-				projectRoot: '/mock/project/root'
+				threshold: "7", // Expect string value, not coerced to number in our mock
+				projectRoot: "/mock/project/root",
 			}),
 			mockLogger,
-			{ session: mockContext.session }
+			{ session: mockContext.session },
 		);
 	});
 
-	test('should execute the tool with decimal threshold', () => {
+	test("should execute the tool with decimal threshold", () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Test with decimal threshold
@@ -342,18 +330,18 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
 				threshold: 6.5,
-				projectRoot: '/mock/project/root'
+				projectRoot: "/mock/project/root",
 			}),
 			mockLogger,
-			{ session: mockContext.session }
+			{ session: mockContext.session },
 		);
 	});
 
-	test('should execute the tool without threshold parameter', () => {
+	test("should execute the tool without threshold parameter", () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Test without threshold (should use default)
@@ -363,25 +351,25 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		// Verify threshold is undefined
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
-				projectRoot: '/mock/project/root'
+				projectRoot: "/mock/project/root",
 			}),
 			mockLogger,
-			{ session: mockContext.session }
+			{ session: mockContext.session },
 		);
 
 		// Check threshold is not included
 		const callArgs = mockAnalyzeTaskComplexityDirect.mock.calls[0][0];
-		expect(callArgs).not.toHaveProperty('threshold');
+		expect(callArgs).not.toHaveProperty("threshold");
 	});
 
-	test('should handle errors from analyzeTaskComplexityDirect', () => {
+	test("should handle errors from analyzeTaskComplexityDirect", () => {
 		// Setup error response
 		mockAnalyzeTaskComplexityDirect.mockReturnValueOnce(errorResponse);
 
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Execute the function
@@ -394,9 +382,9 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		expect(mockHandleApiResult).toHaveBeenCalledWith(errorResponse, mockLogger);
 	});
 
-	test('should handle unexpected errors', () => {
+	test("should handle unexpected errors", () => {
 		// Setup error
-		const testError = new Error('Unexpected error');
+		const testError = new Error("Unexpected error");
 		mockAnalyzeTaskComplexityDirect.mockImplementationOnce(() => {
 			throw testError;
 		});
@@ -404,44 +392,42 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Execute the function
 		executeFunction(validArgs, mockContext);
 
 		// Verify error was logged
-		expect(mockLogger.error).toHaveBeenCalledWith(
-			'Error in analyze tool: Unexpected error'
-		);
+		expect(mockLogger.error).toHaveBeenCalledWith("Error in analyze tool: Unexpected error");
 
 		// Verify error response was created
-		expect(mockCreateErrorResponse).toHaveBeenCalledWith('Unexpected error');
+		expect(mockCreateErrorResponse).toHaveBeenCalledWith("Unexpected error");
 	});
 
-	test('should verify research parameter is correctly passed', () => {
+	test("should verify research parameter is correctly passed", () => {
 		// Setup context
 		const mockContext = {
 			log: mockLogger,
-			session: { workingDirectory: '/mock/dir' }
+			session: { workingDirectory: "/mock/dir" },
 		};
 
 		// Test with research=true
 		executeFunction(
 			{
 				...validArgs,
-				research: true
+				research: true,
 			},
-			mockContext
+			mockContext,
 		);
 
 		// Verify analyzeTaskComplexityDirect was called with research=true
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
-				research: true
+				research: true,
 			}),
 			expect.any(Object),
-			expect.any(Object)
+			expect.any(Object),
 		);
 
 		// Reset mocks
@@ -451,18 +437,18 @@ describe('MCP Tool: analyze_project_complexity', () => {
 		executeFunction(
 			{
 				...validArgs,
-				research: false
+				research: false,
 			},
-			mockContext
+			mockContext,
 		);
 
 		// Verify analyzeTaskComplexityDirect was called with research=false
 		expect(mockAnalyzeTaskComplexityDirect).toHaveBeenCalledWith(
 			expect.objectContaining({
-				research: false
+				research: false,
 			}),
 			expect.any(Object),
-			expect.any(Object)
+			expect.any(Object),
 		);
 	});
 });

@@ -7,12 +7,12 @@
  * This script creates a modified version of dev.js that simulates different error scenarios.
  */
 
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { execSync, spawn } from 'child_process';
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { execSync, spawn } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,20 +37,19 @@ This is a simple test PRD to verify the error handling in the callClaude functio
 // Create a modified version of dev.js that simulates errors
 function createErrorSimulationScript(errorType, failureCount = 2) {
 	// Read the original dev.js file
-	const devJsPath = path.join(__dirname, 'dev.js');
-	const devJsContent = fs.readFileSync(devJsPath, 'utf8');
+	const devJsPath = path.join(__dirname, "dev.js");
+	const devJsContent = fs.readFileSync(devJsPath, "utf8");
 
 	// Create a modified version that simulates errors
 	let modifiedContent = devJsContent;
 
 	// Find the anthropic.messages.create call and replace it with our mock
-	const anthropicCallRegex =
-		/const response = await anthropic\.messages\.create\(/;
+	const anthropicCallRegex = /const response = await anthropic\.messages\.create\(/;
 
-	let mockCode = '';
+	let mockCode = "";
 
 	switch (errorType) {
-		case 'network':
+		case "network":
 			mockCode = `
       // Mock for network error simulation
       let currentAttempt = 0;
@@ -68,7 +67,7 @@ function createErrorSimulationScript(errorType, failureCount = 2) {
       const response = await anthropic.messages.create(`;
 			break;
 
-		case 'timeout':
+		case "timeout":
 			mockCode = `
       // Mock for timeout error simulation
       let currentAttempt = 0;
@@ -86,7 +85,7 @@ function createErrorSimulationScript(errorType, failureCount = 2) {
       const response = await anthropic.messages.create(`;
 			break;
 
-		case 'invalid-json':
+		case "invalid-json":
 			mockCode = `
       // Mock for invalid JSON response
       let currentAttempt = 0;
@@ -110,7 +109,7 @@ function createErrorSimulationScript(errorType, failureCount = 2) {
       const response = await anthropic.messages.create(`;
 			break;
 
-		case 'empty-tasks':
+		case "empty-tasks":
 			mockCode = `
       // Mock for empty tasks array
       let currentAttempt = 0;
@@ -144,7 +143,7 @@ function createErrorSimulationScript(errorType, failureCount = 2) {
 
 	// Write the modified script to a temporary file
 	const tempScriptPath = path.join(__dirname, `temp-dev-${errorType}.js`);
-	fs.writeFileSync(tempScriptPath, modifiedContent, 'utf8');
+	fs.writeFileSync(tempScriptPath, modifiedContent, "utf8");
 
 	return tempScriptPath;
 }
@@ -156,7 +155,7 @@ async function runErrorTest(errorType, numTasks = 5, failureCount = 2) {
 	// Create a test PRD
 	const testPRD = createTestPRD();
 	const testPRDPath = path.join(__dirname, `test-prd-${errorType}.txt`);
-	fs.writeFileSync(testPRDPath, testPRD, 'utf8');
+	fs.writeFileSync(testPRDPath, testPRD, "utf8");
 
 	// Create a modified dev.js that simulates the specified error
 	const tempScriptPath = createErrorSimulationScript(errorType, failureCount);
@@ -164,17 +163,14 @@ async function runErrorTest(errorType, numTasks = 5, failureCount = 2) {
 	console.log(`Created test PRD at ${testPRDPath}`);
 	console.log(`Created error simulation script at ${tempScriptPath}`);
 	console.log(
-		`Running with error type: ${errorType}, failure count: ${failureCount}, tasks: ${numTasks}`
+		`Running with error type: ${errorType}, failure count: ${failureCount}, tasks: ${numTasks}`,
 	);
 
 	try {
 		// Run the modified script
-		execSync(
-			`node ${tempScriptPath} parse-prd --input=${testPRDPath} --tasks=${numTasks}`,
-			{
-				stdio: 'inherit'
-			}
-		);
+		execSync(`node ${tempScriptPath} parse-prd --input=${testPRDPath} --tasks=${numTasks}`, {
+			stdio: "inherit",
+		});
 		console.log(`${errorType} error test completed successfully`);
 	} catch (error) {
 		console.error(`${errorType} error test failed:`, error.message);
@@ -191,28 +187,28 @@ async function runErrorTest(errorType, numTasks = 5, failureCount = 2) {
 
 // Function to run all error tests
 async function runAllErrorTests() {
-	console.log('Starting error handling tests for callClaude function...');
+	console.log("Starting error handling tests for callClaude function...");
 
 	// Test 1: Network error with automatic retry
-	await runErrorTest('network', 5, 2);
+	await runErrorTest("network", 5, 2);
 
 	// Test 2: Timeout error with automatic retry
-	await runErrorTest('timeout', 5, 2);
+	await runErrorTest("timeout", 5, 2);
 
 	// Test 3: Invalid JSON response with task reduction
-	await runErrorTest('invalid-json', 10, 2);
+	await runErrorTest("invalid-json", 10, 2);
 
 	// Test 4: Empty tasks array with task reduction
-	await runErrorTest('empty-tasks', 15, 2);
+	await runErrorTest("empty-tasks", 15, 2);
 
 	// Test 5: Exhausted retries (more failures than MAX_RETRIES)
-	await runErrorTest('network', 5, 4);
+	await runErrorTest("network", 5, 4);
 
-	console.log('\nAll error tests completed!');
+	console.log("\nAll error tests completed!");
 }
 
 // Run the tests
 runAllErrorTests().catch((error) => {
-	console.error('Error running tests:', error);
+	console.error("Error running tests:", error);
 	process.exit(1);
 });

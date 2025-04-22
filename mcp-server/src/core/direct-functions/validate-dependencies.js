@@ -2,12 +2,9 @@
  * Direct function wrapper for validateDependenciesCommand
  */
 
-import { validateDependenciesCommand } from '../../../../scripts/modules/dependency-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import fs from 'fs';
+import { validateDependenciesCommand } from "../../../../scripts/modules/dependency-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
+import fs from "fs";
 
 /**
  * Validate dependencies in tasks.json
@@ -21,13 +18,13 @@ export async function validateDependenciesDirect(args, log) {
 	const { tasksJsonPath } = args;
 
 	if (!tasksJsonPath) {
-		log.error('validateDependenciesDirect called without tasksJsonPath');
+		log.error("validateDependenciesDirect called without tasksJsonPath");
 		return {
 			success: false,
 			error: {
-				code: 'MISSING_ARGUMENT',
-				message: 'tasksJsonPath is required'
-			}
+				code: "MISSING_ARGUMENT",
+				message: "tasksJsonPath is required",
+			},
 		};
 	}
 
@@ -42,9 +39,9 @@ export async function validateDependenciesDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'FILE_NOT_FOUND',
-					message: `Tasks file not found at ${tasksPath}`
-				}
+					code: "FILE_NOT_FOUND",
+					message: `Tasks file not found at ${tasksPath}`,
+				},
 			};
 		}
 
@@ -60,9 +57,9 @@ export async function validateDependenciesDirect(args, log) {
 		return {
 			success: true,
 			data: {
-				message: 'Dependencies validated successfully',
-				tasksPath
-			}
+				message: "Dependencies validated successfully",
+				tasksPath,
+			},
 		};
 	} catch (error) {
 		// Make sure to restore normal logging even if there's an error
@@ -72,9 +69,9 @@ export async function validateDependenciesDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'VALIDATION_ERROR',
-				message: error.message
-			}
+				code: "VALIDATION_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

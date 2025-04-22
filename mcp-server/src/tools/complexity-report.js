@@ -3,14 +3,10 @@
  * Tool for displaying the complexity analysis report
  */
 
-import { z } from 'zod';
-import {
-	handleApiResult,
-	createErrorResponse,
-	getProjectRootFromSession
-} from './utils.js';
-import { complexityReportDirect } from '../core/task-master-core.js';
-import path from 'path';
+import { z } from "zod";
+import { handleApiResult, createErrorResponse, getProjectRootFromSession } from "./utils.js";
+import { complexityReportDirect } from "../core/task-master-core.js";
+import path from "path";
 
 /**
  * Register the complexityReport tool with the MCP server
@@ -18,33 +14,26 @@ import path from 'path';
  */
 export function registerComplexityReportTool(server) {
 	server.addTool({
-		name: 'complexity_report',
-		description: 'Display the complexity analysis report in a readable format',
+		name: "complexity_report",
+		description: "Display the complexity analysis report in a readable format",
 		parameters: z.object({
 			file: z
 				.string()
 				.optional()
-				.describe(
-					'Path to the report file (default: scripts/task-complexity-report.json)'
-				),
-			projectRoot: z
-				.string()
-				.describe('The directory of the project. Must be an absolute path.')
+				.describe("Path to the report file (default: scripts/task-complexity-report.json)"),
+			projectRoot: z.string().describe("The directory of the project. Must be an absolute path."),
 		}),
 		execute: async (args, { log, session }) => {
 			try {
-				log.info(
-					`Getting complexity report with args: ${JSON.stringify(args)}`
-				);
+				log.info(`Getting complexity report with args: ${JSON.stringify(args)}`);
 
 				// Get project root from args or session
-				const rootFolder =
-					args.projectRoot || getProjectRootFromSession(session, log);
+				const rootFolder = args.projectRoot || getProjectRootFromSession(session, log);
 
 				// Ensure project root was determined
 				if (!rootFolder) {
 					return createErrorResponse(
-						'Could not determine project root. Please provide it explicitly or ensure your session contains valid root information.'
+						"Could not determine project root. Please provide it explicitly or ensure your session contains valid root information.",
 					);
 				}
 
@@ -52,38 +41,30 @@ export function registerComplexityReportTool(server) {
 				// Default to scripts/task-complexity-report.json relative to root
 				const reportPath = args.file
 					? path.resolve(rootFolder, args.file)
-					: path.resolve(rootFolder, 'scripts', 'task-complexity-report.json');
+					: path.resolve(rootFolder, "scripts", "task-complexity-report.json");
 
 				const result = await complexityReportDirect(
 					{
 						// Pass the explicitly resolved path
-						reportPath: reportPath
+						reportPath: reportPath,
 						// No other args specific to this tool
 					},
-					log
+					log,
 				);
 
 				if (result.success) {
 					log.info(
-						`Successfully retrieved complexity report${result.fromCache ? ' (from cache)' : ''}`
+						`Successfully retrieved complexity report${result.fromCache ? " (from cache)" : ""}`,
 					);
 				} else {
-					log.error(
-						`Failed to retrieve complexity report: ${result.error.message}`
-					);
+					log.error(`Failed to retrieve complexity report: ${result.error.message}`);
 				}
 
-				return handleApiResult(
-					result,
-					log,
-					'Error retrieving complexity report'
-				);
+				return handleApiResult(result, log, "Error retrieving complexity report");
 			} catch (error) {
 				log.error(`Error in complexity-report tool: ${error.message}`);
-				return createErrorResponse(
-					`Failed to retrieve complexity report: ${error.message}`
-				);
+				return createErrorResponse(`Failed to retrieve complexity report: ${error.message}`);
 			}
-		}
+		},
 	});
 }

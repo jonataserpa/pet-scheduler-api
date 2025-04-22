@@ -3,12 +3,12 @@
  * Direct function implementation for setting task status
  */
 
-import { setTaskStatus } from '../../../../scripts/modules/task-manager.js';
+import { setTaskStatus } from "../../../../scripts/modules/task-manager.js";
 import {
 	enableSilentMode,
 	disableSilentMode,
-	isSilentMode
-} from '../../../../scripts/modules/utils.js';
+	isSilentMode,
+} from "../../../../scripts/modules/utils.js";
 
 /**
  * Direct function wrapper for setTaskStatus with error handling.
@@ -25,35 +25,33 @@ export async function setTaskStatusDirect(args, log) {
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			const errorMessage = 'tasksJsonPath is required but was not provided.';
+			const errorMessage = "tasksJsonPath is required but was not provided.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_ARGUMENT', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_ARGUMENT", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		// Check required parameters (id and status)
 		if (!id) {
-			const errorMessage =
-				'No task ID specified. Please provide a task ID to update.';
+			const errorMessage = "No task ID specified. Please provide a task ID to update.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_TASK_ID', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_TASK_ID", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
 		if (!status) {
-			const errorMessage =
-				'No status specified. Please provide a new status value.';
+			const errorMessage = "No status specified. Please provide a new status value.";
 			log.error(errorMessage);
 			return {
 				success: false,
-				error: { code: 'MISSING_STATUS', message: errorMessage },
-				fromCache: false
+				error: { code: "MISSING_STATUS", message: errorMessage },
+				fromCache: false,
 			};
 		}
 
@@ -81,9 +79,9 @@ export async function setTaskStatusDirect(args, log) {
 					message: `Successfully updated task ${taskId} status to "${newStatus}"`,
 					taskId,
 					status: newStatus,
-					tasksPath: tasksPath // Return the path used
+					tasksPath: tasksPath, // Return the path used
 				},
-				fromCache: false // This operation always modifies state and should never be cached
+				fromCache: false, // This operation always modifies state and should never be cached
 			};
 			return result;
 		} catch (error) {
@@ -91,10 +89,10 @@ export async function setTaskStatusDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'SET_STATUS_ERROR',
-					message: error.message || 'Unknown error setting task status'
+					code: "SET_STATUS_ERROR",
+					message: error.message || "Unknown error setting task status",
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		} finally {
 			// ALWAYS restore normal logging in finally block
@@ -110,10 +108,10 @@ export async function setTaskStatusDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'SET_STATUS_ERROR',
-				message: error.message || 'Unknown error setting task status'
+				code: "SET_STATUS_ERROR",
+				message: error.message || "Unknown error setting task status",
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

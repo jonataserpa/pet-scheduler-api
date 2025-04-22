@@ -43,30 +43,30 @@ Core functions should follow this pattern to support both CLI and MCP use:
 function exampleFunction(param1, param2, options = {}) {
 	try {
 		// Skip UI for MCP
-		if (options.source !== 'mcp') {
+		if (options.source !== "mcp") {
 			displayBanner();
-			console.log(chalk.blue('Processing operation...'));
+			console.log(chalk.blue("Processing operation..."));
 		}
 
 		// Do the core business logic
 		const result = doSomething(param1, param2);
 
 		// For MCP, return structured data
-		if (options.source === 'mcp') {
+		if (options.source === "mcp") {
 			return {
 				success: true,
-				data: result
+				data: result,
 			};
 		}
 
 		// For CLI, display output
-		console.log(chalk.green('Operation completed successfully!'));
+		console.log(chalk.green("Operation completed successfully!"));
 	} catch (error) {
 		// Handle errors based on source
-		if (options.source === 'mcp') {
+		if (options.source === "mcp") {
 			return {
 				success: false,
-				error: error.message
+				error: error.message,
 			};
 		}
 
@@ -82,7 +82,7 @@ function exampleFunction(param1, param2, options = {}) {
 For convenience, you can use the source adapter helpers in `scripts/modules/source-adapter.js`:
 
 ```javascript
-import { adaptForMcp, sourceSplitFunction } from './source-adapter.js';
+import { adaptForMcp, sourceSplitFunction } from "./source-adapter.js";
 
 // Simple adaptation - just adds source parameter support
 export const simpleFunction = adaptForMcp(originalFunction);
@@ -99,7 +99,7 @@ export const complexFunction = sourceSplitFunction(
 	function (param1, param2, options = {}) {
 		// ... MCP implementation
 		return { success: true, data };
-	}
+	},
 );
 ```
 
@@ -121,31 +121,31 @@ When adding new features, follow these steps to ensure CLI and MCP compatibility
 export async function newFeature(param1, param2, options = {}) {
 	try {
 		// Source-specific UI
-		if (options.source !== 'mcp') {
+		if (options.source !== "mcp") {
 			displayBanner();
-			console.log(chalk.blue('Running new feature...'));
+			console.log(chalk.blue("Running new feature..."));
 		}
 
 		// Shared core logic
 		const result = processFeature(param1, param2);
 
 		// Source-specific return handling
-		if (options.source === 'mcp') {
+		if (options.source === "mcp") {
 			return {
 				success: true,
-				data: result
+				data: result,
 			};
 		}
 
 		// CLI output
-		console.log(chalk.green('Feature completed successfully!'));
+		console.log(chalk.green("Feature completed successfully!"));
 		displayOutput(result);
 	} catch (error) {
 		// Error handling based on source
-		if (options.source === 'mcp') {
+		if (options.source === "mcp") {
 			return {
 				success: false,
-				error: error.message
+				error: error.message,
 			};
 		}
 
@@ -159,7 +159,7 @@ export async function newFeature(param1, param2, options = {}) {
 
 ```javascript
 // In mcp-server/src/core/task-master-core.js
-import { newFeature } from '../../../scripts/modules/task-manager.js';
+import { newFeature } from "../../../scripts/modules/task-manager.js";
 
 // Add to exports
 export default {
@@ -168,7 +168,7 @@ export default {
 	async newFeature(args = {}, options = {}) {
 		const { param1, param2 } = args;
 		return executeFunction(newFeature, [param1, param2], options);
-	}
+	},
 };
 ```
 
@@ -178,7 +178,7 @@ export default {
 // In mcp-server/src/tools/utils.js
 const commandMap = {
 	// ... existing mappings
-	'new-feature': 'newFeature'
+	"new-feature": "newFeature",
 };
 ```
 
@@ -186,22 +186,18 @@ const commandMap = {
 
 ```javascript
 // In mcp-server/src/tools/newFeature.js
-import { z } from 'zod';
-import {
-	executeTaskMasterCommand,
-	createContentResponse,
-	createErrorResponse
-} from './utils.js';
+import { z } from "zod";
+import { executeTaskMasterCommand, createContentResponse, createErrorResponse } from "./utils.js";
 
 export function registerNewFeatureTool(server) {
 	server.addTool({
-		name: 'newFeature',
-		description: 'Run the new feature',
+		name: "newFeature",
+		description: "Run the new feature",
 		parameters: z.object({
-			param1: z.string().describe('First parameter'),
-			param2: z.number().optional().describe('Second parameter'),
-			file: z.string().optional().describe('Path to the tasks file'),
-			projectRoot: z.string().describe('Root directory of the project')
+			param1: z.string().describe("First parameter"),
+			param2: z.number().optional().describe("Second parameter"),
+			file: z.string().optional().describe("Path to the tasks file"),
+			projectRoot: z.string().describe("Root directory of the project"),
 		}),
 		execute: async (args, { log }) => {
 			try {
@@ -215,12 +211,7 @@ export function registerNewFeatureTool(server) {
 				const projectRoot = args.projectRoot;
 
 				// Execute the command
-				const result = await executeTaskMasterCommand(
-					'new-feature',
-					log,
-					cmdArgs,
-					projectRoot
-				);
+				const result = await executeTaskMasterCommand("new-feature", log, cmdArgs, projectRoot);
 
 				if (!result.success) {
 					throw new Error(result.error);
@@ -231,7 +222,7 @@ export function registerNewFeatureTool(server) {
 				log.error(`Error in new feature: ${error.message}`);
 				return createErrorResponse(`Error in new feature: ${error.message}`);
 			}
-		}
+		},
 	});
 }
 ```
@@ -240,7 +231,7 @@ export function registerNewFeatureTool(server) {
 
 ```javascript
 // In mcp-server/src/tools/index.js
-import { registerNewFeatureTool } from './newFeature.js';
+import { registerNewFeatureTool } from "./newFeature.js";
 
 export function registerTaskMasterTools(server) {
 	// ... existing registrations

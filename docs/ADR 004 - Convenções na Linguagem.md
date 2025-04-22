@@ -1,6 +1,7 @@
 # ADR 004 - Convenções na Linguagem
 
 ## Status
+
 Proposto
 
 ## Contexto

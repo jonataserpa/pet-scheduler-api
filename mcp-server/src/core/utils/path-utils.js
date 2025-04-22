@@ -8,10 +8,10 @@
  * 2. PROJECT PATH: Where user's tasks.json resides (typically user's project root)
  */
 
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import os from 'os';
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import os from "os";
 
 // Store last found project root to improve performance on subsequent calls (primarily for CLI)
 export let lastFoundProjectRoot = null;
@@ -19,42 +19,42 @@ export let lastFoundProjectRoot = null;
 // Project marker files that indicate a potential project root
 export const PROJECT_MARKERS = [
 	// Task Master specific
-	'tasks.json',
-	'tasks/tasks.json',
+	"tasks.json",
+	"tasks/tasks.json",
 
 	// Common version control
-	'.git',
-	'.svn',
+	".git",
+	".svn",
 
 	// Common package files
-	'package.json',
-	'pyproject.toml',
-	'Gemfile',
-	'go.mod',
-	'Cargo.toml',
+	"package.json",
+	"pyproject.toml",
+	"Gemfile",
+	"go.mod",
+	"Cargo.toml",
 
 	// Common IDE/editor folders
-	'.cursor',
-	'.vscode',
-	'.idea',
+	".cursor",
+	".vscode",
+	".idea",
 
 	// Common dependency directories (check if directory)
-	'node_modules',
-	'venv',
-	'.venv',
+	"node_modules",
+	"venv",
+	".venv",
 
 	// Common config files
-	'.env',
-	'.eslintrc',
-	'tsconfig.json',
-	'babel.config.js',
-	'jest.config.js',
-	'webpack.config.js',
+	".env",
+	".eslintrc",
+	"tsconfig.json",
+	"babel.config.js",
+	"jest.config.js",
+	"webpack.config.js",
 
 	// Common CI/CD files
-	'.github/workflows',
-	'.gitlab-ci.yml',
-	'.circleci/config.yml'
+	".github/workflows",
+	".gitlab-ci.yml",
+	".circleci/config.yml",
 ];
 
 /**
@@ -71,7 +71,7 @@ export function getPackagePath() {
 	// Navigate from core/utils up to the package root
 	// In dev: /path/to/task-master/mcp-server/src/core/utils -> /path/to/task-master
 	// In npm: /path/to/node_modules/task-master/mcp-server/src/core/utils -> /path/to/node_modules/task-master
-	return path.resolve(thisFileDir, '../../../../');
+	return path.resolve(thisFileDir, "../../../../");
 }
 
 /**
@@ -100,12 +100,9 @@ export function findTasksJsonPath(args, log) {
 				projectRoot,
 				currentDir: process.cwd(),
 				serverDir: path.dirname(process.argv[1]),
-				possibleProjectRoot: path.resolve(
-					path.dirname(process.argv[1]),
-					'../..'
-				),
+				possibleProjectRoot: path.resolve(path.dirname(process.argv[1]), "../.."),
 				lastFoundProjectRoot,
-				searchedPaths: error.message
+				searchedPaths: error.message,
 			};
 
 			error.message = `Tasks file not found in any of the expected locations relative to project root "${projectRoot}" (from session).\nDebug Info: ${JSON.stringify(debugInfo, null, 2)}`;
@@ -120,25 +117,17 @@ export function findTasksJsonPath(args, log) {
 		log.info(`Trying last known project root: ${lastFoundProjectRoot}`);
 		try {
 			// Use the cached root
-			const tasksPath = findTasksJsonInDirectory(
-				lastFoundProjectRoot,
-				args.file,
-				log
-			);
+			const tasksPath = findTasksJsonInDirectory(lastFoundProjectRoot, args.file, log);
 			return tasksPath; // Return if found in cached root
 		} catch (error) {
-			log.info(
-				`Task file not found in last known project root, continuing search.`
-			);
+			log.info(`Task file not found in last known project root, continuing search.`);
 			// Continue with search if not found in cache
 		}
 	}
 
 	// 3. Start search from current directory (most common CLI scenario)
 	const startDir = process.cwd();
-	log.info(
-		`Searching for tasks.json starting from current directory: ${startDir}`
-	);
+	log.info(`Searching for tasks.json starting from current directory: ${startDir}`);
 
 	// Try to find tasks.json by walking up the directory tree from cwd
 	try {
@@ -181,12 +170,9 @@ function findTasksJsonInDirectory(dirPath, explicitFilePath, log) {
 	}
 
 	// 2. Check the standard locations relative to dirPath
-	possiblePaths.push(
-		path.join(dirPath, 'tasks.json'),
-		path.join(dirPath, 'tasks', 'tasks.json')
-	);
+	possiblePaths.push(path.join(dirPath, "tasks.json"), path.join(dirPath, "tasks", "tasks.json"));
 
-	log.info(`Checking potential task file paths: ${possiblePaths.join(', ')}`);
+	log.info(`Checking potential task file paths: ${possiblePaths.join(", ")}`);
 
 	// Find the first existing path
 	for (const p of possiblePaths) {
@@ -204,9 +190,9 @@ function findTasksJsonInDirectory(dirPath, explicitFilePath, log) {
 
 	// If no file was found, throw an error
 	const error = new Error(
-		`Tasks file not found in any of the expected locations relative to ${dirPath}: ${possiblePaths.join(', ')}`
+		`Tasks file not found in any of the expected locations relative to ${dirPath}: ${possiblePaths.join(", ")}`,
 	);
-	error.code = 'TASKS_FILE_NOT_FOUND';
+	error.code = "TASKS_FILE_NOT_FOUND";
 	throw error;
 }
 
@@ -244,17 +230,15 @@ function findTasksJsonWithParentSearch(startDir, explicitFilePath, log) {
 			}
 
 			log.info(
-				`Tasks file not found in ${currentDir}, searching in parent directory: ${parentDir}`
+				`Tasks file not found in ${currentDir}, searching in parent directory: ${parentDir}`,
 			);
 			currentDir = parentDir;
 		}
 	}
 
 	// If we've searched all the way to the root and found nothing
-	const error = new Error(
-		`Tasks file not found in ${startDir} or any parent directory.`
-	);
-	error.code = 'TASKS_FILE_NOT_FOUND';
+	const error = new Error(`Tasks file not found in ${startDir} or any parent directory.`);
+	error.code = "TASKS_FILE_NOT_FOUND";
 	throw error;
 }
 
@@ -279,11 +263,7 @@ function findTasksWithNpmConsideration(startDir, log) {
 
 			try {
 				// Check standard locations in home dir
-				return findTasksJsonInDirectory(
-					path.join(homeDir, '.task-master'),
-					null,
-					log
-				);
+				return findTasksJsonInDirectory(path.join(homeDir, ".task-master"), null, log);
 			} catch (thirdError) {
 				// If all approaches fail, throw the original error
 				throw error;
@@ -310,19 +290,17 @@ export function findPRDDocumentPath(projectRoot, explicitPath, log) {
 			log.info(`Using provided PRD document path: ${fullPath}`);
 			return fullPath;
 		} else {
-			log.warn(
-				`Provided PRD document path not found: ${fullPath}, will search for alternatives`
-			);
+			log.warn(`Provided PRD document path not found: ${fullPath}, will search for alternatives`);
 		}
 	}
 
 	// Common locations and file patterns for PRD documents
 	const commonLocations = [
-		'', // Project root
-		'scripts/'
+		"", // Project root
+		"scripts/",
 	];
 
-	const commonFileNames = ['PRD.md', 'prd.md', 'PRD.txt', 'prd.txt'];
+	const commonFileNames = ["PRD.md", "prd.md", "PRD.txt", "prd.txt"];
 
 	// Check all possible combinations
 	for (const location of commonLocations) {
@@ -358,7 +336,7 @@ export function resolveTasksOutputPath(projectRoot, explicitPath, log) {
 	}
 
 	// Default output path: tasks/tasks.json in the project root
-	const defaultPath = path.resolve(projectRoot, 'tasks', 'tasks.json');
+	const defaultPath = path.resolve(projectRoot, "tasks", "tasks.json");
 	log.info(`Using default tasks output path: ${defaultPath}`);
 
 	// Ensure the directory exists
@@ -387,7 +365,7 @@ export function resolveProjectPaths(projectRoot, args, log) {
 	return {
 		projectRoot,
 		prdPath,
-		tasksJsonPath
+		tasksJsonPath,
 		// Add additional path properties as needed
 	};
 }

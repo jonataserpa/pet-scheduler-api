@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 class AsyncOperationManager {
 	constructor() {
@@ -19,7 +19,7 @@ class AsyncOperationManager {
 		const operationId = `op-${uuidv4()}`;
 		const operation = {
 			id: operationId,
-			status: 'pending',
+			status: "pending",
 			startTime: Date.now(),
 			endTime: null,
 			result: null,
@@ -27,24 +27,21 @@ class AsyncOperationManager {
 			// Store necessary parts of context, especially log for background execution
 			log: context.log,
 			reportProgress: context.reportProgress, // Pass reportProgress through
-			session: context.session // Pass session through if needed by the operationFn
+			session: context.session, // Pass session through if needed by the operationFn
 		};
 		this.operations.set(operationId, operation);
-		this.log(operationId, 'info', `Operation added.`);
+		this.log(operationId, "info", `Operation added.`);
 
 		// Start execution in the background (don't await here)
 		this._runOperation(operationId, operationFn, args, context).catch((err) => {
 			// Catch unexpected errors during the async execution setup itself
-			this.log(
-				operationId,
-				'error',
-				`Critical error starting operation: ${err.message}`,
-				{ stack: err.stack }
-			);
-			operation.status = 'failed';
+			this.log(operationId, "error", `Critical error starting operation: ${err.message}`, {
+				stack: err.stack,
+			});
+			operation.status = "failed";
 			operation.error = {
-				code: 'MANAGER_EXECUTION_ERROR',
-				message: err.message
+				code: "MANAGER_EXECUTION_ERROR",
+				message: err.message,
 			};
 			operation.endTime = Date.now();
 
@@ -66,52 +63,44 @@ class AsyncOperationManager {
 		const operation = this.operations.get(operationId);
 		if (!operation) return; // Should not happen
 
-		operation.status = 'running';
-		this.log(operationId, 'info', `Operation running.`);
-		this.emit('statusChanged', { operationId, status: 'running' });
+		operation.status = "running";
+		this.log(operationId, "info", `Operation running.`);
+		this.emit("statusChanged", { operationId, status: "running" });
 
 		try {
 			// Pass the necessary context parts to the direct function
 			// The direct function needs to be adapted if it needs reportProgress
 			// We pass the original context's log, plus our wrapped reportProgress
 			const result = await operationFn(args, operation.log, {
-				reportProgress: (progress) =>
-					this._handleProgress(operationId, progress),
+				reportProgress: (progress) => this._handleProgress(operationId, progress),
 				mcpLog: operation.log, // Pass log as mcpLog if direct fn expects it
-				session: operation.session
+				session: operation.session,
 			});
 
-			operation.status = result.success ? 'completed' : 'failed';
+			operation.status = result.success ? "completed" : "failed";
 			operation.result = result.success ? result.data : null;
 			operation.error = result.success ? null : result.error;
-			this.log(
-				operationId,
-				'info',
-				`Operation finished with status: ${operation.status}`
-			);
+			this.log(operationId, "info", `Operation finished with status: ${operation.status}`);
 		} catch (error) {
-			this.log(
-				operationId,
-				'error',
-				`Operation failed with error: ${error.message}`,
-				{ stack: error.stack }
-			);
-			operation.status = 'failed';
+			this.log(operationId, "error", `Operation failed with error: ${error.message}`, {
+				stack: error.stack,
+			});
+			operation.status = "failed";
 			operation.error = {
-				code: 'OPERATION_EXECUTION_ERROR',
-				message: error.message
+				code: "OPERATION_EXECUTION_ERROR",
+				message: error.message,
 			};
 		} finally {
 			operation.endTime = Date.now();
-			this.emit('statusChanged', {
+			this.emit("statusChanged", {
 				operationId,
 				status: operation.status,
 				result: operation.result,
-				error: operation.error
+				error: operation.error,
 			});
 
 			// Move to completed operations if done or failed
-			if (operation.status === 'completed' || operation.status === 'failed') {
+			if (operation.status === "completed" || operation.status === "failed") {
 				this._moveToCompleted(operationId);
 			}
 		}
@@ -133,7 +122,7 @@ class AsyncOperationManager {
 			startTime: operation.startTime,
 			endTime: operation.endTime,
 			result: operation.result,
-			error: operation.error
+			error: operation.error,
 		};
 
 		this.completedOperations.set(operationId, completedData);
@@ -143,7 +132,7 @@ class AsyncOperationManager {
 		if (this.completedOperations.size > this.maxCompletedOperations) {
 			// Get the oldest operation (sorted by endTime)
 			const oldest = [...this.completedOperations.entries()].sort(
-				(a, b) => a[1].endTime - b[1].endTime
+				(a, b) => a[1].endTime - b[1].endTime,
 			)[0];
 
 			if (oldest) {
@@ -163,17 +152,9 @@ class AsyncOperationManager {
 			try {
 				// Use the reportProgress function captured from the original context
 				operation.reportProgress(progress);
-				this.log(
-					operationId,
-					'debug',
-					`Reported progress: ${JSON.stringify(progress)}`
-				);
+				this.log(operationId, "debug", `Reported progress: ${JSON.stringify(progress)}`);
 			} catch (err) {
-				this.log(
-					operationId,
-					'warn',
-					`Failed to report progress: ${err.message}`
-				);
+				this.log(operationId, "warn", `Failed to report progress: ${err.message}`);
 				// Don't stop the operation, just log the reporting failure
 			}
 		}
@@ -194,7 +175,7 @@ class AsyncOperationManager {
 				startTime: operation.startTime,
 				endTime: operation.endTime,
 				result: operation.result,
-				error: operation.error
+				error: operation.error,
 			};
 		}
 
@@ -207,10 +188,10 @@ class AsyncOperationManager {
 		// Operation not found in either active or completed
 		return {
 			error: {
-				code: 'OPERATION_NOT_FOUND',
-				message: `Operation ID ${operationId} not found. It may have been completed and removed from history, or the ID may be invalid.`
+				code: "OPERATION_NOT_FOUND",
+				message: `Operation ID ${operationId} not found. It may have been completed and removed from history, or the ID may be invalid.`,
 			},
-			status: 'not_found'
+			status: "not_found",
 		};
 	}
 

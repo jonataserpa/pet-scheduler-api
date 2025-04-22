@@ -2,32 +2,32 @@
  * Dependency Manager module tests
  */
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 import {
 	validateTaskDependencies,
 	isCircularDependency,
 	removeDuplicateDependencies,
 	cleanupSubtaskDependencies,
 	ensureAtLeastOneIndependentSubtask,
-	validateAndFixDependencies
-} from '../../scripts/modules/dependency-manager.js';
-import * as utils from '../../scripts/modules/utils.js';
-import { sampleTasks } from '../fixtures/sample-tasks.js';
+	validateAndFixDependencies,
+} from "../../scripts/modules/dependency-manager.js";
+import * as utils from "../../scripts/modules/utils.js";
+import { sampleTasks } from "../fixtures/sample-tasks.js";
 
 // Mock dependencies
-jest.mock('path');
-jest.mock('chalk', () => ({
+jest.mock("path");
+jest.mock("chalk", () => ({
 	green: jest.fn((text) => `<green>${text}</green>`),
 	yellow: jest.fn((text) => `<yellow>${text}</yellow>`),
 	red: jest.fn((text) => `<red>${text}</red>`),
 	cyan: jest.fn((text) => `<cyan>${text}</cyan>`),
-	bold: jest.fn((text) => `<bold>${text}</bold>`)
+	bold: jest.fn((text) => `<bold>${text}</bold>`),
 }));
 
-jest.mock('boxen', () => jest.fn((text) => `[boxed: ${text}]`));
+jest.mock("boxen", () => jest.fn((text) => `[boxed: ${text}]`));
 
-jest.mock('@anthropic-ai/sdk', () => ({
-	Anthropic: jest.fn().mockImplementation(() => ({}))
+jest.mock("@anthropic-ai/sdk", () => ({
+	Anthropic: jest.fn().mockImplementation(() => ({})),
 }));
 
 // Mock utils module
@@ -38,51 +38,45 @@ const mockLog = jest.fn();
 const mockReadJSON = jest.fn();
 const mockWriteJSON = jest.fn();
 
-jest.mock('../../scripts/modules/utils.js', () => ({
+jest.mock("../../scripts/modules/utils.js", () => ({
 	log: mockLog,
 	readJSON: mockReadJSON,
 	writeJSON: mockWriteJSON,
 	taskExists: mockTaskExists,
 	formatTaskId: mockFormatTaskId,
-	findCycles: mockFindCycles
+	findCycles: mockFindCycles,
 }));
 
-jest.mock('../../scripts/modules/ui.js', () => ({
-	displayBanner: jest.fn()
+jest.mock("../../scripts/modules/ui.js", () => ({
+	displayBanner: jest.fn(),
 }));
 
-jest.mock('../../scripts/modules/task-manager.js', () => ({
-	generateTaskFiles: jest.fn()
+jest.mock("../../scripts/modules/task-manager.js", () => ({
+	generateTaskFiles: jest.fn(),
 }));
 
 // Create a path for test files
-const TEST_TASKS_PATH = 'tests/fixture/test-tasks.json';
+const TEST_TASKS_PATH = "tests/fixture/test-tasks.json";
 
-describe('Dependency Manager Module', () => {
+describe("Dependency Manager Module", () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
 		// Set default implementations
 		mockTaskExists.mockImplementation((tasks, id) => {
 			if (Array.isArray(tasks)) {
-				if (typeof id === 'string' && id.includes('.')) {
-					const [taskId, subtaskId] = id.split('.').map(Number);
+				if (typeof id === "string" && id.includes(".")) {
+					const [taskId, subtaskId] = id.split(".").map(Number);
 					const task = tasks.find((t) => t.id === taskId);
-					return (
-						task &&
-						task.subtasks &&
-						task.subtasks.some((st) => st.id === subtaskId)
-					);
+					return task && task.subtasks && task.subtasks.some((st) => st.id === subtaskId);
 				}
-				return tasks.some(
-					(task) => task.id === (typeof id === 'string' ? parseInt(id, 10) : id)
-				);
+				return tasks.some((task) => task.id === (typeof id === "string" ? parseInt(id, 10) : id));
 			}
 			return false;
 		});
 
 		mockFormatTaskId.mockImplementation((id) => {
-			if (typeof id === 'string' && id.includes('.')) {
+			if (typeof id === "string" && id.includes(".")) {
 				return id;
 			}
 			return parseInt(id, 10);
@@ -130,180 +124,174 @@ describe('Dependency Manager Module', () => {
 		});
 	});
 
-	describe('isCircularDependency function', () => {
-		test('should detect a direct circular dependency', () => {
+	describe("isCircularDependency function", () => {
+		test("should detect a direct circular dependency", () => {
 			const tasks = [
 				{ id: 1, dependencies: [2] },
-				{ id: 2, dependencies: [1] }
+				{ id: 2, dependencies: [1] },
 			];
 
 			const result = isCircularDependency(tasks, 1);
 			expect(result).toBe(true);
 		});
 
-		test('should detect an indirect circular dependency', () => {
+		test("should detect an indirect circular dependency", () => {
 			const tasks = [
 				{ id: 1, dependencies: [2] },
 				{ id: 2, dependencies: [3] },
-				{ id: 3, dependencies: [1] }
+				{ id: 3, dependencies: [1] },
 			];
 
 			const result = isCircularDependency(tasks, 1);
 			expect(result).toBe(true);
 		});
 
-		test('should return false for non-circular dependencies', () => {
+		test("should return false for non-circular dependencies", () => {
 			const tasks = [
 				{ id: 1, dependencies: [2] },
 				{ id: 2, dependencies: [3] },
-				{ id: 3, dependencies: [] }
+				{ id: 3, dependencies: [] },
 			];
 
 			const result = isCircularDependency(tasks, 1);
 			expect(result).toBe(false);
 		});
 
-		test('should handle a task with no dependencies', () => {
+		test("should handle a task with no dependencies", () => {
 			const tasks = [
 				{ id: 1, dependencies: [] },
-				{ id: 2, dependencies: [1] }
+				{ id: 2, dependencies: [1] },
 			];
 
 			const result = isCircularDependency(tasks, 1);
 			expect(result).toBe(false);
 		});
 
-		test('should handle a task depending on itself', () => {
+		test("should handle a task depending on itself", () => {
 			const tasks = [{ id: 1, dependencies: [1] }];
 
 			const result = isCircularDependency(tasks, 1);
 			expect(result).toBe(true);
 		});
 
-		test('should handle subtask dependencies correctly', () => {
+		test("should handle subtask dependencies correctly", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
-						{ id: 1, dependencies: ['1.2'] },
-						{ id: 2, dependencies: ['1.3'] },
-						{ id: 3, dependencies: ['1.1'] }
-					]
-				}
+						{ id: 1, dependencies: ["1.2"] },
+						{ id: 2, dependencies: ["1.3"] },
+						{ id: 3, dependencies: ["1.1"] },
+					],
+				},
 			];
 
 			// This creates a circular dependency: 1.1 -> 1.2 -> 1.3 -> 1.1
-			const result = isCircularDependency(tasks, '1.1', ['1.3', '1.2']);
+			const result = isCircularDependency(tasks, "1.1", ["1.3", "1.2"]);
 			expect(result).toBe(true);
 		});
 
-		test('should allow non-circular subtask dependencies within same parent', () => {
+		test("should allow non-circular subtask dependencies within same parent", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
 						{ id: 1, dependencies: [] },
-						{ id: 2, dependencies: ['1.1'] },
-						{ id: 3, dependencies: ['1.2'] }
-					]
-				}
+						{ id: 2, dependencies: ["1.1"] },
+						{ id: 3, dependencies: ["1.2"] },
+					],
+				},
 			];
 
 			// This is a valid dependency chain: 1.3 -> 1.2 -> 1.1
-			const result = isCircularDependency(tasks, '1.1', []);
+			const result = isCircularDependency(tasks, "1.1", []);
 			expect(result).toBe(false);
 		});
 
-		test('should properly handle dependencies between subtasks of the same parent', () => {
+		test("should properly handle dependencies between subtasks of the same parent", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
 						{ id: 1, dependencies: [] },
-						{ id: 2, dependencies: ['1.1'] },
-						{ id: 3, dependencies: [] }
-					]
-				}
+						{ id: 2, dependencies: ["1.1"] },
+						{ id: 3, dependencies: [] },
+					],
+				},
 			];
 
 			// Check if adding a dependency from subtask 1.3 to 1.2 creates a circular dependency
 			// This should be false as 1.3 -> 1.2 -> 1.1 is a valid chain
 			mockTaskExists.mockImplementation(() => true);
-			const result = isCircularDependency(tasks, '1.3', ['1.2']);
+			const result = isCircularDependency(tasks, "1.3", ["1.2"]);
 			expect(result).toBe(false);
 		});
 
-		test('should correctly detect circular dependencies in subtasks of the same parent', () => {
+		test("should correctly detect circular dependencies in subtasks of the same parent", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
-						{ id: 1, dependencies: ['1.3'] },
-						{ id: 2, dependencies: ['1.1'] },
-						{ id: 3, dependencies: ['1.2'] }
-					]
-				}
+						{ id: 1, dependencies: ["1.3"] },
+						{ id: 2, dependencies: ["1.1"] },
+						{ id: 3, dependencies: ["1.2"] },
+					],
+				},
 			];
 
 			// This creates a circular dependency: 1.1 -> 1.3 -> 1.2 -> 1.1
 			mockTaskExists.mockImplementation(() => true);
-			const result = isCircularDependency(tasks, '1.2', ['1.1']);
+			const result = isCircularDependency(tasks, "1.2", ["1.1"]);
 			expect(result).toBe(true);
 		});
 	});
 
-	describe('validateTaskDependencies function', () => {
-		test('should detect missing dependencies', () => {
+	describe("validateTaskDependencies function", () => {
+		test("should detect missing dependencies", () => {
 			const tasks = [
 				{ id: 1, dependencies: [99] }, // 99 doesn't exist
-				{ id: 2, dependencies: [1] }
+				{ id: 2, dependencies: [1] },
 			];
 
 			const result = validateTaskDependencies(tasks);
 
 			expect(result.valid).toBe(false);
 			expect(result.issues.length).toBeGreaterThan(0);
-			expect(result.issues[0].type).toBe('missing');
+			expect(result.issues[0].type).toBe("missing");
 			expect(result.issues[0].taskId).toBe(1);
 			expect(result.issues[0].dependencyId).toBe(99);
 		});
 
-		test('should detect circular dependencies', () => {
+		test("should detect circular dependencies", () => {
 			const tasks = [
 				{ id: 1, dependencies: [2] },
-				{ id: 2, dependencies: [1] }
+				{ id: 2, dependencies: [1] },
 			];
 
 			const result = validateTaskDependencies(tasks);
 
 			expect(result.valid).toBe(false);
-			expect(result.issues.some((issue) => issue.type === 'circular')).toBe(
-				true
-			);
+			expect(result.issues.some((issue) => issue.type === "circular")).toBe(true);
 		});
 
-		test('should detect self-dependencies', () => {
+		test("should detect self-dependencies", () => {
 			const tasks = [{ id: 1, dependencies: [1] }];
 
 			const result = validateTaskDependencies(tasks);
 
 			expect(result.valid).toBe(false);
-			expect(
-				result.issues.some(
-					(issue) => issue.type === 'self' && issue.taskId === 1
-				)
-			).toBe(true);
+			expect(result.issues.some((issue) => issue.type === "self" && issue.taskId === 1)).toBe(true);
 		});
 
-		test('should return valid for correct dependencies', () => {
+		test("should return valid for correct dependencies", () => {
 			const tasks = [
 				{ id: 1, dependencies: [] },
 				{ id: 2, dependencies: [1] },
-				{ id: 3, dependencies: [1, 2] }
+				{ id: 3, dependencies: [1, 2] },
 			];
 
 			const result = validateTaskDependencies(tasks);
@@ -312,10 +300,10 @@ describe('Dependency Manager Module', () => {
 			expect(result.issues.length).toBe(0);
 		});
 
-		test('should handle tasks with no dependencies property', () => {
+		test("should handle tasks with no dependencies property", () => {
 			const tasks = [
 				{ id: 1 }, // Missing dependencies property
-				{ id: 2, dependencies: [1] }
+				{ id: 2, dependencies: [1] },
 			];
 
 			const result = validateTaskDependencies(tasks);
@@ -324,34 +312,30 @@ describe('Dependency Manager Module', () => {
 			expect(result.valid).toBe(true);
 		});
 
-		test('should handle subtask dependencies correctly', () => {
+		test("should handle subtask dependencies correctly", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
 						{ id: 1, dependencies: [] },
-						{ id: 2, dependencies: ['1.1'] }, // Valid - depends on another subtask
-						{ id: 3, dependencies: ['1.2'] } // Valid - depends on another subtask
-					]
+						{ id: 2, dependencies: ["1.1"] }, // Valid - depends on another subtask
+						{ id: 3, dependencies: ["1.2"] }, // Valid - depends on another subtask
+					],
 				},
 				{
 					id: 2,
-					dependencies: ['1.3'], // Valid - depends on a subtask from task 1
-					subtasks: []
-				}
+					dependencies: ["1.3"], // Valid - depends on a subtask from task 1
+					subtasks: [],
+				},
 			];
 
 			// Set up mock to handle subtask validation
 			mockTaskExists.mockImplementation((tasks, id) => {
-				if (typeof id === 'string' && id.includes('.')) {
-					const [taskId, subtaskId] = id.split('.').map(Number);
+				if (typeof id === "string" && id.includes(".")) {
+					const [taskId, subtaskId] = id.split(".").map(Number);
 					const task = tasks.find((t) => t.id === taskId);
-					return (
-						task &&
-						task.subtasks &&
-						task.subtasks.some((st) => st.id === subtaskId)
-					);
+					return task && task.subtasks && task.subtasks.some((st) => st.id === subtaskId);
 				}
 				return tasks.some((task) => task.id === parseInt(id, 10));
 			});
@@ -362,29 +346,29 @@ describe('Dependency Manager Module', () => {
 			expect(result.issues.length).toBe(0);
 		});
 
-		test('should detect missing subtask dependencies', () => {
+		test("should detect missing subtask dependencies", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
-						{ id: 1, dependencies: ['1.4'] }, // Invalid - subtask 4 doesn't exist
-						{ id: 2, dependencies: ['2.1'] } // Invalid - task 2 has no subtasks
-					]
+						{ id: 1, dependencies: ["1.4"] }, // Invalid - subtask 4 doesn't exist
+						{ id: 2, dependencies: ["2.1"] }, // Invalid - task 2 has no subtasks
+					],
 				},
 				{
 					id: 2,
 					dependencies: [],
-					subtasks: []
-				}
+					subtasks: [],
+				},
 			];
 
 			// Mock taskExists to correctly identify missing subtasks
 			mockTaskExists.mockImplementation((taskArray, depId) => {
-				if (typeof depId === 'string' && depId === '1.4') {
+				if (typeof depId === "string" && depId === "1.4") {
 					return false; // Subtask 1.4 doesn't exist
 				}
-				if (typeof depId === 'string' && depId === '2.1') {
+				if (typeof depId === "string" && depId === "2.1") {
 					return false; // Subtask 2.1 doesn't exist
 				}
 				return true; // All other dependencies exist
@@ -398,23 +382,23 @@ describe('Dependency Manager Module', () => {
 			expect(
 				result.issues.some(
 					(issue) =>
-						issue.type === 'missing' &&
-						String(issue.taskId) === '1.1' &&
-						String(issue.dependencyId) === '1.4'
-				)
+						issue.type === "missing" &&
+						String(issue.taskId) === "1.1" &&
+						String(issue.dependencyId) === "1.4",
+				),
 			).toBe(true);
 		});
 
-		test('should detect circular dependencies between subtasks', () => {
+		test("should detect circular dependencies between subtasks", () => {
 			const tasks = [
 				{
 					id: 1,
 					dependencies: [],
 					subtasks: [
-						{ id: 1, dependencies: ['1.2'] },
-						{ id: 2, dependencies: ['1.1'] } // Creates a circular dependency with 1.1
-					]
-				}
+						{ id: 1, dependencies: ["1.2"] },
+						{ id: 2, dependencies: ["1.1"] }, // Creates a circular dependency with 1.1
+					],
+				},
 			];
 
 			// Mock isCircularDependency for subtasks
@@ -423,28 +407,26 @@ describe('Dependency Manager Module', () => {
 			const result = validateTaskDependencies(tasks);
 
 			expect(result.valid).toBe(false);
-			expect(result.issues.some((issue) => issue.type === 'circular')).toBe(
-				true
-			);
+			expect(result.issues.some((issue) => issue.type === "circular")).toBe(true);
 		});
 
-		test('should properly validate dependencies between subtasks of the same parent', () => {
+		test("should properly validate dependencies between subtasks of the same parent", () => {
 			const tasks = [
 				{
 					id: 23,
 					dependencies: [],
 					subtasks: [
-						{ id: 8, dependencies: ['23.13'] },
-						{ id: 10, dependencies: ['23.8'] },
-						{ id: 13, dependencies: [] }
-					]
-				}
+						{ id: 8, dependencies: ["23.13"] },
+						{ id: 10, dependencies: ["23.8"] },
+						{ id: 13, dependencies: [] },
+					],
+				},
 			];
 
 			// Mock taskExists to validate the subtask dependencies
 			mockTaskExists.mockImplementation((taskArray, id) => {
-				if (typeof id === 'string') {
-					if (id === '23.8' || id === '23.10' || id === '23.13') {
+				if (typeof id === "string") {
+					if (id === "23.8" || id === "23.10" || id === "23.13") {
 						return true;
 					}
 				}
@@ -458,14 +440,14 @@ describe('Dependency Manager Module', () => {
 		});
 	});
 
-	describe('removeDuplicateDependencies function', () => {
-		test('should remove duplicate dependencies from tasks', () => {
+	describe("removeDuplicateDependencies function", () => {
+		test("should remove duplicate dependencies from tasks", () => {
 			const tasksData = {
 				tasks: [
 					{ id: 1, dependencies: [2, 2, 3, 3, 3] },
 					{ id: 2, dependencies: [3] },
-					{ id: 3, dependencies: [] }
-				]
+					{ id: 3, dependencies: [] },
+				],
 			};
 
 			const result = removeDuplicateDependencies(tasksData);
@@ -475,12 +457,12 @@ describe('Dependency Manager Module', () => {
 			expect(result.tasks[2].dependencies).toEqual([]);
 		});
 
-		test('should handle empty dependencies array', () => {
+		test("should handle empty dependencies array", () => {
 			const tasksData = {
 				tasks: [
 					{ id: 1, dependencies: [] },
-					{ id: 2, dependencies: [1] }
-				]
+					{ id: 2, dependencies: [1] },
+				],
 			};
 
 			const result = removeDuplicateDependencies(tasksData);
@@ -489,23 +471,23 @@ describe('Dependency Manager Module', () => {
 			expect(result.tasks[1].dependencies).toEqual([1]);
 		});
 
-		test('should handle tasks with no dependencies property', () => {
+		test("should handle tasks with no dependencies property", () => {
 			const tasksData = {
 				tasks: [
 					{ id: 1 }, // No dependencies property
-					{ id: 2, dependencies: [1] }
-				]
+					{ id: 2, dependencies: [1] },
+				],
 			};
 
 			const result = removeDuplicateDependencies(tasksData);
 
-			expect(result.tasks[0]).not.toHaveProperty('dependencies');
+			expect(result.tasks[0]).not.toHaveProperty("dependencies");
 			expect(result.tasks[1].dependencies).toEqual([1]);
 		});
 	});
 
-	describe('cleanupSubtaskDependencies function', () => {
-		test('should remove dependencies to non-existent subtasks', () => {
+	describe("cleanupSubtaskDependencies function", () => {
+		test("should remove dependencies to non-existent subtasks", () => {
 			const tasksData = {
 				tasks: [
 					{
@@ -513,17 +495,17 @@ describe('Dependency Manager Module', () => {
 						dependencies: [],
 						subtasks: [
 							{ id: 1, dependencies: [] },
-							{ id: 2, dependencies: [3] } // Dependency 3 doesn't exist
-						]
+							{ id: 2, dependencies: [3] }, // Dependency 3 doesn't exist
+						],
 					},
 					{
 						id: 2,
-						dependencies: ['1.2'], // Valid subtask dependency
+						dependencies: ["1.2"], // Valid subtask dependency
 						subtasks: [
-							{ id: 1, dependencies: ['1.1'] } // Valid subtask dependency
-						]
-					}
-				]
+							{ id: 1, dependencies: ["1.1"] }, // Valid subtask dependency
+						],
+					},
+				],
 			};
 
 			const result = cleanupSubtaskDependencies(tasksData);
@@ -531,16 +513,16 @@ describe('Dependency Manager Module', () => {
 			// Should remove the invalid dependency to subtask 3
 			expect(result.tasks[0].subtasks[1].dependencies).toEqual([]);
 			// Should keep valid dependencies
-			expect(result.tasks[1].dependencies).toEqual(['1.2']);
-			expect(result.tasks[1].subtasks[0].dependencies).toEqual(['1.1']);
+			expect(result.tasks[1].dependencies).toEqual(["1.2"]);
+			expect(result.tasks[1].subtasks[0].dependencies).toEqual(["1.1"]);
 		});
 
-		test('should handle tasks without subtasks', () => {
+		test("should handle tasks without subtasks", () => {
 			const tasksData = {
 				tasks: [
 					{ id: 1, dependencies: [] },
-					{ id: 2, dependencies: [1] }
-				]
+					{ id: 2, dependencies: [1] },
+				],
 			};
 
 			const result = cleanupSubtaskDependencies(tasksData);
@@ -550,18 +532,18 @@ describe('Dependency Manager Module', () => {
 		});
 	});
 
-	describe('ensureAtLeastOneIndependentSubtask function', () => {
-		test('should clear dependencies of first subtask if none are independent', () => {
+	describe("ensureAtLeastOneIndependentSubtask function", () => {
+		test("should clear dependencies of first subtask if none are independent", () => {
 			const tasksData = {
 				tasks: [
 					{
 						id: 1,
 						subtasks: [
 							{ id: 1, dependencies: [2] },
-							{ id: 2, dependencies: [1] }
-						]
-					}
-				]
+							{ id: 2, dependencies: [1] },
+						],
+					},
+				],
 			};
 
 			const result = ensureAtLeastOneIndependentSubtask(tasksData);
@@ -571,17 +553,17 @@ describe('Dependency Manager Module', () => {
 			expect(tasksData.tasks[0].subtasks[1].dependencies).toEqual([1]);
 		});
 
-		test('should not modify tasks if at least one subtask is independent', () => {
+		test("should not modify tasks if at least one subtask is independent", () => {
 			const tasksData = {
 				tasks: [
 					{
 						id: 1,
 						subtasks: [
 							{ id: 1, dependencies: [] },
-							{ id: 2, dependencies: [1] }
-						]
-					}
-				]
+							{ id: 2, dependencies: [1] },
+						],
+					},
+				],
 			};
 
 			const result = ensureAtLeastOneIndependentSubtask(tasksData);
@@ -591,35 +573,35 @@ describe('Dependency Manager Module', () => {
 			expect(tasksData.tasks[0].subtasks[1].dependencies).toEqual([1]);
 		});
 
-		test('should handle tasks without subtasks', () => {
+		test("should handle tasks without subtasks", () => {
 			const tasksData = {
-				tasks: [{ id: 1 }, { id: 2, dependencies: [1] }]
+				tasks: [{ id: 1 }, { id: 2, dependencies: [1] }],
 			};
 
 			const result = ensureAtLeastOneIndependentSubtask(tasksData);
 
 			expect(result).toBe(false);
 			expect(tasksData).toEqual({
-				tasks: [{ id: 1 }, { id: 2, dependencies: [1] }]
+				tasks: [{ id: 1 }, { id: 2, dependencies: [1] }],
 			});
 		});
 
-		test('should handle empty subtasks array', () => {
+		test("should handle empty subtasks array", () => {
 			const tasksData = {
-				tasks: [{ id: 1, subtasks: [] }]
+				tasks: [{ id: 1, subtasks: [] }],
 			};
 
 			const result = ensureAtLeastOneIndependentSubtask(tasksData);
 
 			expect(result).toBe(false);
 			expect(tasksData).toEqual({
-				tasks: [{ id: 1, subtasks: [] }]
+				tasks: [{ id: 1, subtasks: [] }],
 			});
 		});
 	});
 
-	describe('validateAndFixDependencies function', () => {
-		test('should fix multiple dependency issues and return true if changes made', () => {
+	describe("validateAndFixDependencies function", () => {
+		test("should fix multiple dependency issues and return true if changes made", () => {
 			const tasksData = {
 				tasks: [
 					{
@@ -627,17 +609,17 @@ describe('Dependency Manager Module', () => {
 						dependencies: [1, 1, 99], // Self-dependency and duplicate and invalid dependency
 						subtasks: [
 							{ id: 1, dependencies: [2, 2] }, // Duplicate dependencies
-							{ id: 2, dependencies: [1] }
-						]
+							{ id: 2, dependencies: [1] },
+						],
 					},
 					{
 						id: 2,
 						dependencies: [1],
 						subtasks: [
-							{ id: 1, dependencies: [99] } // Invalid dependency
-						]
-					}
-				]
+							{ id: 1, dependencies: [99] }, // Invalid dependency
+						],
+					},
+				],
 			};
 
 			// Mock taskExists for validating dependencies
@@ -646,14 +628,10 @@ describe('Dependency Manager Module', () => {
 				const idStr = String(id);
 
 				// Handle subtask references (e.g., "1.2")
-				if (idStr.includes('.')) {
-					const [parentId, subtaskId] = idStr.split('.').map(Number);
+				if (idStr.includes(".")) {
+					const [parentId, subtaskId] = idStr.split(".").map(Number);
 					const task = tasks.find((t) => t.id === parentId);
-					return (
-						task &&
-						task.subtasks &&
-						task.subtasks.some((st) => st.id === subtaskId)
-					);
+					return task && task.subtasks && task.subtasks.some((st) => st.id === subtaskId);
 				}
 
 				// Handle regular task references
@@ -677,21 +655,16 @@ describe('Dependency Manager Module', () => {
 			expect(tasksData.tasks[0].dependencies).not.toContain(99);
 			// 3. Dependencies have been deduplicated
 			if (tasksData.tasks[0].subtasks[0].dependencies.length > 0) {
-				expect(tasksData.tasks[0].subtasks[0].dependencies).toEqual(
-					expect.arrayContaining([])
-				);
+				expect(tasksData.tasks[0].subtasks[0].dependencies).toEqual(expect.arrayContaining([]));
 			}
 			// 4. Invalid subtask dependency removed
 			expect(tasksData.tasks[1].subtasks[0].dependencies).toEqual([]);
 
 			// IMPORTANT: Verify no calls to writeJSON with actual tasks.json
-			expect(mockWriteJSON).not.toHaveBeenCalledWith(
-				'tasks/tasks.json',
-				expect.anything()
-			);
+			expect(mockWriteJSON).not.toHaveBeenCalledWith("tasks/tasks.json", expect.anything());
 		});
 
-		test('should return false if no changes needed', () => {
+		test("should return false if no changes needed", () => {
 			const tasksData = {
 				tasks: [
 					{
@@ -699,14 +672,14 @@ describe('Dependency Manager Module', () => {
 						dependencies: [],
 						subtasks: [
 							{ id: 1, dependencies: [] }, // Already has an independent subtask
-							{ id: 2, dependencies: ['1.1'] }
-						]
+							{ id: 2, dependencies: ["1.1"] },
+						],
 					},
 					{
 						id: 2,
-						dependencies: [1]
-					}
-				]
+						dependencies: [1],
+					},
+				],
 			};
 
 			// Mock taskExists to validate all dependencies as valid
@@ -715,14 +688,10 @@ describe('Dependency Manager Module', () => {
 				const idStr = String(id);
 
 				// Handle subtask references
-				if (idStr.includes('.')) {
-					const [parentId, subtaskId] = idStr.split('.').map(Number);
+				if (idStr.includes(".")) {
+					const [parentId, subtaskId] = idStr.split(".").map(Number);
 					const task = tasks.find((t) => t.id === parentId);
-					return (
-						task &&
-						task.subtasks &&
-						task.subtasks.some((st) => st.id === subtaskId)
-					);
+					return task && task.subtasks && task.subtasks.some((st) => st.id === subtaskId);
 				}
 
 				// Handle regular task references
@@ -738,36 +707,30 @@ describe('Dependency Manager Module', () => {
 			expect(tasksData).toEqual(originalData);
 
 			// IMPORTANT: Verify no calls to writeJSON with actual tasks.json
-			expect(mockWriteJSON).not.toHaveBeenCalledWith(
-				'tasks/tasks.json',
-				expect.anything()
-			);
+			expect(mockWriteJSON).not.toHaveBeenCalledWith("tasks/tasks.json", expect.anything());
 		});
 
-		test('should handle invalid input', () => {
+		test("should handle invalid input", () => {
 			expect(validateAndFixDependencies(null)).toBe(false);
 			expect(validateAndFixDependencies({})).toBe(false);
 			expect(validateAndFixDependencies({ tasks: null })).toBe(false);
-			expect(validateAndFixDependencies({ tasks: 'not an array' })).toBe(false);
+			expect(validateAndFixDependencies({ tasks: "not an array" })).toBe(false);
 
 			// IMPORTANT: Verify no calls to writeJSON with actual tasks.json
-			expect(mockWriteJSON).not.toHaveBeenCalledWith(
-				'tasks/tasks.json',
-				expect.anything()
-			);
+			expect(mockWriteJSON).not.toHaveBeenCalledWith("tasks/tasks.json", expect.anything());
 		});
 
-		test('should save changes when tasksPath is provided', () => {
+		test("should save changes when tasksPath is provided", () => {
 			const tasksData = {
 				tasks: [
 					{
 						id: 1,
 						dependencies: [1, 1], // Self-dependency and duplicate
 						subtasks: [
-							{ id: 1, dependencies: [99] } // Invalid dependency
-						]
-					}
-				]
+							{ id: 1, dependencies: [99] }, // Invalid dependency
+						],
+					},
+				],
 			};
 
 			// Mock taskExists for this specific test
@@ -776,14 +739,10 @@ describe('Dependency Manager Module', () => {
 				const idStr = String(id);
 
 				// Handle subtask references
-				if (idStr.includes('.')) {
-					const [parentId, subtaskId] = idStr.split('.').map(Number);
+				if (idStr.includes(".")) {
+					const [parentId, subtaskId] = idStr.split(".").map(Number);
 					const task = tasks.find((t) => t.id === parentId);
-					return (
-						task &&
-						task.subtasks &&
-						task.subtasks.some((st) => st.id === subtaskId)
-					);
+					return task && task.subtasks && task.subtasks.some((st) => st.id === subtaskId);
 				}
 
 				// Handle regular task references
@@ -804,10 +763,7 @@ describe('Dependency Manager Module', () => {
 			expect(tasksData).not.toEqual(originalData);
 
 			// IMPORTANT: Verify no calls to writeJSON with actual tasks.json
-			expect(mockWriteJSON).not.toHaveBeenCalledWith(
-				'tasks/tasks.json',
-				expect.anything()
-			);
+			expect(mockWriteJSON).not.toHaveBeenCalledWith("tasks/tasks.json", expect.anything());
 		});
 	});
 });

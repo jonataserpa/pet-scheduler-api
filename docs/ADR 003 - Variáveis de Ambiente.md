@@ -1,6 +1,7 @@
 # ADR 003 - Variáveis de Ambiente
 
 ## Status
+
 Proposto
 
 ## Contexto
@@ -12,6 +13,7 @@ Separar configurações sensíveis e específicas por ambiente é fundamental. V
 Adotaremos arquivos `.env` com `dotenv`, e as variáveis serão validadas em tempo de execução via biblioteca como `zod` ou `env-schema`.
 
 Variáveis importantes:
+
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `PORT`

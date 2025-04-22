@@ -6,7 +6,9 @@ import { AuthMiddleware, AuthenticatedRequest } from "../middlewares/auth-middle
  * Adaptador para o middleware de autenticação
  * Resolve problemas de tipagem entre o middleware e o Express
  */
-function authMiddlewareAdapter(middleware: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>): RequestHandler {
+function authMiddlewareAdapter(
+	middleware: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>,
+): RequestHandler {
 	return (req: Request, res: Response, next: NextFunction) => {
 		return middleware(req as AuthenticatedRequest, res, next);
 	};
@@ -15,7 +17,11 @@ function authMiddlewareAdapter(middleware: (req: AuthenticatedRequest, res: Resp
 /**
  * Adaptador para o middleware de verificação de papel
  */
-function roleMiddlewareAdapter(roleMiddleware: (role: string) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => void): (role: string) => RequestHandler {
+function roleMiddlewareAdapter(
+	roleMiddleware: (
+		role: string,
+	) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => void,
+): (role: string) => RequestHandler {
 	return (role: string) => {
 		const middleware = roleMiddleware(role);
 		return (req: Request, res: Response, next: NextFunction) => {
@@ -38,7 +44,7 @@ export function setupCustomerNotificationRoutes(
 	// Adaptar middlewares de autenticação
 	const authenticate = authMiddlewareAdapter(authMiddleware.authenticate.bind(authMiddleware));
 	const hasRole = roleMiddlewareAdapter(authMiddleware.hasRole.bind(authMiddleware));
-	
+
 	// Rota para enviar notificação de boas-vindas
 	/**
 	 * @swagger
@@ -171,7 +177,7 @@ export function setupCustomerNotificationRoutes(
 	router.post(
 		"/pending-checkups",
 		authenticate,
-		hasRole('admin'),
+		hasRole("admin"),
 		customerNotificationController.sendPendingCheckupReminders.bind(customerNotificationController),
 	);
 }

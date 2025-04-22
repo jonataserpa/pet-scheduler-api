@@ -2,11 +2,8 @@
  * Direct function wrapper for addSubtask
  */
 
-import { addSubtask } from '../../../../scripts/modules/task-manager.js';
-import {
-	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
+import { addSubtask } from "../../../../scripts/modules/task-manager.js";
+import { enableSilentMode, disableSilentMode } from "../../../../scripts/modules/utils.js";
 
 /**
  * Add a subtask to an existing task
@@ -34,20 +31,20 @@ export async function addSubtaskDirect(args, log) {
 		details,
 		status,
 		dependencies: dependenciesStr,
-		skipGenerate
+		skipGenerate,
 	} = args;
 	try {
 		log.info(`Adding subtask with args: ${JSON.stringify(args)}`);
 
 		// Check if tasksJsonPath was provided
 		if (!tasksJsonPath) {
-			log.error('addSubtaskDirect called without tasksJsonPath');
+			log.error("addSubtaskDirect called without tasksJsonPath");
 			return {
 				success: false,
 				error: {
-					code: 'MISSING_ARGUMENT',
-					message: 'tasksJsonPath is required'
-				}
+					code: "MISSING_ARGUMENT",
+					message: "tasksJsonPath is required",
+				},
 			};
 		}
 
@@ -55,9 +52,9 @@ export async function addSubtaskDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'INPUT_VALIDATION_ERROR',
-					message: 'Parent task ID is required'
-				}
+					code: "INPUT_VALIDATION_ERROR",
+					message: "Parent task ID is required",
+				},
 			};
 		}
 
@@ -66,9 +63,9 @@ export async function addSubtaskDirect(args, log) {
 			return {
 				success: false,
 				error: {
-					code: 'INPUT_VALIDATION_ERROR',
-					message: 'Either taskId or title must be provided'
-				}
+					code: "INPUT_VALIDATION_ERROR",
+					message: "Either taskId or title must be provided",
+				},
 			};
 		}
 
@@ -78,9 +75,9 @@ export async function addSubtaskDirect(args, log) {
 		// Parse dependencies if provided
 		let dependencies = [];
 		if (dependenciesStr) {
-			dependencies = dependenciesStr.split(',').map((depId) => {
+			dependencies = dependenciesStr.split(",").map((depId) => {
 				// Handle both regular IDs and dot notation
-				return depId.includes('.') ? depId.trim() : parseInt(depId.trim(), 10);
+				return depId.includes(".") ? depId.trim() : parseInt(depId.trim(), 10);
 			});
 		}
 
@@ -99,13 +96,7 @@ export async function addSubtaskDirect(args, log) {
 		// Case 1: Convert existing task to subtask
 		if (existingTaskId) {
 			log.info(`Converting task ${existingTaskId} to a subtask of ${parentId}`);
-			const result = await addSubtask(
-				tasksPath,
-				parentId,
-				existingTaskId,
-				null,
-				generateFiles
-			);
+			const result = await addSubtask(tasksPath, parentId, existingTaskId, null, generateFiles);
 
 			// Restore normal logging
 			disableSilentMode();
@@ -114,8 +105,8 @@ export async function addSubtaskDirect(args, log) {
 				success: true,
 				data: {
 					message: `Task ${existingTaskId} successfully converted to a subtask of task ${parentId}`,
-					subtask: result
-				}
+					subtask: result,
+				},
 			};
 		}
 		// Case 2: Create new subtask
@@ -124,19 +115,13 @@ export async function addSubtaskDirect(args, log) {
 
 			const newSubtaskData = {
 				title: title,
-				description: description || '',
-				details: details || '',
-				status: status || 'pending',
-				dependencies: dependencies
+				description: description || "",
+				details: details || "",
+				status: status || "pending",
+				dependencies: dependencies,
 			};
 
-			const result = await addSubtask(
-				tasksPath,
-				parentId,
-				null,
-				newSubtaskData,
-				generateFiles
-			);
+			const result = await addSubtask(tasksPath, parentId, null, newSubtaskData, generateFiles);
 
 			// Restore normal logging
 			disableSilentMode();
@@ -145,8 +130,8 @@ export async function addSubtaskDirect(args, log) {
 				success: true,
 				data: {
 					message: `New subtask ${parentId}.${result.id} successfully created`,
-					subtask: result
-				}
+					subtask: result,
+				},
 			};
 		}
 	} catch (error) {
@@ -157,9 +142,9 @@ export async function addSubtaskDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'CORE_FUNCTION_ERROR',
-				message: error.message
-			}
+				code: "CORE_FUNCTION_ERROR",
+				message: error.message,
+			},
 		};
 	}
 }

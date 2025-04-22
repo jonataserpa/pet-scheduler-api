@@ -6,10 +6,10 @@
 import {
 	readComplexityReport,
 	enableSilentMode,
-	disableSilentMode
-} from '../../../../scripts/modules/utils.js';
-import { getCachedOrExecute } from '../../tools/utils.js';
-import path from 'path';
+	disableSilentMode,
+} from "../../../../scripts/modules/utils.js";
+import { getCachedOrExecute } from "../../tools/utils.js";
+import path from "path";
 
 /**
  * Direct function wrapper for displaying the complexity report with error handling and caching.
@@ -27,11 +27,11 @@ export async function complexityReportDirect(args, log) {
 
 		// Check if reportPath was provided
 		if (!reportPath) {
-			log.error('complexityReportDirect called without reportPath');
+			log.error("complexityReportDirect called without reportPath");
 			return {
 				success: false,
-				error: { code: 'MISSING_ARGUMENT', message: 'reportPath is required' },
-				fromCache: false
+				error: { code: "MISSING_ARGUMENT", message: "reportPath is required" },
+				fromCache: false,
 			};
 		}
 
@@ -57,9 +57,9 @@ export async function complexityReportDirect(args, log) {
 					return {
 						success: false,
 						error: {
-							code: 'FILE_NOT_FOUND_ERROR',
-							message: `No complexity report found at ${reportPath}. Run 'analyze-complexity' first.`
-						}
+							code: "FILE_NOT_FOUND_ERROR",
+							message: `No complexity report found at ${reportPath}. Run 'analyze-complexity' first.`,
+						},
 					};
 				}
 
@@ -67,8 +67,8 @@ export async function complexityReportDirect(args, log) {
 					success: true,
 					data: {
 						report,
-						reportPath
-					}
+						reportPath,
+					},
 				};
 			} catch (error) {
 				// Make sure to restore normal logging even if there's an error
@@ -78,9 +78,9 @@ export async function complexityReportDirect(args, log) {
 				return {
 					success: false,
 					error: {
-						code: 'READ_ERROR',
-						message: error.message
-					}
+						code: "READ_ERROR",
+						message: error.message,
+					},
 				};
 			}
 		};
@@ -90,11 +90,9 @@ export async function complexityReportDirect(args, log) {
 			const result = await getCachedOrExecute({
 				cacheKey,
 				actionFn: coreActionFn,
-				log
+				log,
 			});
-			log.info(
-				`complexityReportDirect completed. From cache: ${result.fromCache}`
-			);
+			log.info(`complexityReportDirect completed. From cache: ${result.fromCache}`);
 			return result; // Returns { success, data/error, fromCache }
 		} catch (error) {
 			// Catch unexpected errors from getCachedOrExecute itself
@@ -102,15 +100,15 @@ export async function complexityReportDirect(args, log) {
 			disableSilentMode();
 
 			log.error(
-				`Unexpected error during getCachedOrExecute for complexityReport: ${error.message}`
+				`Unexpected error during getCachedOrExecute for complexityReport: ${error.message}`,
 			);
 			return {
 				success: false,
 				error: {
-					code: 'UNEXPECTED_ERROR',
-					message: error.message
+					code: "UNEXPECTED_ERROR",
+					message: error.message,
 				},
-				fromCache: false
+				fromCache: false,
 			};
 		}
 	} catch (error) {
@@ -121,10 +119,10 @@ export async function complexityReportDirect(args, log) {
 		return {
 			success: false,
 			error: {
-				code: 'UNEXPECTED_ERROR',
-				message: error.message
+				code: "UNEXPECTED_ERROR",
+				message: error.message,
 			},
-			fromCache: false
+			fromCache: false,
 		};
 	}
 }

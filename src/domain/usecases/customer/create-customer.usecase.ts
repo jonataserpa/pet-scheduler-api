@@ -1,110 +1,100 @@
-import { randomUUID } from 'crypto';
-import { Customer } from '../../entities/customer.js';
-import { Address } from '../../entities/value-objects/address.js';
-import { Contact } from '../../entities/value-objects/contact.js';
-import { CustomerRepository } from '../../repositories/customer-repository.js';
+import { randomUUID } from "crypto";
+import { Customer } from "../../entities/customer.js";
+import { Address } from "../../entities/value-objects/address.js";
+import { Contact } from "../../entities/value-objects/contact.js";
+import { CustomerRepository } from "../../repositories/customer-repository.js";
 
 export interface CreateCustomerDTO {
-  name: string;
-  documentNumber: string;
-  address: {
-    street: string;
-    number: string;
-    complement?: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  contact: {
-    email: string;
-    phone: string;
-    whatsapp?: string;
-  };
+	name: string;
+	documentNumber: string;
+	address: {
+		street: string;
+		number: string;
+		complement?: string;
+		neighborhood: string;
+		city: string;
+		state: string;
+		zipCode: string;
+		country: string;
+	};
+	contact: {
+		email: string;
+		phone: string;
+		whatsapp?: string;
+	};
 }
 
 export interface CreateCustomerResponseDTO {
-  id: string;
-  name: string;
-  documentNumber: string;
-  address: {
-    street: string;
-    number: string;
-    complement?: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    formattedZipCode: string;
-    country: string;
-  };
-  contact: {
-    email: string;
-    phone: string;
-    whatsapp?: string;
-    formattedPhone: string;
-    formattedWhatsapp: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  active: boolean;
+	id: string;
+	name: string;
+	documentNumber: string;
+	address: {
+		street: string;
+		number: string;
+		complement?: string;
+		neighborhood: string;
+		city: string;
+		state: string;
+		zipCode: string;
+		formattedZipCode: string;
+		country: string;
+	};
+	contact: {
+		email: string;
+		phone: string;
+		whatsapp?: string;
+		formattedPhone: string;
+		formattedWhatsapp: string;
+	};
+	createdAt: Date;
+	updatedAt: Date;
+	active: boolean;
 }
 
 /**
  * Caso de uso para criação de um novo cliente
  */
 export class CreateCustomerUseCase {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+	constructor(private readonly customerRepository: CustomerRepository) {}
 
-  /**
-   * Executa o caso de uso
-   * @param data Dados do cliente a ser criado
-   * @returns Cliente criado
-   * @throws Error se o cliente já existir com o mesmo documento
-   */
-  async execute(data: CreateCustomerDTO): Promise<CreateCustomerResponseDTO> {
-    // Verifica se já existe um cliente com o mesmo documento
-    const exists = await this.customerRepository.existsByDocumentNumber(data.documentNumber);
-    
-    if (exists) {
-      throw new Error(`Cliente com documento ${data.documentNumber} já existe`);
-    }
+	/**
+	 * Executa o caso de uso
+	 * @param data Dados do cliente a ser criado
+	 * @returns Cliente criado
+	 * @throws Error se o cliente já existir com o mesmo documento
+	 */
+	async execute(data: CreateCustomerDTO): Promise<CreateCustomerResponseDTO> {
+		// Verifica se já existe um cliente com o mesmo documento
+		const exists = await this.customerRepository.existsByDocumentNumber(data.documentNumber);
 
-    // Cria os value objects
-    const address = Address.create(
-      data.address.street,
-      data.address.number,
-      data.address.neighborhood,
-      data.address.city,
-      data.address.state,
-      data.address.zipCode,
-      data.address.country,
-      data.address.complement
-    );
+		if (exists) {
+			throw new Error(`Cliente com documento ${data.documentNumber} já existe`);
+		}
 
-    const contact = Contact.create(
-      data.contact.email,
-      data.contact.phone,
-      data.contact.whatsapp
-    );
+		// Cria os value objects
+		const address = Address.create(
+			data.address.street,
+			data.address.number,
+			data.address.neighborhood,
+			data.address.city,
+			data.address.state,
+			data.address.zipCode,
+			data.address.country,
+			data.address.complement,
+		);
 
-    // Gera um ID único para o cliente
-    const id = randomUUID();
+		const contact = Contact.create(data.contact.email, data.contact.phone, data.contact.whatsapp);
 
-    // Cria a entidade de cliente
-    const customer = Customer.create(
-      id,
-      data.name,
-      data.documentNumber,
-      address,
-      contact
-    );
+		// Gera um ID único para o cliente
+		const id = randomUUID();
 
-    // Persiste o cliente
-    const savedCustomer = await this.customerRepository.save(customer);
+		// Cria a entidade de cliente
+		const customer = Customer.create(id, data.name, data.documentNumber, address, contact);
 
-    // Retorna o cliente criado
-    return savedCustomer.toObject();
-  }
-} 
+		// Persiste o cliente
+		const savedCustomer = await this.customerRepository.save(customer);
+
+		// Retorna o cliente criado
+		return savedCustomer.toObject();
+	}
+}
