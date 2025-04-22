@@ -298,7 +298,7 @@ export async function startServer(): Promise<void> {
 process.on("SIGTERM", gracefulShutdown);
 process.on("SIGINT", gracefulShutdown);
 
-function gracefulShutdown() {
+function gracefulShutdown(): void {
 	logger.info("Iniciando desligamento gracioso do servidor...");
 
 	// Parar o job de notificações, se estiver em execução
