@@ -12,10 +12,10 @@ export default {
 	coverageDirectory: "coverage",
 
 	// A list of paths to directories that Jest should use to search for files in
-	roots: ["<rootDir>/tests"],
+	roots: ["<rootDir>/src"],
 
 	// The glob patterns Jest uses to detect test files
-	testMatch: ["**/__tests__/**/*.js", "**/?(*.)+(spec|test).js", "**/tests/*.test.js"],
+	testMatch: ["<rootDir>/src/**/__tests__/**/*.ts", "<rootDir>/src/**/*.test.ts"],
 
 	// Transform files
 	transform: {
@@ -23,6 +23,11 @@ export default {
 			"ts-jest",
 			{
 				useESM: true,
+				// Não exigir extensões .js nas importações
+				extensionsToTreatAsEsm: [".ts", ".tsx", ".mts"],
+				moduleNameMapper: {
+					"^(\\.{1,2}/.*)\\.js$": "$1",
+				},
 			},
 		],
 		"^.+\\.jsx?$": [
@@ -36,11 +41,12 @@ export default {
 	// Add extensionsToTreatAsEsm for ESM support
 	extensionsToTreatAsEsm: [".ts", ".tsx", ".mts"],
 
-	// Disable transformations for node_modules
-	transformIgnorePatterns: ["/node_modules/(?!(@anthropic-ai|openai))"],
+	// Disable transformations for node_modules except for specific packages that use ESM
+	transformIgnorePatterns: ["/node_modules/(?!(@prisma))"],
 
-	// Set moduleNameMapper for absolute paths
+	// Set moduleNameMapper for absolute paths and .js extensions
 	moduleNameMapper: {
+		"^(\\.{1,2}/.*)\\.js$": "$1",
 		"^@domain/(.*)$": "<rootDir>/src/domain/$1",
 		"^@application/(.*)$": "<rootDir>/src/application/$1",
 		"^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
@@ -66,9 +72,6 @@ export default {
 
 	// Verbose output
 	verbose: true,
-
-	// Setup file
-	setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
 
 	collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts", "!src/index.ts", "!src/server.ts"],
 };

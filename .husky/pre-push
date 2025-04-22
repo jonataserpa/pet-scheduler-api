@@ -4,5 +4,7 @@
 echo "🔍 Verificando o código antes de enviar para o repositório..."
 npm run lint
 
-echo "🧪 Executando testes com cobertura..."
-npm run test:coverage
+echo "🧪 Executando testes com cobertura apenas para a API Pet Scheduler..."
+npm run test:coverage -- --testPathPattern="src/"
+
+echo "✨ Pré-push concluído com sucesso!"

@@ -18,6 +18,7 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"allowSyntheticDefaultImports": true,
+		"isolatedModules": true,
 		"baseUrl": "./",
 		"paths": {
 			"@domain/*": ["src/domain/*"],

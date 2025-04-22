@@ -18,7 +18,15 @@ export class RecurringTimePeriod {
 	 */
 	public static create(timePeriods: TimePeriod[]): RecurringTimePeriod {
 		if (!timePeriods || timePeriods.length === 0) {
-			throw new Error("RecurringTimePeriod: deve haver pelo menos um período de tempo");
+			throw new Error("RecurringTimePeriod: pelo menos um período de tempo deve ser fornecido");
+		}
+
+		// Verificar dias duplicados
+		const daysOfWeek = timePeriods.map((period) => period.dayOfWeek);
+		const uniqueDays = new Set(daysOfWeek);
+
+		if (uniqueDays.size < daysOfWeek.length) {
+			throw new Error("RecurringTimePeriod: dias da semana duplicados não são permitidos");
 		}
 
 		return new RecurringTimePeriod([...timePeriods]);
@@ -33,14 +41,19 @@ export class RecurringTimePeriod {
 		endTime: string,
 	): RecurringTimePeriod {
 		if (!daysOfWeek || daysOfWeek.length === 0) {
-			throw new Error("RecurringTimePeriod: deve haver pelo menos um dia da semana");
+			throw new Error("RecurringTimePeriod: pelo menos um dia da semana deve ser fornecido");
 		}
 
-		// Remover dias duplicados
-		const uniqueDays = [...new Set(daysOfWeek)];
+		// Verificar dias duplicados
+		const uniqueDays = new Set(daysOfWeek);
+		if (uniqueDays.size < daysOfWeek.length) {
+			throw new Error("RecurringTimePeriod: dias da semana duplicados não são permitidos");
+		}
 
 		// Criar um TimePeriod para cada dia da semana
-		const timePeriods = uniqueDays.map((day) => TimePeriod.create(day, startTime, endTime));
+		const timePeriods = Array.from(uniqueDays).map((day) =>
+			TimePeriod.create(day, startTime, endTime),
+		);
 
 		return new RecurringTimePeriod(timePeriods);
 	}
@@ -87,7 +100,7 @@ export class RecurringTimePeriod {
 		);
 
 		if (filteredPeriods.length === 0) {
-			throw new Error("RecurringTimePeriod: não é possível excluir todos os dias");
+			throw new Error("RecurringTimePeriod: pelo menos um período de tempo deve ser fornecido");
 		}
 
 		return new RecurringTimePeriod(filteredPeriods);
@@ -108,15 +121,16 @@ export class RecurringTimePeriod {
 	}
 
 	/**
-	 * Retorna a duração do período em minutos (considerando que todos os períodos têm a mesma duração)
-	 * Se houver períodos com durações diferentes, retorna a duração do primeiro período
+	 * Retorna a duração do período em minutos (soma das durações de todos os períodos)
 	 */
 	public getDurationInMinutes(): number {
 		if (this._timePeriods.length === 0) {
 			return 0;
 		}
 
-		return this._timePeriods[0].getDurationInMinutes();
+		// Utilizamos Array.prototype.reduce para somar todas as durações
+		// Convertemos cada período para um número em minutos e somamos tudo
+		return this._timePeriods.reduce((total, period) => total + period.getDurationInMinutes(), 0);
 	}
 
 	/**

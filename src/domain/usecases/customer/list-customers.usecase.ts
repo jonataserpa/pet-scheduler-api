@@ -78,7 +78,16 @@ export class ListCustomersUseCase {
 		const totalPages = Math.ceil(total / limit);
 
 		return {
-			customers: customers.map((customer) => customer.toObject()),
+			customers: customers.map((customer) => {
+				const customerObject = customer.toObject();
+				return {
+					...customerObject,
+					address: {
+						...customerObject.address,
+						formattedZipCode: customer.address.formatZipCode(),
+					},
+				};
+			}),
 			pagination: {
 				total,
 				page,

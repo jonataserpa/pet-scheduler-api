@@ -1,5 +1,5 @@
 /**
- * Enum que representa os dias da semana
+ * Enumeração para os dias da semana
  */
 export enum DayOfWeek {
 	SUNDAY = 0,
@@ -39,14 +39,12 @@ const DAY_NAMES: Record<Locale, string[]> = {
 };
 
 /**
- * Value Object que representa um período de tempo em um dia da semana
- * Útil para representar horários recorrentes como horários de funcionamento, agenda semanal, etc.
- * Value Objects são imutáveis e não possuem identidade
+ * Value Object para representar um período de tempo em um dia da semana
  */
 export class TimePeriod {
 	private readonly _dayOfWeek: DayOfWeek;
-	private readonly _startTime: string; // formato HH:MM
-	private readonly _endTime: string; // formato HH:MM
+	private readonly _startTime: string;
+	private readonly _endTime: string;
 
 	private constructor(dayOfWeek: DayOfWeek, startTime: string, endTime: string) {
 		this._dayOfWeek = dayOfWeek;
@@ -57,127 +55,168 @@ export class TimePeriod {
 	}
 
 	/**
-	 * Cria uma nova instância de TimePeriod
+	 * Cria uma instância de TimePeriod após validação
 	 */
 	public static create(dayOfWeek: DayOfWeek, startTime: string, endTime: string): TimePeriod {
-		// Validações
+		// Validar dia da semana
 		if (dayOfWeek < 0 || dayOfWeek > 6 || !Number.isInteger(dayOfWeek)) {
 			throw new Error("TimePeriod: dia da semana inválido");
 		}
 
-		// Validação do formato de hora (HH:MM)
-		const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-
+		// Validar formato de hora (HH:MM)
+		const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 		if (!timeRegex.test(startTime)) {
-			throw new Error("TimePeriod: horário de início inválido, use o formato HH:MM");
+			throw new Error("TimePeriod: formato de hora inválido");
 		}
 
 		if (!timeRegex.test(endTime)) {
-			throw new Error("TimePeriod: horário de fim inválido, use o formato HH:MM");
+			throw new Error("TimePeriod: formato de hora inválido");
 		}
 
-		// Validação do horário final maior que o inicial
-		const [startHour, startMinute] = startTime.split(":").map(Number);
-		const [endHour, endMinute] = endTime.split(":").map(Number);
-
-		const startTotalMinutes = startHour * 60 + startMinute;
-		const endTotalMinutes = endHour * 60 + endMinute;
-
-		if (endTotalMinutes <= startTotalMinutes) {
-			throw new Error("TimePeriod: o horário de fim deve ser posterior ao horário de início");
+		// Validar que a hora inicial é anterior à hora final
+		if (TimePeriod.compareTime(startTime, endTime) >= 0) {
+			throw new Error("TimePeriod: a hora de início deve ser anterior à hora de fim");
 		}
 
 		return new TimePeriod(dayOfWeek, startTime, endTime);
 	}
 
 	/**
-	 * Verifica se um determinado Date está dentro deste período de tempo (considerando dia da semana e horário)
+	 * Compara dois horários no formato HH:MM
+	 * Retorna negativo se t1 < t2, 0 se t1 = t2, positivo se t1 > t2
 	 */
-	public includesDateTime(dateTime: Date): boolean {
-		if (!(dateTime instanceof Date) || isNaN(dateTime.getTime())) {
-			throw new Error("TimePeriod: data e hora para verificação inválidas");
+	private static compareTime(t1: string, t2: string): number {
+		const [h1, m1] = t1.split(":").map((n) => parseInt(n));
+		const [h2, m2] = t2.split(":").map((n) => parseInt(n));
+
+		if (h1 !== h2) {
+			return h1 - h2;
 		}
 
-		// Verifica se o dia da semana coincide
-		const dayMatches = dateTime.getDay() === this._dayOfWeek;
-		if (!dayMatches) return false;
-
-		// Extrair hora e minuto do dateTime
-		const hours = dateTime.getHours();
-		const minutes = dateTime.getMinutes();
-		const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-
-		// Comparar com o intervalo de tempo
-		return this.includesTime(timeString);
+		return m1 - m2;
 	}
 
 	/**
-	 * Verifica se um horário específico (HH:MM) está dentro deste período
+	 * Verifica se um horário específico está dentro do período
 	 */
 	public includesTime(time: string): boolean {
-		const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
-
+		// Validar formato de hora
+		const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 		if (!timeRegex.test(time)) {
-			throw new Error("TimePeriod: horário para verificação inválido, use o formato HH:MM");
+			throw new Error("TimePeriod: formato de hora inválido");
 		}
 
-		const [hour, minute] = time.split(":").map(Number);
-		const timeInMinutes = hour * 60 + minute;
-
-		const [startHour, startMinute] = this._startTime.split(":").map(Number);
-		const startInMinutes = startHour * 60 + startMinute;
-
-		const [endHour, endMinute] = this._endTime.split(":").map(Number);
-		const endInMinutes = endHour * 60 + endMinute;
-
-		return timeInMinutes >= startInMinutes && timeInMinutes <= endInMinutes;
+		return (
+			TimePeriod.compareTime(time, this._startTime) >= 0 &&
+			TimePeriod.compareTime(time, this._endTime) <= 0
+		);
 	}
 
 	/**
-	 * Verifica se este período tem alguma sobreposição com outro período (no mesmo dia da semana)
+	 * Verifica se uma data/hora específica está dentro do período
 	 */
-	public overlaps(other: TimePeriod): boolean {
-		// Se não for o mesmo dia da semana, não há sobreposição
-		if (this._dayOfWeek !== other._dayOfWeek) {
+	public includesDateTime(dateTime: Date): boolean {
+		// Verificar se é o mesmo dia da semana
+		if (dateTime.getDay() !== this._dayOfWeek) {
 			return false;
 		}
 
-		const [thisStartHour, thisStartMinute] = this._startTime.split(":").map(Number);
-		const thisStartInMinutes = thisStartHour * 60 + thisStartMinute;
+		// Obter o horário da data
+		const hours = dateTime.getHours().toString().padStart(2, "0");
+		const minutes = dateTime.getMinutes().toString().padStart(2, "0");
+		const time = `${hours}:${minutes}`;
 
-		const [thisEndHour, thisEndMinute] = this._endTime.split(":").map(Number);
-		const thisEndInMinutes = thisEndHour * 60 + thisEndMinute;
+		return this.includesTime(time);
+	}
 
-		const [otherStartHour, otherStartMinute] = other._startTime.split(":").map(Number);
-		const otherStartInMinutes = otherStartHour * 60 + otherStartMinute;
+	/**
+	 * Verifica se há sobreposição com outro período
+	 */
+	public overlaps(other: TimePeriod): boolean {
+		// Se são dias diferentes, não há sobreposição
+		if (this._dayOfWeek !== other.dayOfWeek) {
+			return false;
+		}
 
-		const [otherEndHour, otherEndMinute] = other._endTime.split(":").map(Number);
-		const otherEndInMinutes = otherEndHour * 60 + otherEndMinute;
-
-		return thisStartInMinutes < otherEndInMinutes && thisEndInMinutes > otherStartInMinutes;
+		// Verifica se há sobreposição de horários
+		return (
+			TimePeriod.compareTime(this._startTime, other.endTime) < 0 &&
+			TimePeriod.compareTime(this._endTime, other.startTime) > 0
+		);
 	}
 
 	/**
 	 * Calcula a duração do período em minutos
 	 */
 	public getDurationInMinutes(): number {
-		const [startHour, startMinute] = this._startTime.split(":").map(Number);
-		const startTotalMinutes = startHour * 60 + startMinute;
+		const [startHours, startMinutes] = this._startTime.split(":").map((n) => parseInt(n));
+		const [endHours, endMinutes] = this._endTime.split(":").map((n) => parseInt(n));
 
-		const [endHour, endMinute] = this._endTime.split(":").map(Number);
-		const endTotalMinutes = endHour * 60 + endMinute;
-
-		return endTotalMinutes - startTotalMinutes;
+		return endHours * 60 + endMinutes - (startHours * 60 + startMinutes);
 	}
 
 	/**
-	 * Retorna um objeto com os dados do período
+	 * Formata o período para exibição
 	 */
-	public toObject(): {
-		dayOfWeek: DayOfWeek;
-		startTime: string;
-		endTime: string;
-	} {
+	public toString(locale: string = "pt-BR", format: "24h" | "12h" = "24h"): string {
+		let dayName = "";
+
+		// Formatação do dia da semana
+		if (locale === "pt-BR") {
+			dayName = DAY_NAMES["pt-BR"][this._dayOfWeek];
+		} else if (locale === "en-US") {
+			dayName = DAY_NAMES["en-US"][this._dayOfWeek];
+		} else if (locale === "es-ES") {
+			dayName = DAY_NAMES["es-ES"][this._dayOfWeek];
+		} else {
+			// Fallback para inglês caso o locale não seja suportado
+			dayName = DAY_NAMES["en-US"][this._dayOfWeek];
+		}
+
+		// Formatação da hora
+		let startTimeFormatted = this._startTime;
+		let endTimeFormatted = this._endTime;
+
+		if (format === "12h") {
+			startTimeFormatted = this.formatTo12Hour(this._startTime);
+			endTimeFormatted = this.formatTo12Hour(this._endTime);
+		}
+
+		// Conector
+		const connector = locale === "pt-BR" ? "até" : "to";
+
+		return `${dayName}, ${startTimeFormatted} ${connector} ${endTimeFormatted}`;
+	}
+
+	/**
+	 * Converte hora do formato 24h para 12h
+	 */
+	private formatTo12Hour(time: string): string {
+		const [hours, minutes] = time.split(":").map((n) => parseInt(n));
+		const period = hours >= 12 ? "PM" : "AM";
+		const hour12 = hours % 12 || 12;
+		return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
+	}
+
+	/**
+	 * Verifica se dois períodos são iguais
+	 */
+	public equals(other: TimePeriod): boolean {
+		if (!(other instanceof TimePeriod)) {
+			return false;
+		}
+
+		return (
+			this._dayOfWeek === other.dayOfWeek &&
+			this._startTime === other.startTime &&
+			this._endTime === other.endTime
+		);
+	}
+
+	/**
+	 * Converte para objeto simples
+	 */
+	public toObject(): { dayOfWeek: DayOfWeek; startTime: string; endTime: string } {
 		return {
 			dayOfWeek: this._dayOfWeek,
 			startTime: this._startTime,
@@ -186,60 +225,18 @@ export class TimePeriod {
 	}
 
 	/**
-	 * Retorna o nome do dia da semana no idioma especificado
+	 * Serializa o objeto para JSON
 	 */
-	private getDayName(locale: Locale = "pt-BR"): string {
-		return DAY_NAMES[locale][this._dayOfWeek];
+	public toJSON(): string {
+		return JSON.stringify(this.toObject());
 	}
 
 	/**
-	 * Formata o período como string no formato e idioma especificados
-	 * @param locale Idioma para exibição (pt-BR, en-US, es-ES)
-	 * @param format Formato de hora (12h ou 24h)
+	 * Cria uma instância a partir de um objeto JSON
 	 */
-	public toString(locale: Locale = "pt-BR", format: TimeFormat = "24h"): string {
-		const dayName = this.getDayName(locale);
-		const startFormatted = this.formatTime(this._startTime, format);
-		const endFormatted = this.formatTime(this._endTime, format);
-
-		const templates = {
-			"pt-BR": `${dayName}, das ${startFormatted} às ${endFormatted}`,
-			"en-US": `${dayName}, from ${startFormatted} to ${endFormatted}`,
-			"es-ES": `${dayName}, de ${startFormatted} a ${endFormatted}`,
-		};
-
-		return templates[locale];
-	}
-
-	/**
-	 * Formata a hora no formato 12h ou 24h
-	 */
-	private formatTime(time: string, format: TimeFormat = "24h"): string {
-		if (format === "24h") {
-			return time;
-		}
-
-		// Converter para formato 12h
-		const [hours, minutes] = time.split(":").map(Number);
-		const period = hours >= 12 ? "PM" : "AM";
-		const hours12 = hours % 12 || 12; // Converte 0 para 12
-
-		return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-	}
-
-	/**
-	 * Compara dois períodos por igualdade de valores
-	 */
-	public equals(other: TimePeriod): boolean {
-		if (!(other instanceof TimePeriod)) {
-			return false;
-		}
-
-		return (
-			this._dayOfWeek === other._dayOfWeek &&
-			this._startTime === other._startTime &&
-			this._endTime === other._endTime
-		);
+	public static fromJSON(json: string): TimePeriod {
+		const data = JSON.parse(json);
+		return TimePeriod.create(data.dayOfWeek, data.startTime, data.endTime);
 	}
 
 	// Getters

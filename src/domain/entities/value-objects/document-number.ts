@@ -1,12 +1,16 @@
 /**
- * Value Object que representa um documento brasileiro (CPF/CNPJ)
- * Value Objects são imutáveis e não possuem identidade
+ * Enum para tipos de documento suportados
  */
 export enum DocumentType {
 	CPF = "CPF",
 	CNPJ = "CNPJ",
+	RG = "RG",
+	PASSPORT = "PASSPORT",
 }
 
+/**
+ * Classe de Value Object para representar documentos de identificação
+ */
 export class DocumentNumber {
 	private readonly _value: string;
 	private readonly _type: DocumentType;
@@ -19,51 +23,70 @@ export class DocumentNumber {
 	}
 
 	/**
-	 * Cria uma nova instância de DocumentNumber a partir de um número de documento
+	 * Cria uma instância de DocumentNumber após validação
 	 */
-	public static create(value: string): DocumentNumber {
-		if (!value || value.trim().length === 0) {
+	public static create(value: string, type?: DocumentType): DocumentNumber {
+		if (!value) {
 			throw new Error("DocumentNumber: documento é obrigatório");
 		}
 
-		// Remove caracteres não numéricos
-		const cleanValue = value.replace(/\D/g, "");
+		const cleanValue = value.replace(/[^\d]/g, "");
 
-		// Verifica se é CPF ou CNPJ com base no tamanho
-		let type: DocumentType;
-		if (cleanValue.length === 11) {
-			type = DocumentType.CPF;
-			if (!DocumentNumber.isValidCPF(cleanValue)) {
-				throw new Error("DocumentNumber: CPF inválido");
+		// Se o tipo não foi fornecido, inferir pelo comprimento
+		if (!type) {
+			if (cleanValue.length === 11) {
+				type = DocumentType.CPF;
+			} else if (cleanValue.length === 14) {
+				type = DocumentType.CNPJ;
+			} else {
+				throw new Error("DocumentNumber: documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ)");
 			}
-		} else if (cleanValue.length === 14) {
-			type = DocumentType.CNPJ;
-			if (!DocumentNumber.isValidCNPJ(cleanValue)) {
-				throw new Error("DocumentNumber: CNPJ inválido");
-			}
-		} else {
-			throw new Error("DocumentNumber: documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ)");
+		}
+
+		// Validação específica por tipo de documento
+		switch (type) {
+			case DocumentType.CPF:
+				if (!DocumentNumber.isValidCpf(cleanValue)) {
+					throw new Error("DocumentNumber: CPF inválido");
+				}
+				break;
+			case DocumentType.CNPJ:
+				if (!DocumentNumber.isValidCnpj(cleanValue)) {
+					throw new Error("DocumentNumber: CNPJ inválido");
+				}
+				break;
+			case DocumentType.RG:
+				if (cleanValue.length < 5) {
+					throw new Error("DocumentNumber: RG inválido");
+				}
+				break;
+			case DocumentType.PASSPORT:
+				if (value.length < 6) {
+					throw new Error("DocumentNumber: Passaporte inválido");
+				}
+				break;
+			default:
+				throw new Error(`Tipo de documento não suportado: ${type}`);
 		}
 
 		return new DocumentNumber(cleanValue, type);
 	}
 
 	/**
-	 * Cria uma nova instância específica de CPF
+	 * Cria uma instância de DocumentNumber para CPF
 	 */
 	public static createCPF(value: string): DocumentNumber {
-		if (!value || value.trim().length === 0) {
+		if (!value) {
 			throw new Error("DocumentNumber: CPF é obrigatório");
 		}
 
-		// Remove caracteres não numéricos
-		const cleanValue = value.replace(/\D/g, "");
+		const cleanValue = value.replace(/[^\d]/g, "");
 
 		if (cleanValue.length !== 11) {
 			throw new Error("DocumentNumber: CPF deve ter 11 dígitos");
 		}
 
-		if (!DocumentNumber.isValidCPF(cleanValue)) {
+		if (!DocumentNumber.isValidCpf(cleanValue)) {
 			throw new Error("DocumentNumber: CPF inválido");
 		}
 
@@ -71,21 +94,20 @@ export class DocumentNumber {
 	}
 
 	/**
-	 * Cria uma nova instância específica de CNPJ
+	 * Cria uma instância de DocumentNumber para CNPJ
 	 */
 	public static createCNPJ(value: string): DocumentNumber {
-		if (!value || value.trim().length === 0) {
+		if (!value) {
 			throw new Error("DocumentNumber: CNPJ é obrigatório");
 		}
 
-		// Remove caracteres não numéricos
-		const cleanValue = value.replace(/\D/g, "");
+		const cleanValue = value.replace(/[^\d]/g, "");
 
 		if (cleanValue.length !== 14) {
 			throw new Error("DocumentNumber: CNPJ deve ter 14 dígitos");
 		}
 
-		if (!DocumentNumber.isValidCNPJ(cleanValue)) {
+		if (!DocumentNumber.isValidCnpj(cleanValue)) {
 			throw new Error("DocumentNumber: CNPJ inválido");
 		}
 
@@ -93,109 +115,132 @@ export class DocumentNumber {
 	}
 
 	/**
-	 * Valida um CPF
-	 * Implementa o algoritmo de validação de CPF
+	 * Valida CPF
 	 */
-	private static isValidCPF(cpf: string): boolean {
-		// Verifica padrões inválidos (todos os dígitos iguais)
-		if (/^(\d)\1{10}$/.test(cpf)) {
-			return false;
-		}
+	private static isValidCpf(cpf: string): boolean {
+		if (cpf.length !== 11) return false;
 
-		// Validação do primeiro dígito verificador
+		// Verifica se todos os dígitos são iguais
+		if (/^(\d)\1+$/.test(cpf)) return false;
+
+		// Algoritmo de validação
 		let sum = 0;
-		for (let i = 0; i < 9; i++) {
-			sum += parseInt(cpf.charAt(i)) * (10 - i);
+		let remainder;
+
+		// Primeiro dígito verificador
+		for (let i = 1; i <= 9; i++) {
+			sum += parseInt(cpf.substring(i - 1, i)) * (11 - i);
 		}
+		remainder = (sum * 10) % 11;
+		if (remainder === 10 || remainder === 11) remainder = 0;
+		if (remainder !== parseInt(cpf.substring(9, 10))) return false;
 
-		let remainder = sum % 11;
-		const digit1 = remainder < 2 ? 0 : 11 - remainder;
-
-		if (parseInt(cpf.charAt(9)) !== digit1) {
-			return false;
-		}
-
-		// Validação do segundo dígito verificador
+		// Segundo dígito verificador
 		sum = 0;
-		for (let i = 0; i < 10; i++) {
-			sum += parseInt(cpf.charAt(i)) * (11 - i);
+		for (let i = 1; i <= 10; i++) {
+			sum += parseInt(cpf.substring(i - 1, i)) * (12 - i);
 		}
+		remainder = (sum * 10) % 11;
+		if (remainder === 10 || remainder === 11) remainder = 0;
+		if (remainder !== parseInt(cpf.substring(10, 11))) return false;
 
-		remainder = sum % 11;
-		const digit2 = remainder < 2 ? 0 : 11 - remainder;
-
-		return parseInt(cpf.charAt(10)) === digit2;
+		return true;
 	}
 
 	/**
-	 * Valida um CNPJ
-	 * Implementa o algoritmo de validação de CNPJ
+	 * Valida CNPJ
 	 */
-	private static isValidCNPJ(cnpj: string): boolean {
-		// Verifica padrões inválidos (todos os dígitos iguais)
-		if (/^(\d)\1{13}$/.test(cnpj)) {
-			return false;
-		}
+	private static isValidCnpj(cnpj: string): boolean {
+		if (cnpj.length !== 14) return false;
 
-		// Validação do primeiro dígito verificador
-		let size = 12;
+		// Verifica se todos os dígitos são iguais
+		if (/^(\d)\1+$/.test(cnpj)) return false;
+
+		// Algoritmo de validação
+		let size = cnpj.length - 2;
 		let numbers = cnpj.substring(0, size);
-		let digits = cnpj.substring(size);
-
+		const digits = cnpj.substring(size);
 		let sum = 0;
 		let pos = size - 7;
 
+		// Primeiro dígito verificador
 		for (let i = size; i >= 1; i--) {
 			sum += parseInt(numbers.charAt(size - i)) * pos--;
 			if (pos < 2) pos = 9;
 		}
-
 		let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-		if (result !== parseInt(digits.charAt(0))) {
-			return false;
-		}
+		if (result !== parseInt(digits.charAt(0))) return false;
 
-		// Validação do segundo dígito verificador
-		size = 13;
+		// Segundo dígito verificador
+		size = size + 1;
 		numbers = cnpj.substring(0, size);
-		digits = cnpj.substring(size);
-
 		sum = 0;
 		pos = size - 7;
-
 		for (let i = size; i >= 1; i--) {
 			sum += parseInt(numbers.charAt(size - i)) * pos--;
 			if (pos < 2) pos = 9;
 		}
-
 		result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+		if (result !== parseInt(digits.charAt(1))) return false;
 
-		return result === parseInt(digits.charAt(0));
+		return true;
 	}
 
 	/**
-	 * Formata o documento de acordo com o tipo (CPF ou CNPJ)
+	 * Retorna o valor formatado do documento
 	 */
 	public format(): string {
-		if (this._type === DocumentType.CPF) {
-			return this._value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-		} else {
-			return this._value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+		switch (this._type) {
+			case DocumentType.CPF:
+				return this._value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+			case DocumentType.CNPJ:
+				return this._value.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+			default:
+				return this._value;
 		}
 	}
 
 	/**
-	 * Retorna apenas os números do documento, sem formatação
+	 * Retorna apenas os dígitos do documento
+	 */
+	get value(): string {
+		return this._value;
+	}
+
+	/**
+	 * Retorna o tipo do documento
+	 */
+	get type(): DocumentType {
+		return this._type;
+	}
+
+	/**
+	 * Método compatível com testes anteriores
 	 */
 	public getValue(): string {
 		return this._value;
 	}
 
 	/**
-	 * Retorna o tipo do documento (CPF ou CNPJ)
+	 * Método compatível com testes anteriores
 	 */
 	public getType(): DocumentType {
 		return this._type;
+	}
+
+	/**
+	 * Compara com outro DocumentNumber
+	 */
+	public equals(other: DocumentNumber): boolean {
+		if (!(other instanceof DocumentNumber)) return false;
+		return this._value === other.value && this._type === other.type;
+	}
+
+	/**
+	 * Representação em string
+	 */
+	public toString(): string {
+		return this.format();
 	}
 
 	/**
@@ -225,26 +270,6 @@ export class DocumentNumber {
 	 */
 	public static fromJSON(json: string): DocumentNumber {
 		const data = JSON.parse(json);
-		return DocumentNumber.create(data.value);
-	}
-
-	/**
-	 * Compara dois documentos por igualdade de valores
-	 */
-	public equals(other: DocumentNumber): boolean {
-		if (!(other instanceof DocumentNumber)) {
-			return false;
-		}
-
-		return this._value === other._value && this._type === other._type;
-	}
-
-	// Getters
-	get value(): string {
-		return this._value;
-	}
-
-	get type(): DocumentType {
-		return this._type;
+		return DocumentNumber.create(data.value, data.type);
 	}
 }

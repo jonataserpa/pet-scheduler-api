@@ -24,9 +24,12 @@ export class Contact {
 			throw new Error("Contato: email é obrigatório");
 		}
 
+		// Normaliza o email antes da validação
+		const normalizedEmail = email.trim().toLowerCase();
+
 		// Validação básica de formato de email
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
+		if (!emailRegex.test(normalizedEmail)) {
 			throw new Error("Contato: formato de email inválido");
 		}
 
@@ -51,7 +54,7 @@ export class Contact {
 			}
 		}
 
-		return new Contact(email.trim().toLowerCase(), cleanedPhone, cleanedWhatsapp);
+		return new Contact(normalizedEmail, cleanedPhone, cleanedWhatsapp);
 	}
 
 	/**
@@ -105,6 +108,22 @@ export class Contact {
 			whatsapp: this._whatsapp,
 			formattedPhone: this.formatPhone(),
 			formattedWhatsapp: this.formatWhatsapp(),
+		};
+	}
+
+	/**
+	 * Retorna um objeto simplificado com os dados básicos do contato
+	 * Usado principalmente para testes
+	 */
+	public toBasicObject(): {
+		email: string;
+		phone: string;
+		whatsapp?: string;
+	} {
+		return {
+			email: this._email,
+			phone: this._phone,
+			whatsapp: this._whatsapp,
 		};
 	}
 

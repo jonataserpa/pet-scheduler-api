@@ -117,7 +117,16 @@ export class UpdateCustomerUseCase {
 		// Persiste as mudanças
 		const updatedCustomer = await this.customerRepository.save(customer);
 
-		// Retorna o cliente atualizado
-		return updatedCustomer.toObject();
+		// Obtém o objeto base do cliente
+		const customerObject = updatedCustomer.toObject();
+
+		// Garante que o objeto retornado tem todos os campos necessários na interface UpdateCustomerResponseDTO
+		return {
+			...customerObject,
+			address: {
+				...customerObject.address,
+				formattedZipCode: address.formatZipCode(), // Assumindo que Address tem um método formatZipCode()
+			},
+		};
 	}
 }

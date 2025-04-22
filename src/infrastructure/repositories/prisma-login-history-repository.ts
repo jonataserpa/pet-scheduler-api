@@ -242,7 +242,7 @@ export class PrismaLoginHistoryRepository implements LoginHistoryRepository {
 			const count = await this.prisma.loginHistory.count({
 				where: {
 					email,
-					status: "FAILED",
+					status: this.mapDomainStatusToPrisma("failed"),
 					timestamp: {
 						gte: windowStartTime,
 					},
@@ -270,7 +270,7 @@ export class PrismaLoginHistoryRepository implements LoginHistoryRepository {
 			const count = await this.prisma.loginHistory.count({
 				where: {
 					ipAddress,
-					status: "FAILED",
+					status: this.mapDomainStatusToPrisma("failed"),
 					timestamp: {
 						gte: windowStartTime,
 					},

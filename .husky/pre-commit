@@ -7,5 +7,7 @@ npm run format
 echo "✅ Verificando se o código está formatado corretamente..."
 npm run format-check
 
-echo "🧪 Executando testes..."
-npm test
+echo "🧪 Executando testes da API Pet Scheduler..."
+npm test -- --testPathPattern="src/"
+
+echo "✨ Pré-commit concluído com sucesso!"

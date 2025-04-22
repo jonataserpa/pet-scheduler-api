@@ -1,0 +1,12 @@
+# Diretórios gerados
+dist
+build
+coverage
+node_modules
+
+# Arquivos gerados
+*.d.ts
+package-lock.json
+
+# Arquivos de teste ou fixtures específicos
+tests/fixtures/* 

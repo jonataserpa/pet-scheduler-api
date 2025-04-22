@@ -284,7 +284,7 @@ describe("Address Value Object", () => {
 				validCountry,
 			);
 
-			const expectedString = `${validStreet}, ${validNumber}, ${validNeighborhood}, ${validCity} - ${validState}, 01234567, ${validCountry}`;
+			const expectedString = `${validStreet}, ${validNumber}, ${validNeighborhood}, ${validCity} - ${validState}, 01234-567`;
 			expect(address.toString()).toBe(expectedString);
 		});
 
@@ -300,7 +300,7 @@ describe("Address Value Object", () => {
 				validComplement,
 			);
 
-			const expectedString = `${validStreet}, ${validNumber} - ${validComplement}, ${validNeighborhood}, ${validCity} - ${validState}, 01234567, ${validCountry}`;
+			const expectedString = `${validStreet}, ${validNumber}, ${validComplement}, ${validNeighborhood}, ${validCity} - ${validState}, 01234-567`;
 			expect(address.toString()).toBe(expectedString);
 		});
 	});

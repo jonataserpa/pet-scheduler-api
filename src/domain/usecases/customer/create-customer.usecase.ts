@@ -94,7 +94,16 @@ export class CreateCustomerUseCase {
 		// Persiste o cliente
 		const savedCustomer = await this.customerRepository.save(customer);
 
-		// Retorna o cliente criado
-		return savedCustomer.toObject();
+		// Obtém o objeto base do cliente
+		const customerObject = savedCustomer.toObject();
+
+		// Garante que o objeto retornado tem todos os campos necessários na interface CreateCustomerResponseDTO
+		return {
+			...customerObject,
+			address: {
+				...customerObject.address,
+				formattedZipCode: address.formatZipCode(),
+			},
+		};
 	}
 }

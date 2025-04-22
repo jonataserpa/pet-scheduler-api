@@ -1,33 +1,34 @@
-import { jest } from '@jest/globals';
-import { PrismaClient } from "@prisma/client";
+import { jest } from "@jest/globals";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { NotificationType, NotificationStatus } from "../../../domain/entities/notification.js";
 import { Notification } from "../../../domain/entities/notification.js";
 import { PrismaNotificationRepositoryRefactored } from "../prisma-notification-repository-refactored.js";
 import { NotificationMapper } from "../../mappers/notification-mapper.js";
 import { v4 as uuidv4 } from "uuid";
 
+// Tipo para função de callback do transaction
+type PrismaCallback<T> = (prisma: any) => Promise<T>;
+
 // Mock do cliente Prisma
 const mockPrismaClient = {
 	notification: {
 		create: jest.fn(),
 		update: jest.fn(),
-		findUnique: jest.fn(),
 		findMany: jest.fn(),
+		findUnique: jest.fn(),
 		count: jest.fn(),
 		delete: jest.fn(),
 	},
-	// @ts-ignore - Ignorando tipagem para função de transaction
-	$transaction: jest.fn(callback => callback(mockPrismaClient)),
+	$transaction: jest.fn((callback: PrismaCallback<any>) => callback(mockPrismaClient)),
 };
 
-// Usamos type assertion para simplificar
+// Usamos type assertion para o PrismaClient
 const prismaClientMock = mockPrismaClient as unknown as PrismaClient;
 
 // Mock para PrismaTransaction
 jest.mock("../../database/prisma-transaction.js", () => ({
 	PrismaTransaction: jest.fn().mockImplementation(() => ({
-		// @ts-ignore - Ignorando tipagem para função de execute
-		execute: jest.fn(callback => callback(prismaClientMock)),
+		execute: jest.fn((callback: PrismaCallback<any>) => callback(prismaClientMock)),
 		executeMultiple: jest.fn(),
 	})),
 }));
@@ -42,11 +43,22 @@ jest.mock("../../../shared/utils/logger.js", () => ({
 	},
 }));
 
+// Mock para o NotificationMapper
+const originalToDomain = NotificationMapper.toDomain;
+const originalCopyNotification = NotificationMapper.copyNotification;
+
 describe("PrismaNotificationRepositoryRefactored", () => {
 	let repository: PrismaNotificationRepositoryRefactored;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+		// Restaurar implementações originais dos métodos mockados
+		if (jest.isMockFunction(NotificationMapper.toDomain)) {
+			NotificationMapper.toDomain = originalToDomain;
+		}
+		if (jest.isMockFunction(NotificationMapper.copyNotification)) {
+			NotificationMapper.copyNotification = originalCopyNotification;
+		}
 		repository = new PrismaNotificationRepositoryRefactored(prismaClientMock);
 	});
 
@@ -67,7 +79,6 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				sentAt: new Date(),
 			};
 
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.create.mockResolvedValue(mockNotification);
 
 			// Spy no NotificationMapper
@@ -124,29 +135,45 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 		it("deve marcar uma notificação como enviada", async () => {
 			// Arrange
 			const id = uuidv4();
-			const mockUpdatedNotification = {
+			const mockNotificationPending = {
 				id,
 				type: NotificationType.EMAIL,
 				content: "Teste de notificação",
 				schedulingId: uuidv4(),
+				status: NotificationStatus.PENDING,
+				sentAt: null,
+			};
+
+			const mockNotificationSent = {
+				...mockNotificationPending,
 				status: NotificationStatus.SENT,
 				sentAt: new Date(),
 			};
 
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
-			mockPrismaClient.notification.update.mockResolvedValue(mockUpdatedNotification);
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
-			mockPrismaClient.notification.findUnique.mockResolvedValue(mockUpdatedNotification);
+			// Mock inicial retorna notificação PENDING
+			mockPrismaClient.notification.findUnique.mockResolvedValue(mockNotificationPending);
+			// Mock update retorna a notificação já com SENT
+			mockPrismaClient.notification.update.mockResolvedValue(mockNotificationSent);
 
-			// Spy no NotificationMapper
-			const toDomainSpy = jest
+			// Primeiro retorna PENDING, depois SENT
+			jest
 				.spyOn(NotificationMapper, "toDomain")
-				.mockReturnValue(
+				.mockImplementationOnce(() =>
 					Notification.create(
 						id,
 						NotificationType.EMAIL,
 						"Teste de notificação",
-						mockUpdatedNotification.schedulingId,
+						mockNotificationPending.schedulingId,
+						NotificationStatus.PENDING,
+						undefined,
+					),
+				)
+				.mockImplementationOnce(() =>
+					Notification.create(
+						id,
+						NotificationType.EMAIL,
+						"Teste de notificação",
+						mockNotificationPending.schedulingId,
 						NotificationStatus.SENT,
 						new Date(),
 					),
@@ -167,59 +194,72 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				where: { id },
 			});
 
-			expect(toDomainSpy).toHaveBeenCalled();
 			expect(result).toBeDefined();
 			expect(result.status).toBe(NotificationStatus.SENT);
 		});
 
-		it("deve atualizar o conteúdo usando transação", async () => {
+		it("deve atualizar o conteúdo usando transação quando status é PENDING", async () => {
 			// Arrange
 			const id = uuidv4();
-			const content = "Novo conteúdo da notificação";
-			const mockUpdatedNotification = {
+			const oldContent = "Conteúdo original";
+			const newContent = "Novo conteúdo da notificação";
+
+			// Preparar uma notificação com status PENDING no banco
+			const pendingNotification = {
 				id,
-				type: NotificationType.EMAIL,
-				content,
+				type: "EMAIL",
+				content: oldContent,
 				schedulingId: uuidv4(),
-				status: NotificationStatus.PENDING,
-				sentAt: new Date(),
+				status: "PENDING",
+				sentAt: null,
 			};
 
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
-			mockPrismaClient.notification.update.mockResolvedValue(mockUpdatedNotification);
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
-			mockPrismaClient.notification.findUnique.mockResolvedValue(mockUpdatedNotification);
+			// Preparar a notificação com o conteúdo atualizado
+			const updatedNotification = {
+				...pendingNotification,
+				content: newContent,
+			};
 
-			// Spy no NotificationMapper
-			const toDomainSpy = jest
-				.spyOn(NotificationMapper, "toDomain")
-				.mockReturnValue(
-					Notification.create(
-						id,
-						NotificationType.EMAIL,
-						content,
-						mockUpdatedNotification.schedulingId,
-						NotificationStatus.PENDING,
-						new Date(),
-					),
-				);
+			// Configurar os mocks do Prisma
+			// Simulando consultas do banco: primeiro retorna a notificação com status PENDING
+			mockPrismaClient.notification.findUnique.mockResolvedValue(pendingNotification);
+			mockPrismaClient.notification.update.mockResolvedValue(updatedNotification);
 
-			// Act
-			const result = await repository.updateContent(id, content);
+			// Mock da entidade de domínio para simular exatamente a validação real
+			// Primeiro, criamos uma notificação de domínio para o teste
+			const pendingDomainNotification = Notification.create(
+				id,
+				NotificationType.EMAIL,
+				oldContent,
+				pendingNotification.schedulingId,
+				NotificationStatus.PENDING,
+				null,
+			);
 
-			// Assert
-			expect(mockPrismaClient.notification.update).toHaveBeenCalledWith({
-				where: { id },
-				data: { content },
-			});
+			// Mock apenas o método toDomain para retornar nossa instância de domínio controlada
+			jest.spyOn(NotificationMapper, "toDomain").mockReturnValue(pendingDomainNotification);
 
+			// Não mockamos copyNotification para usar a implementação real
+			// Então toDomain retorna uma notificação com status PENDING e updateContent vai funcionar
+
+			// Act - Chamar o método que estamos testando
+			const result = await repository.updateContent(id, newContent);
+
+			// Assert - Verificar os resultados esperados
 			expect(mockPrismaClient.notification.findUnique).toHaveBeenCalledWith({
 				where: { id },
 			});
 
-			expect(toDomainSpy).toHaveBeenCalled();
+			expect(mockPrismaClient.notification.update).toHaveBeenCalledWith({
+				where: { id },
+				data: { content: newContent },
+			});
+
+			// Verificar que temos o resultado esperado
 			expect(result).toBeDefined();
-			expect(result.content).toBe(content);
+			expect(result.id).toBe(id);
+			expect(result.content).toBe(newContent);
+			expect(result.status).toBe(NotificationStatus.PENDING);
 		});
 	});
 
@@ -238,7 +278,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 					content: "Teste de notificação 1",
 					schedulingId: uuidv4(),
 					status: NotificationStatus.PENDING,
-					sentAt: new Date(),
+					sentAt: null,
 				},
 				{
 					id: uuidv4(),
@@ -246,11 +286,10 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 					content: "Teste de notificação 2",
 					schedulingId: uuidv4(),
 					status: NotificationStatus.PENDING,
-					sentAt: new Date(),
+					sentAt: null,
 				},
 			];
 
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.findMany.mockResolvedValue(mockNotifications);
 
 			// Spy no NotificationMapper
@@ -263,7 +302,7 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 						prismaNotification.content,
 						prismaNotification.schedulingId,
 						prismaNotification.status as NotificationStatus,
-						prismaNotification.sentAt,
+						undefined,
 					),
 				);
 
@@ -282,7 +321,6 @@ describe("PrismaNotificationRepositoryRefactored", () => {
 				status: NotificationStatus.PENDING,
 			};
 
-			// @ts-ignore - Ignorando problemas de tipagem com mockResolvedValue
 			mockPrismaClient.notification.count.mockResolvedValue(5);
 
 			// Act

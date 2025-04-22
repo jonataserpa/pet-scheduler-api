@@ -1,6 +1,5 @@
 /**
- * Value Object que representa um endereço
- * Value Objects são imutáveis e não possuem identidade
+ * Classe Value Object para representar um endereço
  */
 export class Address {
 	private readonly _street: string;
@@ -30,12 +29,10 @@ export class Address {
 		this._state = state;
 		this._zipCode = zipCode;
 		this._country = country;
-
-		Object.freeze(this);
 	}
 
 	/**
-	 * Cria uma nova instância de Address
+	 * Cria uma instância de Address após validação
 	 */
 	public static create(
 		street: string,
@@ -44,7 +41,7 @@ export class Address {
 		city: string,
 		state: string,
 		zipCode: string,
-		country: string,
+		country: string = "Brasil",
 		complement?: string,
 	): Address {
 		// Validações
@@ -76,14 +73,12 @@ export class Address {
 			throw new Error("Endereço: país é obrigatório");
 		}
 
-		// Limpa o CEP, mantendo apenas dígitos
-		const cleanZipCode = zipCode.trim().replace(/\D/g, "");
+		// Sanitização do CEP (remove caracteres não numéricos)
+		const cleanZipCode = zipCode.replace(/\D/g, "");
 
-		// Validação específica para CEP brasileiro
-		if (country.trim().toUpperCase() === "BRASIL" || country.trim().toUpperCase() === "BRAZIL") {
-			if (!Address.isValidBrazilianZipCode(cleanZipCode)) {
-				throw new Error("Endereço: CEP brasileiro deve conter 8 dígitos");
-			}
+		// Validação específica para CEP brasileiro (8 dígitos)
+		if (country.toLowerCase() === "brasil" && cleanZipCode.length !== 8) {
+			throw new Error("Endereço: CEP inválido");
 		}
 
 		return new Address(
@@ -99,46 +94,92 @@ export class Address {
 	}
 
 	/**
-	 * Valida um CEP brasileiro
+	 * Retorna o endereço formatado em uma linha
 	 */
-	private static isValidBrazilianZipCode(zipCode: string): boolean {
-		return /^\d{8}$/.test(zipCode);
+	public getFormattedLine(): string {
+		const address = [
+			`${this._street}, ${this._number}`,
+			this._complement,
+			this._neighborhood,
+			`${this._city} - ${this._state}`,
+			this.formatZipCode(),
+			this._country !== "Brasil" ? this._country : undefined,
+		].filter(Boolean);
+
+		return address.join(", ");
 	}
 
 	/**
-	 * Formata um CEP brasileiro (12345678 -> 12345-678)
+	 * Retorna a representação em string do endereço
 	 */
-	private formatBrazilianZipCode(): string {
-		return this._zipCode.replace(/^(\d{5})(\d{3})$/, "$1-$2");
+	public toString(): string {
+		return this.getFormattedLine();
 	}
 
 	/**
-	 * Retorna o CEP formatado de acordo com o país
+	 * Formata o CEP
 	 */
-	public getFormattedZipCode(): string {
-		if (this._country.toUpperCase() === "BRASIL" || this._country.toUpperCase() === "BRAZIL") {
-			return this.formatBrazilianZipCode();
+	public formatZipCode(): string {
+		if (this._country.toLowerCase() === "brasil") {
+			return `${this._zipCode.substring(0, 5)}-${this._zipCode.substring(5)}`;
 		}
 		return this._zipCode;
 	}
 
 	/**
-	 * Retorna o endereço formatado como string
+	 * Verifica se dois endereços são iguais
 	 */
-	public toString(): string {
-		let fullAddress = `${this._street}, ${this._number}`;
-
-		if (this._complement) {
-			fullAddress += ` - ${this._complement}`;
+	public equals(other: Address): boolean {
+		if (!(other instanceof Address)) {
+			return false;
 		}
 
-		fullAddress += `, ${this._neighborhood}, ${this._city} - ${this._state}, ${this.getFormattedZipCode()}, ${this._country}`;
-
-		return fullAddress;
+		return (
+			this._street === other.street &&
+			this._number === other.number &&
+			this._complement === other.complement &&
+			this._neighborhood === other.neighborhood &&
+			this._city === other.city &&
+			this._state === other.state &&
+			this._zipCode === other.zipCode &&
+			this._country === other.country
+		);
 	}
 
 	/**
-	 * Retorna um objeto com os dados do endereço
+	 * Retorna uma cópia do objeto com um campo alterado
+	 */
+	public withStreet(street: string): Address {
+		return Address.create(
+			street,
+			this._number,
+			this._neighborhood,
+			this._city,
+			this._state,
+			this._zipCode,
+			this._country,
+			this._complement,
+		);
+	}
+
+	/**
+	 * Retorna uma cópia do objeto com um campo alterado
+	 */
+	public withNumber(number: string): Address {
+		return Address.create(
+			this._street,
+			number,
+			this._neighborhood,
+			this._city,
+			this._state,
+			this._zipCode,
+			this._country,
+			this._complement,
+		);
+	}
+
+	/**
+	 * Retorna uma representação em objeto do endereço
 	 */
 	public toObject(): {
 		street: string;
@@ -148,7 +189,6 @@ export class Address {
 		city: string;
 		state: string;
 		zipCode: string;
-		formattedZipCode: string;
 		country: string;
 	} {
 		return {
@@ -159,20 +199,19 @@ export class Address {
 			city: this._city,
 			state: this._state,
 			zipCode: this._zipCode,
-			formattedZipCode: this.getFormattedZipCode(),
 			country: this._country,
 		};
 	}
 
 	/**
-	 * Serializa o objeto para JSON
+	 * Retorna uma representação em JSON do endereço
 	 */
 	public toJSON(): string {
 		return JSON.stringify(this.toObject());
 	}
 
 	/**
-	 * Deserializa um JSON para Address
+	 * Cria uma instância a partir de uma representação em JSON
 	 */
 	public static fromJSON(json: string): Address {
 		const data = JSON.parse(json);
@@ -219,25 +258,5 @@ export class Address {
 
 	get country(): string {
 		return this._country;
-	}
-
-	/**
-	 * Compara dois endereços por igualdade de valores
-	 */
-	public equals(other: Address): boolean {
-		if (!(other instanceof Address)) {
-			return false;
-		}
-
-		return (
-			this._street === other._street &&
-			this._number === other._number &&
-			this._complement === other._complement &&
-			this._neighborhood === other._neighborhood &&
-			this._city === other._city &&
-			this._state === other._state &&
-			this._zipCode === other._zipCode &&
-			this._country === other._country
-		);
 	}
 }

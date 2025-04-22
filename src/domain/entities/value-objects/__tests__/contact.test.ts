@@ -115,10 +115,10 @@ describe("Contact Value Object", () => {
 		});
 	});
 
-	describe("toObject", () => {
+	describe("toBasicObject", () => {
 		it("deve retornar um objeto com as propriedades corretas sem WhatsApp", () => {
 			const contact = Contact.create(validEmail, validPhone);
-			const obj = contact.toObject();
+			const obj = contact.toBasicObject();
 
 			expect(obj).toEqual({
 				email: validEmail,
@@ -129,12 +129,27 @@ describe("Contact Value Object", () => {
 
 		it("deve retornar um objeto com as propriedades corretas com WhatsApp", () => {
 			const contact = Contact.create(validEmail, validPhone, validWhatsapp);
-			const obj = contact.toObject();
+			const obj = contact.toBasicObject();
 
 			expect(obj).toEqual({
 				email: validEmail,
 				phone: validPhone,
 				whatsapp: validWhatsapp,
+			});
+		});
+	});
+
+	describe("toObject", () => {
+		it("deve retornar um objeto completo com as propriedades formatadas", () => {
+			const contact = Contact.create(validEmail, "11987654321");
+			const obj = contact.toObject();
+
+			expect(obj).toEqual({
+				email: validEmail,
+				phone: "11987654321",
+				whatsapp: undefined,
+				formattedPhone: "(11) 98765-4321",
+				formattedWhatsapp: "",
 			});
 		});
 	});

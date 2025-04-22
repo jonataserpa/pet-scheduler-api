@@ -5,3 +5,4 @@ coverage
 tasks
 package-lock.json
 tests/fixture/*.json
+dist

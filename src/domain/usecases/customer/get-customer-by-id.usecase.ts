@@ -45,6 +45,19 @@ export class GetCustomerByIdUseCase {
 			return null;
 		}
 
-		return customer.toObject();
+		// Obtém o objeto base do cliente
+		const customerObject = customer.toObject();
+
+		// Obtém o objeto de endereço para formatação
+		const address = customer.address;
+
+		// Garante que o objeto retornado tem todos os campos necessários na interface GetCustomerByIdResponseDTO
+		return {
+			...customerObject,
+			address: {
+				...customerObject.address,
+				formattedZipCode: address.formatZipCode(),
+			},
+		};
 	}
 }

@@ -150,15 +150,15 @@ export class User {
 		if (!skipValidation && currentPassword) {
 			const isValid = await this.validatePassword(currentPassword);
 			if (!isValid) {
-				throw new Error("Senha atual incorreta");
+				throw new Error("User: Senha atual inválida");
 			}
 		} else if (!skipValidation) {
-			throw new Error("Senha atual é obrigatória");
+			throw new Error("User: Senha atual é obrigatória");
 		}
 
 		// Validar a nova senha
 		if (!newPassword || newPassword.length < 8) {
-			throw new Error("A nova senha deve ter pelo menos 8 caracteres");
+			throw new Error("User: Nova senha deve ter pelo menos 8 caracteres");
 		}
 
 		// Gerar o hash da nova senha usando a função hash importada
