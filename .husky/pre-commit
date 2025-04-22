@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Verificando formatação do código..."
+echo "🔍 Formatando o código automaticamente..."
 npm run format
 
 echo "✅ Verificando se o código está formatado corretamente..."
 npm run format-check
 
 echo "🧪 Executando testes da API Pet Scheduler..."
-npm test -- --testPathPattern="src/"
+npm run test
 
 echo "✨ Pré-commit concluído com sucesso!"

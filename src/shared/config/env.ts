@@ -25,8 +25,8 @@ const envSchema = z.object({
 		.default("http://localhost:3000"),
 
 	// Database
-	DATABASE_URL: isTestEnvironment 
-		? z.string().default("mongodb://localhost:27017/pet-scheduler-test") 
+	DATABASE_URL: isTestEnvironment
+		? z.string().default("mongodb://localhost:27017/pet-scheduler-test")
 		: z.string().url(),
 
 	// Redis
@@ -111,20 +111,24 @@ if (!envParse.success) {
 	for (const error of envParse.error.errors) {
 		console.error(`- ${error.path.join(".")}: ${error.message}`);
 	}
-	
+
 	// Se não estivermos no ambiente de teste, encerra o processo
 	if (!isTestEnvironment) {
 		process.exit(1);
 	} else {
-		console.warn("⚠️ Executando com valores padrão para testes. Isso deve ser usado apenas em ambiente de desenvolvimento/teste.");
+		console.warn(
+			"⚠️ Executando com valores padrão para testes. Isso deve ser usado apenas em ambiente de desenvolvimento/teste.",
+		);
 	}
 }
 
 // Exporta as variáveis de ambiente validadas
-export const env = envParse.success ? envParse.data : envSchema.parse({
-	...process.env,
-	NODE_ENV: "test",
-	DATABASE_URL: "mongodb://localhost:27017/pet-scheduler-test",
-	JWT_SECRET: "test-jwt-secret-key-for-testing-only",
-	JWT_REFRESH_SECRET: "test-refresh-secret-key-for-testing-only"
-});
+export const env = envParse.success
+	? envParse.data
+	: envSchema.parse({
+			...process.env,
+			NODE_ENV: "test",
+			DATABASE_URL: "mongodb://localhost:27017/pet-scheduler-test",
+			JWT_SECRET: "test-jwt-secret-key-for-testing-only",
+			JWT_REFRESH_SECRET: "test-refresh-secret-key-for-testing-only",
+		});

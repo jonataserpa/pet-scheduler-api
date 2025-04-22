@@ -1,7 +1,16 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔍 Verificando o código antes de enviar para o repositório..."
+echo "🔍 Formatando o código automaticamente..."
+npm run format || true
+
+echo "✅ Verificando se o código está formatado corretamente..."
+npm run format-check || true
+
+echo "🧪 Executando testes da API Pet Scheduler..."
+npm run test || true
+
+echo "🔍 Verificando o código com lint antes de enviar para o repositório..."
 npm run lint || true
 
 echo "🧪 Executando testes com cobertura apenas para a API Pet Scheduler..."
