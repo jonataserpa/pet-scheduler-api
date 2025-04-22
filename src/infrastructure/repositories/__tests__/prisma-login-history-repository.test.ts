@@ -1,11 +1,12 @@
 import { jest } from "@jest/globals";
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import { LoginHistory } from "../../../domain/entities/login-history.js";
+import { LoginHistory, LoginStatus, AuthMethod } from "../../../domain/entities/login-history.js";
 import { PrismaLoginHistoryRepository } from "../prisma-login-history-repository.js";
+import { PrismaCallbackSync } from "./mock-types.d.ts";
 
 // Definindo tipo para facilitar o uso do callback
-type PrismaCallback<T> = (prisma: any) => T;
+type PrismaCallback<T> = (prisma: PrismaClient) => T;
 
 // Mock do cliente Prisma
 jest.mock("@prisma/client", () => {
@@ -132,7 +133,7 @@ jest.mock("../../../domain/repositories/login-history-repository.js", () => ({
 
 describe("PrismaLoginHistoryRepository", () => {
 	let repository: PrismaLoginHistoryRepository;
-	let prismaClient: any;
+	let prismaClient: PrismaClient;
 
 	beforeEach(() => {
 		jest.clearAllMocks();

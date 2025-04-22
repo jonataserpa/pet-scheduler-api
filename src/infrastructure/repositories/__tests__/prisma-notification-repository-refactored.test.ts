@@ -5,9 +5,7 @@ import { Notification } from "../../../domain/entities/notification.js";
 import { PrismaNotificationRepositoryRefactored } from "../prisma-notification-repository-refactored.js";
 import { NotificationMapper } from "../../mappers/notification-mapper.js";
 import { v4 as uuidv4 } from "uuid";
-
-// Tipo para função de callback do transaction
-type PrismaCallback<T> = (prisma: any) => Promise<T>;
+import { MockNotificationModel, MockPrismaClient, PrismaCallback } from "./mock-types.d.ts";
 
 // Mock do cliente Prisma
 const mockPrismaClient = {
@@ -19,7 +17,7 @@ const mockPrismaClient = {
 		count: jest.fn(),
 		delete: jest.fn(),
 	},
-	$transaction: jest.fn((callback: PrismaCallback<any>) => callback(mockPrismaClient)),
+	$transaction: jest.fn((callback: PrismaCallback<unknown>) => callback(mockPrismaClient as unknown as PrismaClient)),
 };
 
 // Usamos type assertion para o PrismaClient
@@ -28,7 +26,7 @@ const prismaClientMock = mockPrismaClient as unknown as PrismaClient;
 // Mock para PrismaTransaction
 jest.mock("../../database/prisma-transaction.js", () => ({
 	PrismaTransaction: jest.fn().mockImplementation(() => ({
-		execute: jest.fn((callback: PrismaCallback<any>) => callback(prismaClientMock)),
+		execute: jest.fn((callback: PrismaCallback<PrismaClient>) => callback(prismaClientMock)),
 		executeMultiple: jest.fn(),
 	})),
 }));
