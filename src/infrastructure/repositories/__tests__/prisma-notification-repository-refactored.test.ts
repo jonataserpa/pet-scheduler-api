@@ -17,7 +17,9 @@ const mockPrismaClient = {
 		count: jest.fn(),
 		delete: jest.fn(),
 	},
-	$transaction: jest.fn((callback: PrismaCallback<unknown>) => callback(mockPrismaClient as unknown as PrismaClient)),
+	$transaction: jest.fn((callback: PrismaCallback<unknown>) =>
+		callback(mockPrismaClient as unknown as PrismaClient),
+	),
 };
 
 // Usamos type assertion para o PrismaClient
