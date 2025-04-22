@@ -18,7 +18,7 @@
 		"seed": "ts-node prisma/seed.ts",
 		"db:seed": "prisma db seed",
 		"version": "changeset version",
-		"release": "npm run build && changeset publish",
+		"release": "npm run build",
 		"prepare": "husky install",
 		"check-git": "git status"
 	},
