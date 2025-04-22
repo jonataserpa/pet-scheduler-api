@@ -5,6 +5,9 @@ import path from "path";
 // Carrega as variáveis de ambiente do arquivo .env
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+// Verificamos se estamos no ambiente de testes
+const isTestEnvironment = process.env.NODE_ENV === "test";
+
 // Define o esquema de validação das variáveis de ambiente
 const envSchema = z.object({
 	// Ambiente
@@ -22,7 +25,9 @@ const envSchema = z.object({
 		.default("http://localhost:3000"),
 
 	// Database
-	DATABASE_URL: z.string().url(),
+	DATABASE_URL: isTestEnvironment 
+		? z.string().default("mongodb://localhost:27017/pet-scheduler-test") 
+		: z.string().url(),
 
 	// Redis
 	REDIS_HOST: z.string().default("localhost"),
@@ -33,9 +38,13 @@ const envSchema = z.object({
 	REDIS_PASSWORD: z.string().optional().default(""),
 
 	// JWT
-	JWT_SECRET: z.string().min(10),
+	JWT_SECRET: isTestEnvironment
+		? z.string().default("test-jwt-secret-key-for-testing-only")
+		: z.string().min(10),
 	JWT_EXPIRES_IN: z.string().default("1d"),
-	JWT_REFRESH_SECRET: z.string().min(10),
+	JWT_REFRESH_SECRET: isTestEnvironment
+		? z.string().default("test-refresh-secret-key-for-testing-only")
+		: z.string().min(10),
 	JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
 
 	// Email (para notificações e recuperação de senha)
@@ -102,8 +111,20 @@ if (!envParse.success) {
 	for (const error of envParse.error.errors) {
 		console.error(`- ${error.path.join(".")}: ${error.message}`);
 	}
-	process.exit(1);
+	
+	// Se não estivermos no ambiente de teste, encerra o processo
+	if (!isTestEnvironment) {
+		process.exit(1);
+	} else {
+		console.warn("⚠️ Executando com valores padrão para testes. Isso deve ser usado apenas em ambiente de desenvolvimento/teste.");
+	}
 }
 
 // Exporta as variáveis de ambiente validadas
-export const env = envParse.data;
+export const env = envParse.success ? envParse.data : envSchema.parse({
+	...process.env,
+	NODE_ENV: "test",
+	DATABASE_URL: "mongodb://localhost:27017/pet-scheduler-test",
+	JWT_SECRET: "test-jwt-secret-key-for-testing-only",
+	JWT_REFRESH_SECRET: "test-refresh-secret-key-for-testing-only"
+});
