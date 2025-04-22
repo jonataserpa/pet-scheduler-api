@@ -19,6 +19,8 @@ model User {
   role      Role      @default(EMPLOYEE)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  lastLoginAt DateTime?
+  active    Boolean   @default(true)
 
   @@map("users")
 }

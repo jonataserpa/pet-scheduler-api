@@ -55,10 +55,19 @@ export class PrismaUserRepository implements IUserRepository {
       active: user.active,
     };
 
-    const updatedUser = await this.prisma.user.update({
+    await this.prisma.user.updateMany({
       where: { id: user.id },
       data,
     });
+
+    // Busca o usuário atualizado para retornar
+    const updatedUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (!updatedUser) {
+      throw new Error(`Usuário com id ${user.id} não encontrado após atualização`);
+    }
 
     return this.mapToDomain(updatedUser);
   }
