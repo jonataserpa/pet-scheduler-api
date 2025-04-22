@@ -69,6 +69,20 @@ export class LoginHistory {
 		if (!email) throw new Error("Email é obrigatório");
 		if (!timestamp) throw new Error("Timestamp é obrigatório");
 		if (!ipAddress) throw new Error("Endereço IP é obrigatório");
+		if (!userAgent) throw new Error("User-Agent é obrigatório");
+		if (!status) throw new Error("Status é obrigatório");
+		
+		// Validação de status válido
+		const validStatuses: LoginStatus[] = ["success", "failed", "locked", "password_reset", "suspicious"];
+		if (!validStatuses.includes(status)) {
+			throw new Error(`Status inválido: ${status}. Os valores permitidos são: ${validStatuses.join(", ")}`);
+		}
+
+		// Validação de formato de email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			throw new Error(`Email inválido: ${email}`);
+		}
 
 		return new LoginHistory(
 			id,
